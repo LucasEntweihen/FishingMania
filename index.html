@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gato Pescador - Um jogo de pesca relaxante e dinâmico. Colecione peixes raros, desbloqueie varas lendárias e ajude o gatinho a se tornar o mestre dos mares.">
+    <meta name="keywords" content="jogo de pesca, cat coins, jogo relaxante, gato pescador, html5 games, pesca rpg">
+    <meta name="author" content="Seu Nome">
+    <title>Gato Pescador - Aventura Oceânica</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #0277BD;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        main {
+            flex: 1;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        h1 { margin: 0; font-size: 2.5rem; }
+        h2 { color: #0277BD; border-bottom: 2px solid #B3E5FC; padding-bottom: 0.5rem; }
+        p { font-size: 1.1rem; margin-bottom: 1.5rem; }
+        .cta-button {
+            display: inline-block;
+            background-color: #FF9800;
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.25);
+            background-color: #F57C00;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        footer {
+            background-color: #01579B;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Gato Pescador</h1>
+    <p>Relaxe, pesque e conquiste os 7 mares com seu companheiro felino.</p>
+</header>
+
+<main>
+    <div style="text-align: center;">
+        <a href="pesca.html" class="cta-button">JOGAR AGORA</a>
+    </div>
+
+    <section>
+        <h2>Sobre o Jogo</h2>
+        <p>Bem-vindo ao mundo encantador de <strong>Gato Pescador</strong>. Neste jogo incremental e relaxante, você assume o controle de um gato astuto com o objetivo de capturar os peixes mais lendários do oceano.</p>
+        <p>Use suas <strong>Cat Coins</strong> para adquirir equipamentos melhores. Existem 10 varas de pesca únicas, cada uma projetada para alcançar profundidades abissais e capturar criaturas de raridade Divina.</p>
+    </section>
+
+    <section>
+        <h2>Funcionalidades</h2>
+        <div class="features">
+            <div class="feature-card">
+                <h3>Raridades Exclusivas</h3>
+                <p>De Comum a Divino, cada peixe possui atributos únicos gerados proceduralmente.</p>
+            </div>
+            <div class="feature-card">
+                <h3>10 Varas Lendárias</h3>
+                <p>Melhore seu equipamento para pescar mais rápido e mais fundo.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Visual Relaxante</h3>
+                <p>Observe as silhuetas dos peixes nadando ao fundo enquanto planeja sua próxima jogada.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2026 Gato Pescador Studios. Todos os direitos reservados.</p>
+</footer>
+
+<script>
+    // Pequeno script para animar o botão levemente
+    const btn = document.querySelector('.cta-button');
+    setInterval(() => {
+        btn.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+            btn.style.transform = 'scale(1)';
+        }, 500);
+    }, 3000);
+</script>
+
+</body>
+</html>
