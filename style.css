@@ -22,7 +22,6 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .icon-btn:hover { transform: scale(1.05); }
 .gold-btn { background: linear-gradient(to bottom, #FFD700, #FFC107); color: #3e2723; border: 2px solid #fff; }
 
-/* Estilo para o botão de sair */
 .exit-btn { background: #ff5252; color: white; border: 2px solid #d32f2f; }
 .exit-btn:hover { background: #d32f2f; transform: scale(1.05); }
 
@@ -68,7 +67,6 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .close-btn { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; }
 .shop-grid { padding: 20px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
 
-/* SEÇÕES DA LOJA */
 .shop-section-title { grid-column: 1 / -1; margin-top: 15px; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #555; font-weight: bold; }
 
 .rod-card, .gear-card { background: #f9f9f9; padding: 10px; border-radius: 8px; border: 2px solid #eee; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }

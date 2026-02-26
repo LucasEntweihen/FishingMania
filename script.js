@@ -11,7 +11,7 @@
     currentSinker: 'chumbo',
     baitInventory: {},
     currentBait: null,
-    loadedImages: {},
+    loadedImages: {}, // Guarda as imagens carregadas
     collection: {},     
     collection67: {},   
     isDay: true
@@ -45,18 +45,23 @@ const RARITIES = {
     DIVINO: { id: 'divino', prob: 0.001, mult: 500, style: 'text-divino', border: 'border-divino', name: 'Divino', variations: [{ name: 'Quase Arco-íris', image: 'img/Semi-rainbowfish.jpg', time: 'day' }, { name: 'Só mais um pouco', image: 'img/meus porrinhas.png', time: 'night' }] }
 };
 
+// PRÉ-CARREGAMENTO DAS IMAGENS
 function preloadImages() {
     Object.values(RARITIES).forEach(rarity => {
         rarity.variations.forEach(fish => {
-            const img = new Image(); img.src = fish.image; GAME_STATE.loadedImages[fish.image] = img;
+            const img = new Image(); 
+            img.src = fish.image; 
+            GAME_STATE.loadedImages[fish.image] = img;
         });
     });
     ['img/67comum.jpg', 'img/67raro.jpg', 'img/67muitoraro.webp'].forEach(src => {
-        const img = new Image(); img.src = src;
+        const img = new Image(); 
+        img.src = src; 
     });
 }
 preloadImages();
 
+// GERAÇÃO DAS VARAS
 function generateRods() {
     const names = ["Galho Seco", "Vara de Plástico", "Vara de Bambu", "Bambu Reforçado", "Fibra de Vidro", "Fibra Premium", "Alumínio Leve", "Alumínio Aeronáutico", "Carbono Básico", "Carbono Pro", "Grafite Flex", "Grafite Titânio", "Vara Oceânica", "Mestre dos Mares", "Caçadora de Mitos", "Arpão Antigo", "Tridente de Netuno", "Vara Galáctica", "Vara Quântica", "A Vara do Criador"];
     return names.map((name, index) => {
@@ -83,7 +88,6 @@ const elSinkerSlot = document.getElementById('sinker-slot');
 const elBaitSlot = document.getElementById('bait-slot');
 const elSaveStatus = document.getElementById('save-status');
 
-// Modais e Botões
 const elShopModal = document.getElementById('shop-modal');
 const elCollectionModal = document.getElementById('collection-modal');
 const elCollection67Modal = document.getElementById('collection-67-modal');
@@ -100,38 +104,60 @@ const elCollection67Grid = document.getElementById('collection-67-grid');
 const elCollectionProgress = document.getElementById('collection-progress');
 const elCollection67Progress = document.getElementById('collection-67-progress');
 
-// --- SISTEMA DE SALVAR (LOCAL STORAGE APENAS) ---
+// --- SISTEMA DE SALVAMENTO BLINDADO ---
 function updateSaveStatus(msg) { if(elSaveStatus) elSaveStatus.innerText = msg; }
 
 function saveGame() {
-    localStorage.setItem('gatoPescadorSave', JSON.stringify(GAME_STATE));
+    // Salva estritamente os DADOS DO JOGADOR, ignorando imagens e referências do sistema.
+    const playerSave = {
+        coins: GAME_STATE.coins,
+        currentRodIndex: GAME_STATE.currentRodIndex,
+        ownedRods: GAME_STATE.ownedRods,
+        ownedSinkers: GAME_STATE.ownedSinkers,
+        currentSinker: GAME_STATE.currentSinker,
+        baitInventory: GAME_STATE.baitInventory,
+        currentBait: GAME_STATE.currentBait,
+        collection: GAME_STATE.collection,
+        collection67: GAME_STATE.collection67
+    };
+    localStorage.setItem('gatoPescadorSave', JSON.stringify(playerSave));
     updateSaveStatus("✅ Salvo Localmente");
 }
 
 function loadGame() {
     const localData = localStorage.getItem('gatoPescadorSave');
     if (localData) {
-        Object.assign(GAME_STATE, JSON.parse(localData));
-        updateSaveStatus("👤 Jogo Carregado");
+        try {
+            const parsed = JSON.parse(localData);
+            // Injeta apenas os valores salvos no estado do jogo
+            GAME_STATE.coins = parsed.coins || 0;
+            GAME_STATE.currentRodIndex = parsed.currentRodIndex || 0;
+            GAME_STATE.ownedRods = parsed.ownedRods || [0];
+            GAME_STATE.ownedSinkers = parsed.ownedSinkers || ['chumbo'];
+            GAME_STATE.currentSinker = parsed.currentSinker || 'chumbo';
+            GAME_STATE.baitInventory = parsed.baitInventory || {};
+            GAME_STATE.currentBait = parsed.currentBait || null;
+            GAME_STATE.collection = parsed.collection || {};
+            GAME_STATE.collection67 = parsed.collection67 || {};
+            updateSaveStatus("👤 Jogo Carregado");
+        } catch(e) {
+            console.error("Save corrompido", e);
+            updateSaveStatus("Erro ao Carregar");
+        }
     } else {
         updateSaveStatus("Novo Jogo");
     }
     updateUI();
 }
 
-// Carrega ao iniciar
 loadGame();
-// Salva a cada 30s
 setInterval(saveGame, 30000);
 
-// --- SAIR DO JOGO ---
 elExitBtn.onclick = () => {
     elExitBtn.innerText = "Salvando...";
     elExitBtn.disabled = true;
     saveGame();
-    setTimeout(() => {
-        window.location.href = 'index.html'; // Substitua por "landing.html" se necessário
-    }, 800);
+    setTimeout(() => { window.location.href = 'index.html'; }, 800);
 };
 
 /* ==========================================
@@ -154,8 +180,8 @@ startTimeCycle();
    5. SISTEMA DE PESCA E MODIFICADORES
    ========================================== */
 function calculateCatch() {
-    const rod = GAME_STATE.rods[GAME_STATE.currentRodIndex];
-    const sinker = SINKERS.find(s => s.id === GAME_STATE.currentSinker);
+    const rod = GAME_STATE.rods[GAME_STATE.currentRodIndex] || GAME_STATE.rods[0];
+    const sinker = SINKERS.find(s => s.id === GAME_STATE.currentSinker) || SINKERS[0];
     const bait = GAME_STATE.currentBait ? BAITS.find(b => b.id === GAME_STATE.currentBait) : null;
 
     let luckFactor = rod.luck;
@@ -208,8 +234,8 @@ function castLine() {
     updateUI(); 
 
     GAME_STATE.isFishing = true;
-    const rod = GAME_STATE.rods[GAME_STATE.currentRodIndex];
-    const sinker = SINKERS.find(s => s.id === GAME_STATE.currentSinker);
+    const rod = GAME_STATE.rods[GAME_STATE.currentRodIndex] || GAME_STATE.rods[0];
+    const sinker = SINKERS.find(s => s.id === GAME_STATE.currentSinker) || SINKERS[0];
 
     elCastBtn.disabled = true; elCastBtn.innerText = "Descendo...";
     elCat.classList.remove('cat-idle'); elCat.classList.add('cat-fishing');
@@ -223,7 +249,7 @@ function castLine() {
     let speedMult = rod.speed;
     if (sinker.stats.speed) speedMult *= sinker.stats.speed;
 
-    const travelTime = Math.max(400, 2000 - (rod.id * 80)) / (sinker.stats.speed || 1);
+    const travelTime = Math.max(400, 2000 - (rod.id * 80)) / (speedMult || 1);
     
     elLineContainer.style.transition = `height ${travelTime}ms ease-in`;
     elLineContainer.style.height = `${targetDepth}px`;
@@ -277,11 +303,11 @@ function finishFishing(fish) {
 }
 
 document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') { e.preventDefault(); castLine(); }
+    if (e.code === 'Space' && !GAME_STATE.isFishing) { e.preventDefault(); castLine(); }
 });
 
 /* ==========================================
-   6. UI E POPUPS
+   6. UI, LOJA E AQUÁRIOS
    ========================================== */
 function showPopup(fish, sealImage) {
     const div = document.createElement('div');
@@ -317,19 +343,21 @@ function showPopup(fish, sealImage) {
 
 function updateUI() {
     elCoins.innerText = GAME_STATE.coins.toLocaleString();
-    const currentRod = GAME_STATE.rods[GAME_STATE.currentRodIndex];
+    const currentRod = GAME_STATE.rods[GAME_STATE.currentRodIndex] || GAME_STATE.rods[0];
     elRodDisplay.innerText = `Vara: ${currentRod.name}`;
     elRodVisual.className = 'rod-visual'; 
     elRodVisual.classList.add(`rod-tier-${currentRod.id}`);
 
-    const sinker = SINKERS.find(s => s.id === GAME_STATE.currentSinker);
+    const sinker = SINKERS.find(s => s.id === GAME_STATE.currentSinker) || SINKERS[0];
     elSinkerSlot.innerText = `🪨 ${sinker.name}`;
     
     if (GAME_STATE.currentBait) {
         const bait = BAITS.find(b => b.id === GAME_STATE.currentBait);
-        const qty = GAME_STATE.baitInventory[bait.id];
-        elBaitSlot.innerText = `${bait.icon} ${bait.name} (x${qty})`;
-        elBaitVisual.innerText = bait.icon;
+        if(bait) {
+            const qty = GAME_STATE.baitInventory[bait.id] || 0;
+            elBaitSlot.innerText = `${bait.icon} ${bait.name} (x${qty})`;
+            elBaitVisual.innerText = bait.icon;
+        }
     } else {
         elBaitSlot.innerText = "🪝 Sem Isca";
         elBaitVisual.innerText = "";
@@ -340,7 +368,7 @@ function updateUI() {
     if (!elCollection67Modal.classList.contains('hidden')) renderCollection67();
 }
 
-// --- LOJA UNIFICADA E COLEÇÕES ---
+// Interações Botões Menu
 elOpenShopBtn.onclick = () => { elShopModal.classList.remove('hidden'); renderShop(); };
 elCloseShopBtn.onclick = () => elShopModal.classList.add('hidden');
 elOpenCollectionBtn.onclick = () => { elCollectionModal.classList.remove('hidden'); renderCollection(); };
@@ -388,8 +416,7 @@ function equipBait(id) {
 function renderShop() {
     elShopContainer.innerHTML = '';
 
-    const titleRods = document.createElement('div'); titleRods.className = 'shop-section-title'; titleRods.innerText = "🎣 Varas";
-    elShopContainer.appendChild(titleRods);
+    const titleRods = document.createElement('div'); titleRods.className = 'shop-section-title'; titleRods.innerText = "🎣 Varas"; elShopContainer.appendChild(titleRods);
     GAME_STATE.rods.forEach(rod => {
         const div = document.createElement('div'); const isOwned = GAME_STATE.ownedRods.includes(rod.id); const isEquipped = GAME_STATE.currentRodIndex === rod.id;
         const statusClass = isOwned ? (isEquipped ? 'equipped' : 'owned') : ''; const btnText = isOwned ? (isEquipped ? "Equipado" : "Equipar") : `💰 ${rod.price}`;
@@ -397,8 +424,7 @@ function renderShop() {
         div.onclick = () => buyRod(rod.id); elShopContainer.appendChild(div);
     });
 
-    const titleSinkers = document.createElement('div'); titleSinkers.className = 'shop-section-title'; titleSinkers.innerText = "🪨 Chumbadas";
-    elShopContainer.appendChild(titleSinkers);
+    const titleSinkers = document.createElement('div'); titleSinkers.className = 'shop-section-title'; titleSinkers.innerText = "🪨 Chumbadas"; elShopContainer.appendChild(titleSinkers);
     SINKERS.forEach(sinker => {
         const div = document.createElement('div'); const isOwned = GAME_STATE.ownedSinkers.includes(sinker.id); const isEquipped = GAME_STATE.currentSinker === sinker.id;
         const statusClass = isOwned ? (isEquipped ? 'equipped' : 'owned') : ''; const btnText = isOwned ? (isEquipped ? "Equipado" : "Equipar") : `💰 ${sinker.price}`;
@@ -406,8 +432,7 @@ function renderShop() {
         div.onclick = () => buySinker(sinker.id); elShopContainer.appendChild(div);
     });
 
-    const titleBaits = document.createElement('div'); titleBaits.className = 'shop-section-title'; titleBaits.innerText = "🪝 Iscas (Consumíveis)";
-    elShopContainer.appendChild(titleBaits);
+    const titleBaits = document.createElement('div'); titleBaits.className = 'shop-section-title'; titleBaits.innerText = "🪝 Iscas (Consumíveis)"; elShopContainer.appendChild(titleBaits);
     BAITS.forEach(bait => {
         const div = document.createElement('div'); const count = GAME_STATE.baitInventory[bait.id] || 0; const isEquipped = GAME_STATE.currentBait === bait.id;
         const statusClass = isEquipped ? 'equipped' : (count > 0 ? 'owned' : '');
@@ -439,17 +464,27 @@ function createCard(container, fish, rarity, count, is67) {
 }
 
 /* ==========================================
-   7. BACKGROUND ANIMADO
+   7. BACKGROUND ANIMADO (CORRIGIDO)
    ========================================== */
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
 const fishes = [];
+
 function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-window.addEventListener('resize', resizeCanvas); resizeCanvas();
+window.addEventListener('resize', resizeCanvas); 
+resizeCanvas();
 
 function pickRandomFishForBg() {
     const rand = Math.random(); let r = RARITIES.COMUM;
-    if (rand < RARITIES.DIVINO.prob) r = RARITIES.DIVINO; else if (rand < RARITIES.SECRETO.prob) r = RARITIES.SECRETO; else if (rand < RARITIES.MITICO.prob) r = RARITIES.MITICO; else if (rand < RARITIES.LENDARIO.prob) r = RARITIES.LENDARIO; else if (rand < RARITIES.EPICO.prob) r = RARITIES.EPICO; else if (rand < RARITIES.RARO.prob) r = RARITIES.RARO;
+    
+    // Deixa o fundo mais realista, peixes raros aparecem menos
+    if (rand < 0.005) r = RARITIES.DIVINO; 
+    else if (rand < 0.01) r = RARITIES.SECRETO; 
+    else if (rand < 0.03) r = RARITIES.MITICO; 
+    else if (rand < 0.08) r = RARITIES.LENDARIO; 
+    else if (rand < 0.20) r = RARITIES.EPICO; 
+    else if (rand < 0.40) r = RARITIES.RARO;
+    
     const valid = r.variations.filter(v => v.time === 'all' || (GAME_STATE.isDay && v.time === 'day') || (!GAME_STATE.isDay && v.time === 'night'));
     const variation = valid.length > 0 ? valid[Math.floor(Math.random() * valid.length)] : r.variations[0];
     return { rarity: r, variation: variation };
@@ -457,16 +492,75 @@ function pickRandomFishForBg() {
 
 class SwimmingFish {
     constructor() { this.reset(true); }
+    
     reset(initial = false) {
-        const picked = pickRandomFishForBg(); this.specificImage = picked.variation.image; this.direction = Math.random() > 0.5 ? 1 : -1;
-        this.y = Math.random() * (canvas.height - 200) + 200; this.x = initial ? Math.random() * canvas.width : (this.direction === 1 ? -150 : canvas.width + 150);
-        this.speed = (Math.random() * 1.5 + 0.5) * this.direction; this.width = Math.min(40 + (picked.rarity.mult * 1.5), 100); this.height = this.width; this.opacity = Math.random() * 0.2 + 0.15;
+        const picked = pickRandomFishForBg(); 
+        this.specificImage = picked.variation.image; 
+        
+        // 0 = fundo, 1 = frente
+        this.depth = Math.random(); 
+        this.direction = Math.random() > 0.5 ? 1 : -1;
+        this.y = Math.random() * (canvas.height - 200) + 200; 
+        
+        // LIMITA O TAMANHO MÁXIMO para não ficarem gigantes e sumirem bizarramente
+        let sizeBonus = Math.min(60, picked.rarity.mult * 0.8); 
+        this.width = (40 + sizeBonus) * (0.4 + (this.depth * 0.6)); 
+        
+        // Define uma margem de segurança baseada na largura para eles não sumirem na tela
+        let safeBoundary = this.width + 100; 
+        this.x = initial ? Math.random() * canvas.width : (this.direction === 1 ? -safeBoundary : canvas.width + safeBoundary);
+        
+        this.speed = (0.5 + (this.depth * 1.5)) * this.direction; 
+        this.opacity = 0.1 + (this.depth * 0.4); 
     }
-    update() { this.x += this.speed; if ((this.direction === 1 && this.x > canvas.width + 150) || (this.direction === -1 && this.x < -150)) this.reset(); }
-    draw() { const img = GAME_STATE.loadedImages[this.specificImage]; if (!img) return; ctx.save(); ctx.globalAlpha = this.opacity; ctx.translate(this.x, this.y); if (this.direction === -1) ctx.scale(-1, 1); ctx.drawImage(img, -this.width/2, -this.height/2, this.width, this.height); ctx.restore(); }
+    
+    update() { 
+        this.x += this.speed; 
+        let safeBoundary = this.width + 100;
+        
+        // Verifica se passou BEM além da borda da tela antes de resetar
+        if ((this.direction === 1 && this.x > canvas.width + safeBoundary) || 
+            (this.direction === -1 && this.x < -safeBoundary)) {
+            this.reset(); 
+        } 
+    }
+    
+    draw() { 
+        const img = GAME_STATE.loadedImages[this.specificImage]; 
+        
+        // SEGURANÇA: Se a imagem não existe ou não carregou ainda, não tente desenhar, senão o código morre.
+        if (!img || !img.complete || img.naturalWidth === 0) return; 
+        
+        // Calcula a altura mantendo a proporção exata do peixe, para não o esmagar!
+        const aspectRatio = img.naturalHeight / img.naturalWidth;
+        const finalHeight = this.width * aspectRatio;
+
+        ctx.save(); 
+        ctx.globalAlpha = this.opacity; 
+        ctx.translate(this.x, this.y); 
+        
+        if (this.direction === -1) ctx.scale(-1, 1); 
+        
+        ctx.drawImage(img, -this.width/2, -finalHeight/2, this.width, finalHeight); 
+        ctx.restore(); 
+    }
 }
-for(let i=0; i<40; i++) fishes.push(new SwimmingFish());
-function animateBg() { ctx.clearRect(0, 0, canvas.width, canvas.height); fishes.forEach(f => { f.update(); f.draw(); }); requestAnimationFrame(animateBg); }
+
+// Cria 25 peixes simultâneos
+for(let i=0; i<25; i++) { fishes.push(new SwimmingFish()); }
+
+function animateBg() { 
+    try {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        fishes.forEach(f => { 
+            f.update(); 
+            f.draw(); 
+        }); 
+    } catch (e) {
+        console.warn("Erro no canvas de fundo:", e);
+    }
+    requestAnimationFrame(animateBg); 
+}
 
 elCastBtn.addEventListener('click', castLine);
 animateBg();
