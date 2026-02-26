@@ -1,132 +1,534 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gato Pescador - Um jogo de pesca relaxante e dinâmico. Colecione peixes raros, desbloqueie varas lendárias e ajude o gatinho a se tornar o mestre dos mares.">
-    <meta name="keywords" content="jogo de pesca, cat coins, jogo relaxante, gato pescador, html5 games, pesca rpg">
-    <meta name="author" content="Seu Nome">
-    <title>Gato Pescador - Aventura Oceânica</title>
+    <title>Gato Pescador - A Lenda dos Mares</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Poppins:wght@400;700&display=swap"
+        rel="stylesheet">
+
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
-            color: #333;
+        :root {
+            --primary: #0288D1;
+            --secondary: #FFD700;
+            --accent: #FF6F00;
+            --dark: #01579B;
+            --light: #E1F5FE;
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0277BD, #004c8c, #002171);
+            color: white;
+            overflow-x: hidden;
             min-height: 100vh;
         }
-        header {
-            background-color: #0277BD;
-            color: white;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+
+        /* --- BACKGROUND ANIMADO (BOLHAS) --- */
+        .bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            top: 0;
+            left: 0;
         }
-        main {
+
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: rise 15s infinite ease-in;
+        }
+
+        .bubble:nth-child(1) {
+            width: 40px;
+            height: 40px;
+            left: 10%;
+            animation-duration: 8s;
+        }
+
+        .bubble:nth-child(2) {
+            width: 20px;
+            height: 20px;
+            left: 20%;
+            animation-duration: 5s;
+            animation-delay: 1s;
+        }
+
+        .bubble:nth-child(3) {
+            width: 50px;
+            height: 50px;
+            left: 35%;
+            animation-duration: 10s;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(4) {
+            width: 80px;
+            height: 80px;
+            left: 50%;
+            animation-duration: 11s;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(5) {
+            width: 35px;
+            height: 35px;
+            left: 55%;
+            animation-duration: 6s;
+            animation-delay: 1s;
+        }
+
+        .bubble:nth-child(6) {
+            width: 45px;
+            height: 45px;
+            left: 65%;
+            animation-duration: 8s;
+            animation-delay: 3s;
+        }
+
+        .bubble:nth-child(7) {
+            width: 25px;
+            height: 25px;
+            left: 70%;
+            animation-duration: 12s;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(8) {
+            width: 80px;
+            height: 80px;
+            left: 80%;
+            animation-duration: 6s;
+            animation-delay: 1s;
+        }
+
+        @keyframes rise {
+            0% {
+                bottom: -100px;
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(100px);
+            }
+
+            100% {
+                bottom: 1080px;
+                transform: translateX(-200px);
+            }
+        }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            min-height: 90vh;
+            width: 100%;
+            gap: 50px;
+        }
+
+        .hero-content {
             flex: 1;
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        h1 { margin: 0; font-size: 2.5rem; }
-        h2 { color: #0277BD; border-bottom: 2px solid #B3E5FC; padding-bottom: 0.5rem; }
-        p { font-size: 1.1rem; margin-bottom: 1.5rem; }
-        .cta-button {
-            display: inline-block;
-            background-color: #FF9800;
-            color: white;
-            padding: 1rem 2rem;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            min-width: 300px;
             text-align: center;
-            margin: 2rem 0;
+            /* Centralizado em mobile */
         }
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.25);
-            background-color: #F57C00;
+
+        @media(min-width: 768px) {
+            .hero-content {
+                text-align: left;
+            }
         }
+
+        .game-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .hero-visual {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .cat-img {
+            width: 280px;
+            filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.4));
+            animation: floatCat 4s infinite ease-in-out;
+        }
+
+        @keyframes floatCat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(2deg);
+            }
+        }
+
+        /* --- LOGIN CARD (GLASSMORPHISM) --- */
+        .login-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+            transition: transform 0.3s;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 15px;
+            text-decoration: none;
+        }
+
+        .btn-google {
+            background: white;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-google:hover {
+            background: #f1f1f1;
+            transform: scale(1.02);
+        }
+
+        .btn-guest {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+        }
+
+        .btn-guest:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+        }
+
+        .btn-play {
+            background: linear-gradient(45deg, #FFD700, #FFA000);
+            color: #3E2723;
+            font-size: 1.3rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            border: 2px solid #FFF8E1;
+        }
+
+        .btn-play:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid white;
+            margin-bottom: 15px;
+            background: #ccc;
+        }
+
+        /* --- FEATURES SECTION --- */
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            width: 100%;
+            margin-top: 50px;
+            margin-bottom: 50px;
         }
+
         .feature-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            border-radius: 20px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
         }
+
+        .feature-card:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .feature-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .feature-text {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
         footer {
-            background-color: #01579B;
-            color: white;
-            text-align: center;
-            padding: 1rem;
             margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            opacity: 0.6;
+            font-size: 0.8rem;
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Utilitários */
+        .hidden {
+            display: none !important;
+        }
+
+        .highlight {
+            color: var(--secondary);
         }
     </style>
 </head>
+
 <body>
 
-<header>
-    <h1>Gato Pescador</h1>
-    <p>Relaxe, pesque e conquiste os 7 mares com seu companheiro felino.</p>
-</header>
-
-<main>
-    <div style="text-align: center;">
-        <a href="pesca.html" class="cta-button">JOGAR AGORA</a>
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
     </div>
 
-    <section>
-        <h2>Sobre o Jogo</h2>
-        <p>Bem-vindo ao mundo encantador de <strong>Gato Pescador</strong>. Neste jogo incremental e relaxante, você assume o controle de um gato astuto com o objetivo de capturar os peixes mais lendários do oceano.</p>
-        <p>Use suas <strong>Cat Coins</strong> para adquirir equipamentos melhores. Existem 10 varas de pesca únicas, cada uma projetada para alcançar profundidades abissais e capturar criaturas de raridade Divina.</p>
-    </section>
+    <div class="container">
 
-    <section>
-        <h2>Funcionalidades</h2>
-        <div class="features">
+        <section class="hero">
+
+            <div class="hero-content">
+                <h1 class="game-title">Gato <span class="highlight">Pescador</span></h1>
+                <p class="game-subtitle">
+                    Mergulhe em uma aventura relaxante.<br>
+                    Colecione peixes raros, descubra o <span class="highlight">lendário 67cm</span> e conquiste os 7
+                    mares com seu equipamento.
+                </p>
+
+                <div class="login-card">
+                    <div id="login-state">
+                        <p style="margin-bottom: 20px; font-size: 0.9rem;">Salve seu progresso na nuvem para nunca
+                            perder sua coleção.</p>
+                        <button id="btn-login-google" class="btn btn-google">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                            Entrar com Google
+                        </button>
+                        <div style="display: flex; align-items: center; gap: 10px; margin: 15px 0; opacity: 0.6;">
+                            <div style="height:1px; background:white; flex:1"></div> ou <div
+                                style="height:1px; background:white; flex:1"></div>
+                        </div>
+                        <button id="btn-guest" class="btn btn-guest">Jogar como Convidado</button>
+                    </div>
+
+                    <div id="play-state" class="hidden">
+                        <img src="" id="user-photo" class="user-avatar" alt="User">
+                        <h3 id="welcome-msg" style="margin-bottom: 5px;">Olá, Pescador!</h3>
+                        <p style="font-size: 0.8rem; margin-bottom: 25px; opacity: 0.8;">Seu progresso está salvo e
+                            seguro.</p>
+
+                        <button id="btn-play" class="btn btn-play">
+                            🎣 JOGAR AGORA
+                        </button>
+
+                        <button onclick="logout()"
+                            style="background:none; border:none; color:white; text-decoration:underline; cursor:pointer; font-size:0.8rem; margin-top:10px; opacity: 0.6;">
+                            Sair da conta
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <img src="img/gato mergulhador.png" class="cat-img" alt="Gato Mergulhador">
+            </div>
+
+        </section>
+
+        <section class="features">
             <div class="feature-card">
-                <h3>Raridades Exclusivas</h3>
-                <p>De Comum a Divino, cada peixe possui atributos únicos gerados proceduralmente.</p>
+                <span class="feature-icon">📏</span>
+                <div class="feature-title">O Lendário 67cm</div>
+                <div class="feature-text">Existe uma chance minúscula de encontrar peixes gigantes. Monte sua galeria
+                    dourada exclusiva!</div>
             </div>
             <div class="feature-card">
-                <h3>10 Varas Lendárias</h3>
-                <p>Melhore seu equipamento para pescar mais rápido e mais fundo.</p>
+                <span class="feature-icon">🌗</span>
+                <div class="feature-title">Ciclo Dia & Noite</div>
+                <div class="feature-text">O oceano muda. Certas criaturas míticas só aparecem sob a luz do sol ou o
+                    brilho da lua.</div>
             </div>
             <div class="feature-card">
-                <h3>Visual Relaxante</h3>
-                <p>Observe as silhuetas dos peixes nadando ao fundo enquanto planeja sua próxima jogada.</p>
+                <span class="feature-icon">☁️</span>
+                <div class="feature-title">Save na Nuvem</div>
+                <div class="feature-text">Jogue no PC ou no Celular. Seu progresso e suas moedas estão sempre
+                    sincronizados.</div>
             </div>
-        </div>
-    </section>
-</main>
+        </section>
 
-<footer>
-    <p>&copy; 2026 Gato Pescador Studios. Todos os direitos reservados.</p>
-</footer>
+        <footer>
+            <p>&copy; 2026 Gato Pescador Studios. Todos os direitos reservados.</p>
+        </footer>
 
-<script>
-    // Pequeno script para animar o botão levemente
-    const btn = document.querySelector('.cta-button');
-    setInterval(() => {
-        btn.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            btn.style.transform = 'scale(1)';
-        }, 500);
-    }, 3000);
-</script>
+    </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // ======================================================
+        // ⚠️ COLE SUA FIREBASE CONFIG AQUI ABAIXO ⚠️
+        // ======================================================
+        const firebaseConfig = {
+  apiKey: "AIzaSyDHz1W47O5kTiEPw7OjEjSXD0eH_ICtfDA",
+  authDomain: "fishingmania-6dced.firebaseapp.com",
+  databaseURL: "https://fishingmania-6dced-default-rtdb.firebaseio.com",
+  projectId: "fishingmania-6dced",
+  storageBucket: "fishingmania-6dced.firebasestorage.app",
+  messagingSenderId: "761476396898",
+  appId: "1:761476396898:web:2b81f955acbf622a4c9e3b",
+  measurementId: "G-Q96SDKRJ1D"
+};
+
+        // Verificação de Segurança Básica
+        if (!firebaseConfig.apiKey) {
+            alert("ERRO: Você esqueceu de colar a 'firebaseConfig' no código! O login não funcionará sem ela.");
+        }
+
+        // Inicializa
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Elementos DOM
+        const loginState = document.getElementById('login-state');
+        const playState = document.getElementById('play-state');
+        const userPhoto = document.getElementById('user-photo');
+        const welcomeMsg = document.getElementById('welcome-msg');
+        
+        const btnLogin = document.getElementById('btn-login-google');
+        const btnGuest = document.getElementById('btn-guest');
+        const btnPlay = document.getElementById('btn-play');
+
+        // Função de Login (COM DIAGNÓSTICO DE ERRO)
+        btnLogin.addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log("Login com sucesso!", result.user);
+                })
+                .catch((error) => {
+                    console.error("Erro no login:", error);
+                    // Traduzindo erros comuns para facilitar
+                    let msg = error.message;
+                    if (msg.includes("auth/operation-not-allowed")) msg = "O login com Google não está ativado no Console do Firebase.";
+                    if (msg.includes("auth/unauthorized-domain")) msg = "Este domínio (localhost/127.0.0.1) não está autorizado no Firebase Authentication.";
+                    if (msg.includes("auth/popup-closed-by-user")) msg = "Você fechou a janela de login antes de terminar.";
+                    
+                    alert("Erro ao conectar: \n" + msg);
+                });
+        });
+
+        // Função Jogar (Redireciona)
+        const startGame = () => window.location.href = "pesca.html";
+        
+        btnPlay.addEventListener('click', startGame);
+        btnGuest.addEventListener('click', startGame);
+
+        // Monitorar Status do Usuário
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário LOGADO
+                loginState.classList.add('hidden');
+                playState.classList.remove('hidden');
+                
+                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Viajante';
+                welcomeMsg.innerText = `Olá, Capitão ${firstName}!`;
+                
+                if(user.photoURL) {
+                    userPhoto.src = user.photoURL;
+                } else {
+                    userPhoto.src = "https://ui-avatars.com/api/?name=" + firstName + "&background=random";
+                }
+
+            } else {
+                // Usuário DESLOGADO
+                loginState.classList.remove('hidden');
+                playState.classList.add('hidden');
+            }
+        });
+
+        // Expor logout globalmente
+        window.logout = () => signOut(auth);
+
+    </script>
 </body>
+
 </html>
