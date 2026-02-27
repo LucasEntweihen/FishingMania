@@ -1,3 +1,7 @@
+// Verifica se a URL tem o aviso de convidado
+const urlParams = new URLSearchParams(window.location.search);
+const isGuestMode = urlParams.get('guest') === 'true';
+
 /* ==========================================
    1. CONFIGURAÇÕES E ESTADO
    ========================================== */
@@ -83,46 +87,54 @@ const BAITS = [
 const RARITIES = {
     COMUM: {
         id: 'comum', prob: 0.50, mult: 1, style: 'text-comum', border: 'border-comum', name: 'Comum', variations: [
-            { name: 'Peixe Genérico', image: 'img/Genericfish001.webp', time: 'all' },
-            { name: 'Bombardilo', image: 'img/bombardilo crocarilho.webp', time: 'day' },
-            { name: 'Ah, peixe legal', image: 'img/PeixeLegal.avif', time: 'all' },
-            { name: 'Cruel kidfish', image: 'img/KidFish.png', time: 'night' }
+            { name: 'Peixe Genérico', image: '/img/peixe/Genericfish001.webp', time: 'all' },
+            { name: 'Bombardilo', image: '/img/peixe/bombardilo crocarilho.webp', time: 'day' },
+            { name: 'Ah, peixe legal', image: '/img/peixe/PeixeLegal.avif', time: 'all' },
+            { name: 'Cruel kidfish', image: '/img/peixe/KidFish.png', time: 'night' }
         ]
     },
     RARO: {
         id: 'raro', prob: 0.25, mult: 3, style: 'text-raro', border: 'border-raro', name: 'Raro', variations: [
-            { name: 'Peixe Estranho', image: 'img/UnderWaterAhhFish.png', time: 'night' },
-            { name: 'Meu çélebro', image: 'img/tarlalareo fish.png', time: 'all' },
-            { name: 'PUTAPEIXE', image: 'img/PUTARALHOFISH, porra.png', time: 'all' }
+            { name: 'Peixe Estranho', image: '/img/peixe/UnderWaterAhhFish.png', time: 'night' },
+            { name: 'Meu çélebro', image: '/img/peixe/tarlalareo fish.png', time: 'all' },
+            { name: 'PUTAPEIXE', image: '/img/peixe/PUTARALHOFISH, porra.png', time: 'all' },
+            { name: 'Peixe Burrinho', image: '/img/peixe/dumbAssFish.png', time: 'all' }
         ]
     },
     EPICO: {
         id: 'epico', prob: 0.15, mult: 8, style: 'text-epico', border: 'border-epico', name: 'Épico', variations: [
-            { name: 'Mahi-Mahi', image: 'img/Mahi-Mahifish square.webp', time: 'all' },
-            { name: 'Peixe Otário', image: 'img/PeixeOtario.png', time: 'day' }]
+            { name: 'Mahi-Mahi', image: '/img/peixe/Mahi-Mahifish square.webp', time: 'all' },
+            { name: 'Peixe Otário', image: '/img/peixe/PeixeOtario.png', time: 'day' },
+            { name: 'Peixe Lhapaço', image: '/img/peixe/peixe-palhaco.png', time: 'all' },
+            { name: 'Carlos: a.Cardume', image: '/img/peixe/Carlosacardume.png', time: 'day' }
+        ]
     },
     LENDARIO: {
         id: 'lendario', prob: 0.07, mult: 20, style: 'text-lendario', border: 'border-lendario', name: 'Lendário', variations: [
-            { name: 'Peixe Motosserra', image: 'img/Chainsawfish.webp', time: 'night' },
-            { name: 'Peixe Demônio negro', image: 'img/DemonicAHHfish (1).png', time: 'night' }
+            { name: 'Peixe Motosserra', image: '/img/peixe/Chainsawfish.webp', time: 'night' },
+            { name: 'Peixe Demônio negro', image: '/img/peixe/DemonicAHHfish (1).png', time: 'night' }
         ]
     },
     MITICO: {
         id: 'mitico', prob: 0.025, mult: 50, style: 'text-mitico', border: 'border-mitico', name: 'Mítico', variations: [
-            { name: 'Jogo do Peixe Retardo', image: 'img/GameofRetardedfish.png', time: 'night' },
-            { name: 'Peixe Câncer', image: 'img/PeixeCancer.png', time: 'all' },
-            { name: 'Meus filhos ', image: 'img/cardume dos meus filhos.png', time: 'all' }]
+            { name: 'Jogo do Peixe Retardo', image: '/img/peixe/GameofRetardedfish.png', time: 'night' },
+            { name: 'Peixe Câncer', image: '/img/peixe/PeixeCancer.png', time: 'all' },
+            { name: 'Meus filhos ', image: '/img/peixe/cardume dos meus filhos.png', time: 'all' }]
     },
     SECRETO: {
         id: 'secreto', prob: 0.004, mult: 150, style: 'text-secreto', border: 'border-secreto', name: 'Secreto', variations: [
-            { name: 'Peixe Retardado', image: 'img/Retardedfish.png', time: 'all' }]
+            { name: 'Peixe Retardado', image: '/img/peixe/Retardedfish.png', time: 'all' }]
     },
     DIVINO: {
         id: 'divino', prob: 0.001, mult: 500, style: 'text-divino', border: 'border-divino', name: 'Divino', variations: [
-            { name: 'Quase Arco-íris', image: 'img/Semi-rainbowfish.png', time: 'day' },
-            { name: 'Só mais um pouco', image: 'img/meus porrinhas.png', time: 'night' },
-            { name: 'SHIGERU?', image: 'img/ShigeruFish.png', time: 'all' },
-            { name: 'SHIGERU DO ORGULHO???', image: 'img/PrideShigeruFish.png', time: 'night' }
+            { name: 'Quase Arco-íris', image: '/img/peixe/Semi-rainbowfish.png', time: 'day' },
+            { name: 'Só mais um pouco', image: '/img/peixe/meus porrinhas.png', time: 'night' }
+        ]
+    },
+    AURUDO: {
+        id: 'aurudo', prob: 0.0001, mult: 5000, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
+            { name: 'SHIGERU?', image: '/img/peixe/ShigeruFish.png', time: 'all' },
+            { name: 'SHIGERU DO ORGULHO???', image: '/img/peixe/PrideShigeruFish.png', time: 'night' }
         ]
     }
 };
@@ -136,7 +148,7 @@ function preloadImages() {
             GAME_STATE.loadedImages[fish.image] = img;
         });
     });
-    ['img/67comum.jpg', 'img/67raro.jpg', 'img/67muitoraro.webp'].forEach(src => {
+    ['/img/asset/67comum.jpg', '/img/asset/67raro.jpg', '/img/asset/67muitoraro.webp'].forEach(src => {
         const img = new Image();
         img.src = src;
     });
@@ -190,6 +202,11 @@ const elCollection67Progress = document.getElementById('collection-67-progress')
 function updateSaveStatus(msg) { if (elSaveStatus) elSaveStatus.innerText = msg; }
 
 function saveGame() {
+    // BLOQUEIO CONVIDADO: Não salva absolutamente nada.
+    if (isGuestMode) {
+        updateSaveStatus("🚫 Modo Convidado");
+        return; 
+    }
     // Salva estritamente os DADOS DO JOGADOR, ignorando imagens e referências do sistema.
     const playerSave = {
         coins: GAME_STATE.coins,
@@ -207,7 +224,14 @@ function saveGame() {
 }
 
 function loadGame() {
+    // BLOQUEIO CONVIDADO: Não carrega absolutamente nada.
+    if (isGuestMode) {
+        updateSaveStatus("🚫 Modo Convidado");
+        updateUI();
+        return; 
+    }
     const localData = localStorage.getItem('gatoPescadorSave');
+    
     if (localData) {
         try {
             const parsed = JSON.parse(localData);
@@ -236,10 +260,21 @@ loadGame();
 setInterval(saveGame, 30000);
 
 elExitBtn.onclick = () => {
-    elExitBtn.innerText = "Salvando...";
-    elExitBtn.disabled = true;
-    saveGame();
-    setTimeout(() => { window.location.href = 'index.html'; }, 800);
+    // Tenta usar '../index.html' se a pesca.html estiver dentro de uma pasta /html/
+    // Se eles estiverem na mesma pasta, mude para 'index.html'
+    const targetUrl = '/index.html'; 
+
+    if (isGuestMode) {
+        // Se for convidado, simplesmente sai da página (tudo se perde)
+        window.location.href = targetUrl; 
+    } else {
+        elExitBtn.innerText = "Salvando...";
+        elExitBtn.disabled = true;
+        saveGame();
+        setTimeout(() => { 
+            window.location.href = targetUrl; 
+        }, 800);
+    }
 };
 
 /* ==========================================
@@ -273,7 +308,8 @@ function calculateCatch() {
     const rand = Math.random();
     let caughtRarity = RARITIES.COMUM;
 
-    if (rand < RARITIES.DIVINO.prob * luckFactor) caughtRarity = RARITIES.DIVINO;
+    if (rand < RARITIES.AURUDO.prob * luckFactor) caughtRarity = RARITIES.AURUDO;
+    else if (rand < RARITIES.DIVINO.prob * luckFactor) caughtRarity = RARITIES.DIVINO;
     else if (rand < RARITIES.SECRETO.prob * luckFactor) caughtRarity = RARITIES.SECRETO;
     else if (rand < RARITIES.MITICO.prob * luckFactor) caughtRarity = RARITIES.MITICO;
     else if (rand < RARITIES.LENDARIO.prob * luckFactor) caughtRarity = RARITIES.LENDARIO;
@@ -297,7 +333,7 @@ function calculateCatch() {
 
     if (Math.random() < chance67) finalSize = 67;
 
-    let value = Math.floor(finalSize * caughtRarity.mult);
+    let value = Math.floor(finalSize * caughtRarity.mult * (sinker.stats.value || 1) * (bait?.stats.value || 1));
     if (sinker.stats.value) value = Math.floor(value * sinker.stats.value);
     if (bait && bait.stats.value) value = Math.floor(value * bait.stats.value);
 
@@ -331,7 +367,8 @@ function castLine() {
     let speedMult = rod.speed;
     if (sinker.stats.speed) speedMult *= sinker.stats.speed;
 
-    const travelTime = Math.max(400, 2000 - (rod.id * 80)) / (speedMult || 1);
+// <-- NOVO: Multiplica o tempo de descida pela dificuldade do bioma
+const travelTime = (Math.max(400, 2000 - (rod.id * 80)) / (speedMult || 1)) * (window.eventCastTimeMult || 1);
 
     elLineContainer.style.transition = `height ${travelTime}ms ease-in`;
     elLineContainer.style.height = `${targetDepth}px`;
@@ -364,9 +401,9 @@ function finishFishing(fish) {
         GAME_STATE.collection67[fishName]++;
 
         const rid = fish.rarity.id;
-        if (rid === 'comum' || rid === 'raro') sealImage = 'img/67comum.jpg';
-        else if (rid === 'epico' || rid === 'lendario') sealImage = 'img/67raro.jpg';
-        else sealImage = 'img/67muitoraro.webp';
+        if (rid === 'comum' || rid === 'raro') sealImage = '/img/asset/67comum.jpg';
+        else if (rid === 'epico' || rid === 'lendario') sealImage = '/img/asset/67raro.jpg';
+        else sealImage = '/img/asset/67muitoraro.webp';
     } else {
         if (!GAME_STATE.collection[fishName]) GAME_STATE.collection[fishName] = 0;
         GAME_STATE.collection[fishName]++;
@@ -538,7 +575,7 @@ function createCard(container, fish, rarity, count, is67) {
     const isUnlocked = count > 0; let cardClass = `collection-card ${isUnlocked ? 'unlocked' : 'locked'}`; if (is67) cardClass += ' special-67';
     let sealHtml = '';
     if (is67 && isUnlocked) {
-        const rid = rarity.id; let s = 'img/67comum.jpg'; if (rid === 'epico' || rid === 'lendario') s = 'img/67raro.jpg'; else if (rid === 'mitico' || rid === 'secreto' || rid === 'divino') s = 'img/67muitoraro.webp'; sealHtml = `<img src="${s}" class="collection-seal">`;
+        const rid = rarity.id; let s = '/img/asset/67comum.jpg'; if (rid === 'epico' || rid === 'lendario') s = '/img/asset/67raro.jpg'; else if (rid === 'mitico' || rid === 'secreto' || rid === 'divino' || rid == 'aurudo') s = '/img/asset/67muitoraro.webp'; sealHtml = `<img src="${s}" class="collection-seal">`;
     }
     const div = document.createElement('div'); div.className = cardClass; let timeIcon = fish.time === 'day' ? '☀️' : (fish.time === 'night' ? '🌙' : '');
     div.innerHTML = `${isUnlocked ? `<div class="count-badge">x${count}</div>` : ''}<div style="position: absolute; top: 2px; left: 5px; font-size: 0.7rem;">${timeIcon}</div><img src="${fish.image}" class="collection-img" onerror="this.src='https://placehold.co/50x50?text=?'">${sealHtml}<div style="font-size: 0.75rem; font-weight: bold; color: ${isUnlocked ? '#333' : '#999'}">${fish.name}</div><div style="font-size: 0.65rem; color: ${isUnlocked ? 'green' : '#ccc'}">${rarity.name}</div>`;
@@ -560,7 +597,8 @@ function pickRandomFishForBg() {
     const rand = Math.random(); let r = RARITIES.COMUM;
 
     // Deixa o fundo mais realista, peixes raros aparecem menos
-    if (rand < 0.005) r = RARITIES.DIVINO;
+    if (rand < 0.005) r = RARITIES.AURUDO;
+    else if (rand < 0.005) r = RARITIES.DIVINO;
     else if (rand < 0.01) r = RARITIES.SECRETO;
     else if (rand < 0.03) r = RARITIES.MITICO;
     else if (rand < 0.08) r = RARITIES.LENDARIO;

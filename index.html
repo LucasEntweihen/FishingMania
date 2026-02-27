@@ -102,7 +102,6 @@
         .btn-guest { background: #eee; color: #555; margin-top: 15px; }
         .btn-guest:hover { background: #ddd; }
         
-        /* Formulário de Email */
         .auth-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
         .auth-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; font-family: 'Poppins', sans-serif; }
         .auth-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2, 136, 209, 0.2); }
@@ -111,13 +110,6 @@
         .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #eee; margin: 0 10px; }
 
         .error-msg { color: #d32f2f; font-size: 0.85rem; margin-bottom: 10px; min-height: 20px; font-weight: 600;}
-
-        /* Animações */
-        @keyframes dropDown { 0% { transform: translateY(-50px) scale(0.9); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
-        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 0.9; } }
-        @keyframes floatUp { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-        @keyframes pulse { 0% { box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4), 0 4px 0 #E65100; } 50% { box-shadow: 0 8px 30px rgba(255, 152, 0, 0.7), 0 4px 0 #E65100; } 100% { box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4), 0 4px 0 #E65100; } }
-        @keyframes rise { 0% { transform: translateY(0) scale(1); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-1000px) scale(1.5); opacity: 0; } }
 
         @media (max-width: 768px) { .hero h1 { font-size: 2.8rem; } .about-grid { grid-template-columns: 1fr; text-align: center; } .about-image { display: none; } }
     </style>
@@ -132,11 +124,14 @@
             
             <button id="main-cta-btn" class="cta-button">⏳ Carregando...</button>
             
+            <button id="main-guest-btn" class="auth-btn btn-guest" style="display: none; max-width: 350px; margin-top: 15px; border-radius: 50px;">
+                Jogar como Convidado (Sem Salvar)
+            </button>
+            
             <div id="user-info" class="user-badge" style="display: none;">
                 <span id="user-email"></span>
                 <button id="btn-logout" class="logout-btn">Sair da Conta</button>
             </div>
-
         </div>
         
         <div class="wave-divider">
@@ -153,36 +148,7 @@
                 <p>Bem-vindo ao mundo encantador de <strong>Gato Pescador</strong>. Neste jogo incremental, você assume o controle de um gato aventureiro focado em capturar os peixes mais absurdos e raros do fundo do mar.</p>
                 <p>Venda suas capturas para ganhar <strong>Cat Coins 🪙</strong>. Use seu lucro para investir em iscas mágicas, chumbadas pesadas e varas de pesca tecnológicas que permitem alcançar as profundezas abissais!</p>
             </div>
-            <div class="about-image">
-                🐱🎣<br>
-                <span style="font-size: 1.5rem; font-family: 'Fredoka', sans-serif; color: #0277bd;">Mestre dos Mares</span>
-            </div>
-        </section>
-
-        <section>
-            <h2 class="section-title">O que te espera no mar?</h2>
-            <div class="features-grid">
-                <div class="feature-card scroll-anim">
-                    <div class="feature-icon">🐟</div>
-                    <h3>Enciclopédia Viva</h3>
-                    <p>De peixes Comuns a criaturas de raridade Divina. Cada captura é adicionada à sua coleção. Será que você consegue pescar todos?</p>
-                </div>
-                <div class="feature-card scroll-anim">
-                    <div class="feature-icon">⚙️</div>
-                    <h3>Evolução Contínua</h3>
-                    <p>Desbloqueie até 20 varas de pesca diferentes, desde um simples Galho Seco até a lendária Vara Quântica. Equipe chumbadas para pescar mais rápido!</p>
-                </div>
-                <div class="feature-card scroll-anim">
-                    <div class="feature-icon">🌗</div>
-                    <h3>Ciclo Dia e Noite</h3>
-                    <p>O oceano muda com o tempo. Algumas criaturas misteriosas só ousam sair de seus esconderijos quando a noite cai.</p>
-                </div>
-                <div class="feature-card scroll-anim">
-                    <div class="feature-icon">🏆</div>
-                    <h3>Galeria dos 67cm</h3>
-                    <p>Apenas os peixes mais exímios atingem a perfeição dos 67 centímetros. Colecione selos de ouro exclusivos capturando essas lendas.</p>
-                </div>
-            </div>
+            <div class="about-image">🐱🎣<br><span style="font-size: 1.5rem; font-family: 'Fredoka', sans-serif; color: #0277bd;">Mestre dos Mares</span></div>
         </section>
     </main>
 
@@ -195,66 +161,38 @@
         <div class="modal-content">
             <button class="close-modal" id="close-modal-btn">&times;</button>
             <h2>Entrar no Jogo</h2>
-            
             <button id="btn-google" class="auth-btn btn-google">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="20">
                 Entrar com o Google
             </button>
-            
             <div class="divider">ou e-mail</div>
-            
             <div class="auth-form">
                 <input type="email" id="email-input" class="auth-input" placeholder="Seu E-mail">
                 <input type="password" id="password-input" class="auth-input" placeholder="Sua Senha">
             </div>
-            
             <div id="error-message" class="error-msg"></div>
-            
             <button id="btn-login-email" class="auth-btn btn-email">Entrar</button>
             <button id="btn-register-email" class="auth-btn btn-register">Criar Nova Conta</button>
-            
             <div class="divider"></div>
-            
             <button id="btn-guest" class="auth-btn btn-guest">Jogar como Convidado (Sem Nuvem)</button>
         </div>
     </div>
 
     <script type="module">
-        /* --- 1. EFEITOS VISUAIS DA LANDING PAGE --- */
         const bubbleContainer = document.getElementById('bubbles-container');
         for (let i = 0; i < 15; i++) {
             let bubble = document.createElement('div');
             bubble.classList.add('bubble');
             let size = Math.random() * 40 + 10; 
-            bubble.style.width = `${size}px`;
-            bubble.style.height = `${size}px`;
+            bubble.style.width = `${size}px`; bubble.style.height = `${size}px`;
             bubble.style.left = `${Math.random() * 100}%`;
             bubble.style.animationDuration = `${Math.random() * 5 + 3}s`;
             bubble.style.animationDelay = `${Math.random() * 5}s`;
             bubbleContainer.appendChild(bubble);
         }
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target); 
-                }
-            });
-        }, { threshold: 0.2 });
-        document.querySelectorAll('.scroll-anim').forEach(card => observer.observe(card));
-
-        /* --- 2. CONFIGURAÇÃO DO FIREBASE --- */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged, 
-            signInWithPopup, 
-            GoogleAuthProvider,
-            signInWithEmailAndPassword,
-            createUserWithEmailAndPassword,
-            signOut // Importação da função de Sair da conta adicionada!
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDHz1W47O5kTiEPw7OjEjSXD0eH_ICtfDA",
@@ -271,105 +209,60 @@
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
 
-        /* --- 3. LÓGICA DE UI E AUTENTICAÇÃO --- */
         const mainCtaBtn = document.getElementById('main-cta-btn');
+        const mainGuestBtn = document.getElementById('main-guest-btn'); // Novo Botão
         const loginModal = document.getElementById('login-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const errorMsg = document.getElementById('error-message');
-        
-        // Elementos da nova UI de conta
         const userInfoBox = document.getElementById('user-info');
         const userEmailText = document.getElementById('user-email');
         const btnLogout = document.getElementById('btn-logout');
         
         let isUserLoggedIn = false;
 
-        // Escuta se o jogador já está logado ou se saiu
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 isUserLoggedIn = true;
-                // Ajusta UI para usuário logado
-                mainCtaBtn.innerText = "🎣 JOGAR AGORA";
+                mainCtaBtn.innerText = "🎣 CONTINUAR JOGO";
                 userInfoBox.style.display = 'flex';
-                // Mostra o nome do Google ou o email
                 userEmailText.innerText = `👤 ${user.displayName || user.email}`;
+                mainGuestBtn.style.display = 'flex'; // Exibe o botão de convidado para quem tá logado
             } else {
                 isUserLoggedIn = false;
-                // Ajusta UI para usuário desconectado
                 mainCtaBtn.innerText = "🔑 LOGIN PARA JOGAR";
                 userInfoBox.style.display = 'none';
+                mainGuestBtn.style.display = 'none'; // Esconde, pois a pessoa acessa pelo Modal
             }
         });
 
-        // Botão principal ("Login" ou "Jogar Agora")
         mainCtaBtn.addEventListener('click', () => {
-            if (isUserLoggedIn) {
-                window.location.href = 'pesca.html'; 
-            } else {
-                loginModal.classList.add('active'); 
-                errorMsg.innerText = '';
-            }
+            if (isUserLoggedIn) { window.location.href = '/html/pesca.html'; } 
+            else { loginModal.classList.add('active'); errorMsg.innerText = ''; }
         });
 
-        // Evento de Deslogar
-        btnLogout.addEventListener('click', () => {
-            signOut(auth).then(() => {
-                console.log("Usuário deslogado.");
-            }).catch((error) => {
-                console.error("Erro ao sair:", error);
-            });
+        // Adiciona ?guest=true na URL quando clica em convidado (Na tela principal)
+        mainGuestBtn.addEventListener('click', () => {
+            window.location.href = '/html/pesca.html?guest=true';
+        });
+        
+        // Adiciona ?guest=true na URL quando clica em convidado (No Modal)
+        document.getElementById('btn-guest').addEventListener('click', () => {
+            window.location.href = '/html/pesca.html?guest=true';
         });
 
-        // Fechar Modal
-        closeModalBtn.addEventListener('click', () => {
-            loginModal.classList.remove('active');
-        });
-
-        // --- MÉTODOS DE LOGIN ---
+        btnLogout.addEventListener('click', () => { signOut(auth).catch((error) => console.error(error)); });
+        closeModalBtn.addEventListener('click', () => { loginModal.classList.remove('active'); });
 
         function showError(code) {
             let message = "Ocorreu um erro. Tente novamente.";
             if (code.includes('invalid-credential') || code.includes('wrong-password')) message = "E-mail ou senha incorretos.";
             if (code.includes('email-already-in-use')) message = "Este e-mail já está cadastrado.";
-            if (code.includes('weak-password')) message = "A senha deve ter pelo menos 6 caracteres.";
-            if (code.includes('invalid-email')) message = "Formato de e-mail inválido.";
             errorMsg.innerText = message;
         }
 
-        // 1. Google Auth
-        document.getElementById('btn-google').addEventListener('click', () => {
-            signInWithPopup(auth, googleProvider)
-                .then(() => { window.location.href = 'pesca.html'; })
-                .catch((error) => { showError(error.code); });
-        });
-
-        // 2. Email Auth (Entrar)
-        document.getElementById('btn-login-email').addEventListener('click', () => {
-            const email = document.getElementById('email-input').value;
-            const pass = document.getElementById('password-input').value;
-            if(!email || !pass) return errorMsg.innerText = "Preencha e-mail e senha.";
-            
-            signInWithEmailAndPassword(auth, email, pass)
-                .then(() => { window.location.href = 'pesca.html'; })
-                .catch((error) => { showError(error.code); });
-        });
-
-        // 3. Email Auth (Criar Conta)
-        document.getElementById('btn-register-email').addEventListener('click', () => {
-            const email = document.getElementById('email-input').value;
-            const pass = document.getElementById('password-input').value;
-            if(!email || !pass) return errorMsg.innerText = "Preencha e-mail e senha para criar conta.";
-            
-            createUserWithEmailAndPassword(auth, email, pass)
-                .then(() => { window.location.href = 'pesca.html'; })
-                .catch((error) => { showError(error.code); });
-        });
-
-        // 4. Modo Convidado (Bypass Auth)
-        document.getElementById('btn-guest').addEventListener('click', () => {
-            window.location.href = 'pesca.html';
-        });
-
+        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = '/html/pesca.html'; }).catch((e) => { showError(e.code); }); });
+        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha."; signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
+        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha para criar conta."; createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
     </script>
 </body>
 </html>
