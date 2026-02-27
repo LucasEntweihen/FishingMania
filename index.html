@@ -260,7 +260,7 @@
             errorMsg.innerText = message;
         }
 
-        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = '/html/pesca.html'; }).catch((e) => { showError(e.code); }); });
+        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = '/pesca.html'; }).catch((e) => { showError(e.code); }); });
         document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha."; signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
         document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha para criar conta."; createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
     </script>
