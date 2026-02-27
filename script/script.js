@@ -262,7 +262,7 @@ setInterval(saveGame, 30000);
 elExitBtn.onclick = () => {
     // Tenta usar '../index.html' se a pesca.html estiver dentro de uma pasta /html/
     // Se eles estiverem na mesma pasta, mude para 'index.html'
-    const targetUrl = '/index.html'; 
+    const targetUrl = '/html/index.html'; 
 
     if (isGuestMode) {
         // Se for convidado, simplesmente sai da página (tudo se perde)
