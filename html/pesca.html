@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gato Pescador - Mestre dos 67</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style/style.css">
+</head>
+<body>
+
+    <div id="game-container" class="day-mode">
+        <canvas id="bg-canvas"></canvas>
+
+        <div id="ui-layer">
+            
+            <div class="top-bar">
+                <div class="left-group">
+                    <div class="currency badge">
+                        <span class="coin-icon">🪙</span>
+                        <span id="cat-coins">0</span>
+                    </div>
+                    <div id="time-indicator" class="time-badge badge">☀️ Dia</div>
+                </div>
+                
+                <div class="menu-buttons">
+                    <button id="open-shop-btn" class="icon-btn">🛒 Loja</button>
+                    <button id="open-collection-btn" class="icon-btn">📖 Peixes</button>
+                    <button id="open-67-btn" class="icon-btn gold-btn">🏆 Galeria 67</button>
+                    <button id="exit-game-btn" class="icon-btn exit-btn">🚪 Sair</button>
+                </div>
+            </div>
+
+            <div class="center-stage">
+                <div id="cat-fisherman" class="cat-idle">
+                    <img src="/img/asset/gato mergulhador.png" class="cat-visual" alt="Gato Pescador" onerror="this.style.display='none'">
+                    <div class="rod-visual rod-tier-0"></div>
+                </div>
+                
+                <div id="line-container">
+                    <div id="fishing-line"></div>
+                    <div id="hook-group">
+                        <div id="hook">J</div>
+                        <div id="bait-visual"></div>
+                        <img id="hooked-fish-img" src="" alt="Peixe Fisgado">
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-area">
+                <div class="gear-display">
+                    <div class="gear-slot tooltip" id="sinker-slot" data-tip="Peso da linha">🪨 Padrão</div>
+                    <div class="gear-slot tooltip" id="bait-slot" data-tip="Isca atual">🪝 Sem Isca</div>
+                </div>
+
+                <button id="cast-btn" class="main-action-btn">PESCAR (ESPAÇO)</button>
+                <div id="current-rod-display">Vara Atual: Galho Seco</div>
+                <div id="save-status">Carregando...</div>
+            </div>
+
+            <div id="shop-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>🏪 Loja de Pesca</h2>
+                        <button id="close-shop-btn" class="close-btn">&times;</button>
+                    </div>
+                    <div id="shop-container" class="shop-grid"></div>
+                </div>
+            </div>
+
+            <div id="collection-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header header-teal">
+                        <h2>📖 Enciclopédia <span id="collection-progress" class="header-stat">(0/0)</span></h2>
+                        <button id="close-collection-btn" class="close-btn">&times;</button>
+                    </div>
+                    <div id="collection-grid" class="shop-grid"></div>
+                </div>
+            </div>
+
+            <div id="collection-67-modal" class="modal hidden">
+                <div class="modal-content gold-border">
+                    <div class="modal-header header-gold">
+                        <h2>🏆 Galeria dos 67cm <span id="collection-67-progress" class="header-stat">(0/0)</span></h2>
+                        <button id="close-67-btn" class="close-btn dark-text">&times;</button>
+                    </div>
+                    <div id="collection-67-grid" class="shop-grid"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/script/script.js"></script>
+    <script src="/script/events.js"></script>
+    <script src="/script/ragefish.js"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+:root {
+    --bg-sky-day: #87CEEB; --bg-ocean-day: #0288D1; --bg-deep-day: #01579B;
+    --bg-sky-night: #0d1b2a; --bg-ocean-night: #1b263b; --bg-deep-night: #415a77;
+    --c-comum: #bdc3c7; --c-raro: #2ecc71; --c-epico: #9b59b6;
+    --c-lendario: #f39c12; --c-mitico: #e74c3c; --c-secreto: #2c3e50; --c-divino: #f1c40f;
+}
+
+body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; }
+#game-container { position: relative; width: 100%; height: 100%; transition: background 5s ease-in-out; }
+#game-container.day-mode { background: linear-gradient(to bottom, var(--bg-sky-day) 0%, var(--bg-ocean-day) 30%, var(--bg-deep-day) 100%); }
+#game-container.night-mode { background: linear-gradient(to bottom, var(--bg-sky-night) 0%, var(--bg-ocean-night) 40%, #000000 100%); }
+#bg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+#ui-layer { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; flex-direction: column; }
+
+.top-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; z-index: 20; }
+.left-group { display: flex; gap: 10px; align-items: center; }
+.currency { font-size: 1.5rem; font-weight: bold; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; }
+.time-badge { font-size: 1.2rem; font-weight: bold; color: white; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); }
+
+.menu-buttons { display: flex; gap: 10px; }
+.icon-btn { background: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; color: #0277BD; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s; }
+.icon-btn:hover { transform: scale(1.05); }
+.gold-btn { background: linear-gradient(to bottom, #FFD700, #FFC107); color: #3e2723; border: 2px solid #fff; }
+
+.exit-btn { background: #ff5252; color: white; border: 2px solid #d32f2f; }
+.exit-btn:hover { background: #d32f2f; transform: scale(1.05); }
+
+.center-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+#cat-fisherman { position: relative; z-index: 5; margin-bottom: 80px; transition: transform 0.3s ease-in-out; }
+.cat-visual { width: 150px; height: auto; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.4)); }
+.cat-idle { animation: floatCat 3s infinite ease-in-out; }
+.cat-fishing { transform: rotate(5deg) translateY(10px); }
+@keyframes floatCat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+.rod-visual { width: 130px; height: 8px; position: absolute; top: 60%; left: 70%; transform: rotate(-25deg); transform-origin: left center; border-radius: 5px; z-index: 6; transition: all 0.5s ease; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+.rod-tier-0, .rod-tier-1, .rod-tier-2 { background: #5D4037; }
+.rod-tier-3, .rod-tier-4, .rod-tier-5 { background: #A1887F; border: 1px solid #5D4037; }
+.rod-tier-6, .rod-tier-7, .rod-tier-8 { background: #CFD8DC; border: 1px solid #90A4AE; }
+.rod-tier-9, .rod-tier-10, .rod-tier-11 { background: linear-gradient(to right, #424242, #212121); }
+.rod-tier-12, .rod-tier-13, .rod-tier-14 { background: linear-gradient(to right, #039BE5, #0277BD); }
+.rod-tier-15, .rod-tier-16 { background: linear-gradient(to right, #E91E63, #9C27B0); box-shadow: 0 0 10px #E91E63;}
+.rod-tier-17, .rod-tier-18 { background: linear-gradient(45deg, #6200EA, #C51162); box-shadow: 0 0 15px #6200EA; }
+.rod-tier-19 { background: linear-gradient(to right, #FFD700, #FFF8E1, #FFD700); height: 10px; box-shadow: 0 0 25px #FFD700; border: 1px solid white; }
+
+#line-container { position: absolute; top: 50%; left: 50%; width: 1px; height: 0px; z-index: 4; pointer-events: none; transform: translate(120px, -45px); }
+#fishing-line { width: 100%; height: 100%; background: rgba(255, 255, 255, 0.6); }
+#hook-group { position: absolute; bottom: -25px; left: -12px; width: 24px; height: 24px; }
+#hook { color: #B0BEC5; font-weight: bold; font-size: 24px; transform: rotate(45deg); text-shadow: 1px 1px 2px black; }
+#bait-visual { position: absolute; top: 5px; left: 0; font-size: 1.2rem; filter: drop-shadow(0 0 2px black); }
+#hooked-fish-img { position: absolute; top: 5px; left: -20px; width: 60px; height: 60px; object-fit: contain; display: none; animation: wiggle 0.5s infinite; filter: drop-shadow(0 0 5px white); }
+
+.controls-area { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.gear-display { display: flex; gap: 15px; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 15px; }
+.gear-slot { color: white; font-size: 0.9rem; font-weight: bold; }
+
+#cast-btn { background: rgba(255, 255, 255, 0.2); border: 2px solid white; color: white; padding: 15px 50px; font-size: 1.2rem; border-radius: 50px; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.3s; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
+#cast-btn:hover { background: rgba(255, 255, 255, 0.4); transform: translateY(-2px); box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+#cast-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+#current-rod-display { color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-top: 5px; text-shadow: 0 1px 2px black; }
+#save-status { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(3px); transition: opacity 0.3s; }
+.hidden { opacity: 0; pointer-events: none; }
+.modal-content { background: white; width: 90%; max-width: 500px; max-height: 80vh; border-radius: 15px; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; }
+.modal-content.gold-border { border: 4px solid #FFD700; }
+.modal-header { background: #0277BD; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+.close-btn { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; }
+.shop-grid { padding: 20px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+
+.shop-section-title { grid-column: 1 / -1; margin-top: 15px; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #555; font-weight: bold; }
+
+.rod-card, .gear-card { background: #f9f9f9; padding: 10px; border-radius: 8px; border: 2px solid #eee; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+.rod-card:hover, .gear-card:hover { border-color: #0277BD; }
+.rod-card.owned, .gear-card.owned { border-color: var(--c-raro); background: #e8f8f5; }
+.rod-card.equipped, .gear-card.equipped { border-color: var(--c-lendario); background: #fff8e1; box-shadow: 0 0 10px rgba(243, 156, 18, 0.3); }
+.stack-count { position: absolute; top: -5px; right: -5px; background: #333; color: white; font-size: 0.7rem; padding: 2px 5px; border-radius: 10px; }
+
+.collection-card { background: #f0f0f0; padding: 10px; border-radius: 8px; text-align: center; border: 2px solid #ccc; position: relative; opacity: 0.6; transition: 0.3s; }
+.collection-card.unlocked { opacity: 1; background: white; border-color: #00897B; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.collection-img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; }
+.collection-card.locked .collection-img { filter: brightness(0) opacity(0.3); }
+.count-badge { position: absolute; top: -5px; right: -5px; background: #d32f2f; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+
+.collection-card.special-67.unlocked { border: 2px solid gold; background: linear-gradient(to bottom right, #fff, #fffbe6); box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+.collection-seal { position: absolute; top: 40px; right: 5px; width: 40px; height: 40px; object-fit: contain; z-index: 5; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3)); transform: rotate(15deg); }
+
+/* ==========================================================================
+   POPUP DE PESCA (PEQUENO E QUADRADO - 200x200px)
+   ========================================================================== */
+.catch-popup { 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    background: #ffffff; 
+    
+    width: 200px; 
+    height: 200px; 
+    
+    padding: 10px; 
+    border-radius: 15px; 
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px; 
+    
+    text-align: center; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+    z-index: 100; 
+    border: 4px solid transparent; 
+    
+    animation: popupIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fish-visual-container { 
+    position: relative; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70px; 
+    margin-bottom: 5px;
+}
+
+.popup-fish-img { 
+    max-width: 120px; 
+    height: 65px; 
+    object-fit: contain; 
+    display: block; 
+    filter: drop-shadow(0 4px 5px rgba(0,0,0,0.2));
+}
+
+.fish-flash { animation: wiggle 2s infinite ease-in-out; }
+
+.popup-seal { 
+    position: absolute; 
+    bottom: -5px; 
+    right: -15px; 
+    width: 35px; 
+    height: 35px; 
+    object-fit: contain; 
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); 
+    z-index: 102; 
+    animation: popIn 0.5s forwards; 
+}
+
+.popup-name { 
+    font-size: 1rem; 
+    font-weight: 800; 
+    color: #333; 
+    margin: 0; 
+    line-height: 1.1; 
+    width: 100%;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+.popup-rarity-text { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+.popup-info-line { font-size: 0.75rem; color: #555; margin: 0; font-weight: 600; }
+.popup-value { font-size: 1rem; color: #f39c12; font-weight: 900; margin-top: 2px; }
+
+@keyframes wiggle { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+@keyframes popIn { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 100% { transform: scale(1) rotate(15deg); opacity: 1; } }
+
+.text-comum { color: var(--c-comum); } .text-raro { color: var(--c-raro); } .text-epico { color: var(--c-epico); text-shadow: 0 0 10px rgba(155, 89, 182, 0.4); } 
+.text-lendario { color: var(--c-lendario); text-shadow: 0 0 15px rgba(243, 156, 18, 0.6); } .text-mitico { color: var(--c-mitico); text-shadow: 0 0 20px rgba(231, 76, 60, 0.8); } 
+.text-secreto { color: black; text-shadow: 0 0 5px white; } .text-divino { background: linear-gradient(to right, #bf953f, #fcf6ba, #bf953f); -webkit-background-clip: text; color: transparent; text-shadow: 0 0 30px gold; font-size: 1.8rem;}
+.border-comum { border-color: var(--c-comum); } .border-raro { border-color: var(--c-raro); } .border-epico { border-color: var(--c-epico); } 
+.border-lendario { border-color: var(--c-lendario); } .border-mitico { border-color: var(--c-mitico); } .border-secreto { border-color: var(--c-secreto); } .border-divino { border-color: var(--c-divino); box-shadow: 0 0 50px var(--c-divino); }
+
+
+/* ==========================================================================
+   RAGEBAIT FISH & SUSHI MODAL
+   ========================================================================== */
+   #rage-fish-container {
+    position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; transition: transform 0.2s ease;
+}
+#rage-fish-container:hover { transform: scale(1.1); }
+#rage-fish-img { width: 80px; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); animation: floatRage 3s ease-in-out infinite; }
+
+#rage-fish-bubble {
+    position: absolute; bottom: 100px; right: 10px; background: white;
+    border: 2px solid #333; border-radius: 15px; padding: 10px;
+    font-family: 'Fredoka', sans-serif; font-size: 0.9rem; color: #333;
+    width: 180px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+
+/* O biquinho do balão de fala */
+#rage-fish-bubble::after { content: ''; position: absolute; bottom: -10px; right: 30px; border-width: 10px 10px 0; border-style: solid; border-color: #333 transparent transparent transparent; display: block; width: 0; }
+#rage-fish-bubble::before { content: ''; position: absolute; bottom: -7px; right: 31px; border-width: 8px 8px 0; border-style: solid; border-color: white transparent transparent transparent; display: block; width: 0; z-index: 1; }
+
+/* Botão de Sushi Horizontal e Reto */
+#sushi-btn {
+    position: fixed;
+    top: 85px; 
+    left: 30px; 
+    background: linear-gradient(to right, #ff4757, #c0392b); 
+    color: white; border: 2px solid #fff; padding: 8px 20px; border-radius: 8px;
+    font-family: 'Fredoka', sans-serif; font-weight: bold; font-size: 1rem;
+    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 20;
+    /* Usando a nova animação que NÃO rotaciona */
+    animation: popInStraight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transition: transform 0.2s;
+}
+#sushi-btn:hover { transform: scale(1.05); }
+
+/* Nova animação reta para botões */
+@keyframes popInStraight {
+    0% { transform: scale(0); opacity: 0; } 
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes floatRage { 
+    0%, 100% { transform: translateY(0); } 
+    50% { transform: translateY(-10px); } 
+}
+
+/* Tela (Modal) de Mensagens do Peixe */
+#fish-msg-list { max-height: 180px; overflow-y: auto; margin-top: 15px; text-align: left; }
+.fish-msg-item { display: flex; justify-content: space-between; background: #f9f9f9; padding: 8px 12px; margin-bottom: 8px; border-radius: 8px; align-items: center; border: 1px solid #eee; font-size: 0.9rem; color: #333;}
+.fish-msg-item button { background: #ff5252; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 5px 10px; font-weight: bold; }
+.fish-msg-item button:hover { background: #d32f2f; }
