@@ -346,7 +346,7 @@ function setNightMode() { elGameContainer.classList.remove('day-mode'); elGameCo
 startTimeCycle();
 
 /* ==========================================
-   5. SISTEMA DE PESCA E MODIFICADORES
+    5. SISTEMA DE PESCA E MODIFICADORES
    ========================================== */
 function calculateCatch() {
     const rod = GAME_STATE.rods[GAME_STATE.currentRodIndex] || GAME_STATE.rods[0];
