@@ -69,14 +69,6 @@
         .about-text p { font-size: 1.15rem; margin-bottom: 1.5rem; color: #555; }
         .about-image { background: #e1f5fe; border-radius: 20px; padding: 2rem; text-align: center; box-shadow: 0 10px 30px rgba(2, 119, 189, 0.1); border: 4px dashed #b3e5fc; font-size: 5rem; transform: rotate(3deg); }
 
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
-        .feature-card { background: white; padding: 2.5rem 1.5rem; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s, box-shadow 0.3s; border: 1px solid #eee; opacity: 0; transform: translateY(30px); }
-        .feature-card.visible { opacity: 1; transform: translateY(0); }
-        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(2, 119, 189, 0.15); border-color: #b3e5fc; }
-        .feature-icon { font-size: 3.5rem; margin-bottom: 1rem; display: inline-block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        .feature-card h3 { font-size: 1.4rem; color: var(--primary); margin-bottom: 1rem; }
-        .feature-card p { color: var(--text-light); font-size: 1rem; }
-
         footer { background-color: var(--text-dark); color: white; text-align: center; padding: 2rem; margin-top: 4rem; }
         footer p { opacity: 0.7; font-size: 0.9rem; }
 
@@ -179,6 +171,7 @@
     </div>
 
     <script type="module">
+        // Bolhas no fundo
         const bubbleContainer = document.getElementById('bubbles-container');
         for (let i = 0; i < 15; i++) {
             let bubble = document.createElement('div');
@@ -210,7 +203,7 @@
         const googleProvider = new GoogleAuthProvider();
 
         const mainCtaBtn = document.getElementById('main-cta-btn');
-        const mainGuestBtn = document.getElementById('main-guest-btn'); // Novo Botão
+        const mainGuestBtn = document.getElementById('main-guest-btn');
         const loginModal = document.getElementById('login-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const errorMsg = document.getElementById('error-message');
@@ -220,34 +213,34 @@
         
         let isUserLoggedIn = false;
 
+        // Ouve mudanças no login
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 isUserLoggedIn = true;
                 mainCtaBtn.innerText = "🎣 CONTINUAR JOGO";
                 userInfoBox.style.display = 'flex';
                 userEmailText.innerText = `👤 ${user.displayName || user.email}`;
-                mainGuestBtn.style.display = 'flex'; // Exibe o botão de convidado para quem tá logado
+                mainGuestBtn.style.display = 'flex'; 
             } else {
                 isUserLoggedIn = false;
                 mainCtaBtn.innerText = "🔑 LOGIN PARA JOGAR";
                 userInfoBox.style.display = 'none';
-                mainGuestBtn.style.display = 'none'; // Esconde, pois a pessoa acessa pelo Modal
+                mainGuestBtn.style.display = 'none'; 
             }
         });
 
+        // CORREÇÃO 1: O link estava fixo para o local da sua máquina, mudei para caminho relativo correto.
         mainCtaBtn.addEventListener('click', () => {
-            if (isUserLoggedIn) { window.location.href = '/html/pesca.html'; } 
+            if (isUserLoggedIn) { window.location.href = 'html/pesca.html'; } 
             else { loginModal.classList.add('active'); errorMsg.innerText = ''; }
         });
 
-        // Adiciona ?guest=true na URL quando clica em convidado (Na tela principal)
         mainGuestBtn.addEventListener('click', () => {
-            window.location.href = '/html/pesca.html?guest=true';
+            window.location.href = 'html/pesca.html?guest=true';
         });
         
-        // Adiciona ?guest=true na URL quando clica em convidado (No Modal)
         document.getElementById('btn-guest').addEventListener('click', () => {
-            window.location.href = '/html/pesca.html?guest=true';
+            window.location.href = 'html/pesca.html?guest=true';
         });
 
         btnLogout.addEventListener('click', () => { signOut(auth).catch((error) => console.error(error)); });
@@ -260,277 +253,10 @@
             errorMsg.innerText = message;
         }
 
-        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = '/html/pesca.html'; }).catch((e) => { showError(e.code); }); });
-        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha."; signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
-        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha para criar conta."; createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gato Pescador - Um jogo de pesca relaxante e dinâmico. Colecione peixes raros, desbloqueie varas lendárias e ajude o gatinho a se tornar o mestre dos mares.">
-    <meta name="keywords" content="jogo de pesca, cat coins, jogo relaxante, gato pescador, html5 games, pesca rpg, idle game">
-    <meta name="author" content="Gato Pescador Studios">
-    <title>Gato Pescador - Aventura Oceânica</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary: #0288D1;
-            --primary-dark: #01579B;
-            --secondary: #FF9800;
-            --secondary-hover: #F57C00;
-            --text-dark: #2c3e50;
-            --text-light: #7f8c8d;
-            --bg-light: #f8f9fa;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; color: var(--text-dark); background-color: var(--bg-light); line-height: 1.6; overflow-x: hidden; }
-        h1, h2, h3 { font-family: 'Fredoka', sans-serif; }
-
-        /* --- HERO SECTION --- */
-        .hero { position: relative; background: linear-gradient(135deg, #0288D1 0%, #01579B 100%); color: white; text-align: center; padding: 8rem 2rem 10rem 2rem; overflow: hidden; }
-        .hero-content { position: relative; z-index: 10; max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: center;}
-        .hero h1 { font-size: 4rem; text-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 1rem; animation: dropDown 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .hero p { font-size: 1.3rem; font-weight: 300; opacity: 0.9; margin-bottom: 2.5rem; animation: fadeIn 1.5s ease; }
-
-        .cta-button {
-            display: inline-block; background: linear-gradient(to bottom, #FFB74D, #FF9800); color: #fff; padding: 1.2rem 3rem; text-decoration: none;
-            font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.5rem; border-radius: 50px; text-transform: uppercase; letter-spacing: 2px;
-            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4), 0 4px 0 #E65100; transition: all 0.2s ease; cursor: pointer; border: none;
-            animation: pulse 2s infinite, floatUp 1s ease 0.5s both;
-        }
-        .cta-button:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(255, 152, 0, 0.5), 0 4px 0 #E65100; background: linear-gradient(to bottom, #FFCC80, #FFA726); }
-        .cta-button:active { transform: translateY(2px); box-shadow: 0 2px 10px rgba(255, 152, 0, 0.4), 0 0 0 #E65100; }
-
-        /* Área do Usuário Logado */
-        .user-badge {
-            display: flex; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.25);
-            padding: 8px 20px; border-radius: 30px; margin-top: 20px; font-size: 1rem;
-            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2);
-            animation: fadeIn 0.5s ease;
-        }
-        .logout-btn {
-            background: #ff5252; color: white; border: none; padding: 6px 15px;
-            border-radius: 15px; cursor: pointer; font-weight: bold; font-family: 'Poppins', sans-serif;
-            font-size: 0.85rem; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .logout-btn:hover { background: #d32f2f; transform: scale(1.05); }
-
-        .wave-divider { position: absolute; bottom: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; transform: rotate(180deg); }
-        .wave-divider svg { position: relative; display: block; width: calc(100% + 1.3px); height: 100px; }
-        .wave-divider .shape-fill { fill: var(--bg-light); }
-        .bubbles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-        .bubble { position: absolute; background: rgba(255, 255, 255, 0.1); border-radius: 50%; bottom: -50px; animation: rise infinite ease-in; }
-
-        /* --- SESSÃO PRINCIPAL --- */
-        main { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
-        .section-title { text-align: center; font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 3rem; position: relative; }
-        .section-title::after { content: ''; display: block; width: 80px; height: 4px; background: var(--secondary); margin: 10px auto 0; border-radius: 2px; }
-
-        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; margin-bottom: 5rem; }
-        .about-text p { font-size: 1.15rem; margin-bottom: 1.5rem; color: #555; }
-        .about-image { background: #e1f5fe; border-radius: 20px; padding: 2rem; text-align: center; box-shadow: 0 10px 30px rgba(2, 119, 189, 0.1); border: 4px dashed #b3e5fc; font-size: 5rem; transform: rotate(3deg); }
-
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
-        .feature-card { background: white; padding: 2.5rem 1.5rem; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s, box-shadow 0.3s; border: 1px solid #eee; opacity: 0; transform: translateY(30px); }
-        .feature-card.visible { opacity: 1; transform: translateY(0); }
-        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(2, 119, 189, 0.15); border-color: #b3e5fc; }
-        .feature-icon { font-size: 3.5rem; margin-bottom: 1rem; display: inline-block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        .feature-card h3 { font-size: 1.4rem; color: var(--primary); margin-bottom: 1rem; }
-        .feature-card p { color: var(--text-light); font-size: 1rem; }
-
-        footer { background-color: var(--text-dark); color: white; text-align: center; padding: 2rem; margin-top: 4rem; }
-        footer p { opacity: 0.7; font-size: 0.9rem; }
-
-        /* --- MODAL DE LOGIN --- */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .modal.active { opacity: 1; pointer-events: all; }
-        .modal-content { background: white; width: 90%; max-width: 400px; border-radius: 20px; padding: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; text-align: center; transform: translateY(30px); transition: transform 0.3s; }
-        .modal.active .modal-content { transform: translateY(0); }
-        
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; background: none; border: none; cursor: pointer; color: #999; line-height: 1; }
-        .close-modal:hover { color: #333; }
-        
-        .modal h2 { color: var(--primary-dark); margin-bottom: 1.5rem; font-size: 1.8rem; }
-        
-        /* Botões de Auth */
-        .auth-btn { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; border: none; }
-        .btn-google { background: white; color: #555; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .btn-google:hover { background: #f5f5f5; }
-        .btn-email { background: var(--primary); color: white; }
-        .btn-email:hover { background: var(--primary-dark); }
-        .btn-register { background: none; color: var(--primary); border: 2px solid var(--primary); }
-        .btn-register:hover { background: #e1f5fe; }
-        .btn-guest { background: #eee; color: #555; margin-top: 15px; }
-        .btn-guest:hover { background: #ddd; }
-        
-        .auth-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-        .auth-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; font-family: 'Poppins', sans-serif; }
-        .auth-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2, 136, 209, 0.2); }
-        
-        .divider { display: flex; align-items: center; color: #aaa; margin: 15px 0; font-size: 0.9rem; }
-        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #eee; margin: 0 10px; }
-
-        .error-msg { color: #d32f2f; font-size: 0.85rem; margin-bottom: 10px; min-height: 20px; font-weight: 600;}
-
-        @media (max-width: 768px) { .hero h1 { font-size: 2.8rem; } .about-grid { grid-template-columns: 1fr; text-align: center; } .about-image { display: none; } }
-    </style>
-</head>
-<body>
-
-    <header class="hero">
-        <div class="bubbles" id="bubbles-container"></div>
-        <div class="hero-content">
-            <h1>Gato Pescador</h1>
-            <p>Relaxe, jogue a isca e conquiste os mistérios do oceano com o felino mais habilidoso dos 7 mares.</p>
-            
-            <button id="main-cta-btn" class="cta-button">⏳ Carregando...</button>
-            
-            <button id="main-guest-btn" class="auth-btn btn-guest" style="display: none; max-width: 350px; margin-top: 15px; border-radius: 50px;">
-                Jogar como Convidado (Sem Salvar)
-            </button>
-            
-            <div id="user-info" class="user-badge" style="display: none;">
-                <span id="user-email"></span>
-                <button id="btn-logout" class="logout-btn">Sair da Conta</button>
-            </div>
-        </div>
-        
-        <div class="wave-divider">
-            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
-            </svg>
-        </div>
-    </header>
-
-    <main>
-        <section class="about-grid">
-            <div class="about-text">
-                <h2 class="section-title" style="text-align: left;">Sua Jornada Começa Aqui</h2>
-                <p>Bem-vindo ao mundo encantador de <strong>Gato Pescador</strong>. Neste jogo incremental, você assume o controle de um gato aventureiro focado em capturar os peixes mais absurdos e raros do fundo do mar.</p>
-                <p>Venda suas capturas para ganhar <strong>Cat Coins 🪙</strong>. Use seu lucro para investir em iscas mágicas, chumbadas pesadas e varas de pesca tecnológicas que permitem alcançar as profundezas abissais!</p>
-            </div>
-            <div class="about-image">🐱🎣<br><span style="font-size: 1.5rem; font-family: 'Fredoka', sans-serif; color: #0277bd;">Mestre dos Mares</span></div>
-        </section>
-    </main>
-
-    <footer>
-        <h2 style="margin-bottom: 10px;">Gato Pescador</h2>
-        <p>&copy; 2026 Gato Pescador Studios. Todos os direitos reservados.</p>
-    </footer>
-
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <button class="close-modal" id="close-modal-btn">&times;</button>
-            <h2>Entrar no Jogo</h2>
-            <button id="btn-google" class="auth-btn btn-google">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="20">
-                Entrar com o Google
-            </button>
-            <div class="divider">ou e-mail</div>
-            <div class="auth-form">
-                <input type="email" id="email-input" class="auth-input" placeholder="Seu E-mail">
-                <input type="password" id="password-input" class="auth-input" placeholder="Sua Senha">
-            </div>
-            <div id="error-message" class="error-msg"></div>
-            <button id="btn-login-email" class="auth-btn btn-email">Entrar</button>
-            <button id="btn-register-email" class="auth-btn btn-register">Criar Nova Conta</button>
-            <div class="divider"></div>
-            <button id="btn-guest" class="auth-btn btn-guest">Jogar como Convidado (Sem Nuvem)</button>
-        </div>
-    </div>
-
-    <script type="module">
-        const bubbleContainer = document.getElementById('bubbles-container');
-        for (let i = 0; i < 15; i++) {
-            let bubble = document.createElement('div');
-            bubble.classList.add('bubble');
-            let size = Math.random() * 40 + 10; 
-            bubble.style.width = `${size}px`; bubble.style.height = `${size}px`;
-            bubble.style.left = `${Math.random() * 100}%`;
-            bubble.style.animationDuration = `${Math.random() * 5 + 3}s`;
-            bubble.style.animationDelay = `${Math.random() * 5}s`;
-            bubbleContainer.appendChild(bubble);
-        }
-
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDHz1W47O5kTiEPw7OjEjSXD0eH_ICtfDA",
-            authDomain: "fishingmania-6dced.firebaseapp.com",
-            databaseURL: "https://fishingmania-6dced-default-rtdb.firebaseio.com",
-            projectId: "fishingmania-6dced",
-            storageBucket: "fishingmania-6dced.firebasestorage.app",
-            messagingSenderId: "761476396898",
-            appId: "1:761476396898:web:2b81f955acbf622a4c9e3b",
-            measurementId: "G-Q96SDKRJ1D"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const googleProvider = new GoogleAuthProvider();
-
-        const mainCtaBtn = document.getElementById('main-cta-btn');
-        const mainGuestBtn = document.getElementById('main-guest-btn'); // Novo Botão
-        const loginModal = document.getElementById('login-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const errorMsg = document.getElementById('error-message');
-        const userInfoBox = document.getElementById('user-info');
-        const userEmailText = document.getElementById('user-email');
-        const btnLogout = document.getElementById('btn-logout');
-        
-        let isUserLoggedIn = false;
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                isUserLoggedIn = true;
-                mainCtaBtn.innerText = "🎣 CONTINUAR JOGO";
-                userInfoBox.style.display = 'flex';
-                userEmailText.innerText = `👤 ${user.displayName || user.email}`;
-                mainGuestBtn.style.display = 'flex'; // Exibe o botão de convidado para quem tá logado
-            } else {
-                isUserLoggedIn = false;
-                mainCtaBtn.innerText = "🔑 LOGIN PARA JOGAR";
-                userInfoBox.style.display = 'none';
-                mainGuestBtn.style.display = 'none'; // Esconde, pois a pessoa acessa pelo Modal
-            }
-        });
-
-        mainCtaBtn.addEventListener('click', () => {
-            if (isUserLoggedIn) { window.location.href = '/html/pesca.html'; } 
-            else { loginModal.classList.add('active'); errorMsg.innerText = ''; }
-        });
-
-        // Adiciona ?guest=true na URL quando clica em convidado (Na tela principal)
-        mainGuestBtn.addEventListener('click', () => {
-            window.location.href = '/html/pesca.html?guest=true';
-        });
-        
-        // Adiciona ?guest=true na URL quando clica em convidado (No Modal)
-        document.getElementById('btn-guest').addEventListener('click', () => {
-            window.location.href = '/html/pesca.html?guest=true';
-        });
-
-        btnLogout.addEventListener('click', () => { signOut(auth).catch((error) => console.error(error)); });
-        closeModalBtn.addEventListener('click', () => { loginModal.classList.remove('active'); });
-
-        function showError(code) {
-            let message = "Ocorreu um erro. Tente novamente.";
-            if (code.includes('invalid-credential') || code.includes('wrong-password')) message = "E-mail ou senha incorretos.";
-            if (code.includes('email-already-in-use')) message = "Este e-mail já está cadastrado.";
-            errorMsg.innerText = message;
-        }
-
-        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = '/html/pesca.html'; }).catch((e) => { showError(e.code); }); });
-        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha."; signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
-        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha para criar conta."; createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
+        // CORREÇÃO 2: Redirecionamento seguro pós-login
+        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = 'html/pesca.html'; }).catch((e) => { showError(e.code); }); });
+        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha."; signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
+        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha para criar conta."; createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
     </script>
 </body>
 </html>
