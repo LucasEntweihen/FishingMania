@@ -206,7 +206,7 @@ const elCollection67Grid = document.getElementById('collection-67-grid');
 const elCollectionProgress = document.getElementById('collection-progress');
 const elCollection67Progress = document.getElementById('collection-67-progress');
 
-// --- SISTEMA DE SALVAMENTO BLINDADO ---
+// --- SISTEMA DE SALVAMENTO PROFUNDO E BLINDADO ---
 function updateSaveStatus(msg) { if (elSaveStatus) elSaveStatus.innerText = msg; }
 
 function saveGame() {
@@ -215,7 +215,7 @@ function saveGame() {
         updateSaveStatus("🚫 Modo Convidado");
         return; 
     }
-    // Salva estritamente os DADOS DO JOGADOR, ignorando imagens e referências do sistema.
+
     const playerSave = {
         coins: GAME_STATE.coins,
         currentRodIndex: GAME_STATE.currentRodIndex,
@@ -227,41 +227,85 @@ function saveGame() {
         collection: GAME_STATE.collection,
         collection67: GAME_STATE.collection67
     };
-    localStorage.setItem('gatoPescadorSave', JSON.stringify(playerSave));
-    updateSaveStatus("✅ Salvo Localmente");
+
+    if (currentUser) {
+        // SE ESTIVER LOGADO: Cria um save local EXCLUSIVO para este E-mail (evita conflito na mesma máquina)
+        localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
+        
+        // Envia para o Firebase
+        set(ref(db, 'users/' + currentUser.uid), playerSave)
+            .then(() => updateSaveStatus("☁️ Salvo Nuvem e Local"))
+            .catch((e) => console.error("Erro ao salvar:", e));
+    } else {
+        // SE FOR VISITANTE SEM LOGIN: Salva num arquivo genérico
+        localStorage.setItem('gatoPescadorSave_visitante', JSON.stringify(playerSave));
+        updateSaveStatus("✅ Salvo Localmente");
+    }
 }
 
 function loadGame() {
-    // BLOQUEIO CONVIDADO: Não carrega absolutamente nada.
+    // BLOQUEIO CONVIDADO
     if (isGuestMode) {
         updateSaveStatus("🚫 Modo Convidado");
         updateUI();
         return; 
     }
-    const localData = localStorage.getItem('gatoPescadorSave');
-    
-    if (localData) {
-        try {
-            const parsed = JSON.parse(localData);
-            // Injeta apenas os valores salvos no estado do jogo
-            GAME_STATE.coins = parsed.coins || 0;
-            GAME_STATE.currentRodIndex = parsed.currentRodIndex || 0;
-            GAME_STATE.ownedRods = parsed.ownedRods || [0];
-            GAME_STATE.ownedSinkers = parsed.ownedSinkers || ['chumbo'];
-            GAME_STATE.currentSinker = parsed.currentSinker || 'chumbo';
-            GAME_STATE.baitInventory = parsed.baitInventory || {};
-            GAME_STATE.currentBait = parsed.currentBait || null;
-            GAME_STATE.collection = parsed.collection || {};
-            GAME_STATE.collection67 = parsed.collection67 || {};
-            updateSaveStatus("👤 Jogo Carregado");
-        } catch (e) {
-            console.error("Save corrompido", e);
-            updateSaveStatus("Erro ao Carregar");
+
+    if (!currentUser) {
+        // Tenta puxar o save do visitante ou migrar o antigo
+        let localData = localStorage.getItem('gatoPescadorSave_visitante') || localStorage.getItem('gatoPescadorSave');
+        if (localData) {
+            try {
+                const parsed = JSON.parse(localData);
+                Object.assign(GAME_STATE, parsed);
+                updateSaveStatus("👤 Visitante Carregado");
+            } catch (e) { console.error("Save corrompido"); }
+        } else {
+            updateSaveStatus("Novo Jogo");
         }
-    } else {
-        updateSaveStatus("Novo Jogo");
+        updateUI();
+        return;
     }
-    updateUI();
+
+    updateSaveStatus("🔄 Sincronizando...");
+    
+    // Puxa os dados OFICIAIS da Nuvem
+    get(child(ref(db), `users/${currentUser.uid}`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            // Conta existe na Nuvem! Puxa de lá e atualiza a máquina local.
+            Object.assign(GAME_STATE, snapshot.val());
+            GAME_STATE.rods = generateRods(); 
+            GAME_STATE.isFishing = false;
+            
+            // Atualiza o backup local da pessoa
+            localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(GAME_STATE));
+            updateSaveStatus("☁️ Conta Conectada");
+            
+        } else {
+            // É a primeira vez que este e-mail faz login na nuvem!
+            // Verifica se ele tem um save local atrelado a essa conta.
+            let localBackup = localStorage.getItem('gatoPescadorSave_' + currentUser.uid);
+            
+            // SISTEMA DE MIGRAÇÃO: Se não achar, puxa o save "antigo" geral do PC e limpa ele para não vazar.
+            if (!localBackup && localStorage.getItem('gatoPescadorSave')) {
+                localBackup = localStorage.getItem('gatoPescadorSave');
+                localStorage.removeItem('gatoPescadorSave'); // Deleta o save genérico para não infectar outra conta depois
+                console.log("Save antigo migrado para a conta na nuvem!");
+            }
+
+            if (localBackup) {
+                try { Object.assign(GAME_STATE, JSON.parse(localBackup)); } catch(e){}
+            }
+            
+            GAME_STATE.rods = generateRods();
+            saveGame(); // Sobe o progresso encontrado para o Firebase
+        }
+        updateUI();
+    }).catch((e) => {
+        console.error(e);
+        updateSaveStatus("❌ Erro Nuvem");
+        updateUI();
+    });
 }
 
 loadGame();
@@ -270,7 +314,7 @@ setInterval(saveGame, 30000);
 elExitBtn.onclick = () => {
     // Tenta usar '../index.html' se a pesca.html estiver dentro de uma pasta /html/
     // Se eles estiverem na mesma pasta, mude para 'index.html'
-    const targetUrl = '/html/index.html'; 
+    const targetUrl = '/index.html'; 
 
     if (isGuestMode) {
         // Se for convidado, simplesmente sai da página (tudo se perde)
