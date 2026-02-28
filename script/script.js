@@ -507,9 +507,16 @@ window.castLine = function() {
 // 5. EVENT LISTENERS E CONTROLE DE MENUS
 // ==========================================================================
 document.addEventListener('keydown', (e) => { 
-    if (e.code === 'Space' && !window.GAME_STATE.isFishing) { 
-        e.preventDefault(); 
-        window.castLine(); 
+    if (e.code === 'Space') { 
+        e.preventDefault(); // Evita que a página role para baixo
+        
+        // A MÁGICA ESTÁ AQUI: Se a tecla estiver sendo segurada, não faz nada!
+        if (e.repeat) return; 
+
+        // Só tenta pescar se o gato já não estiver pescando
+        if (!window.GAME_STATE.isFishing) {
+            window.castLine(); 
+        }
     } 
 });
 
