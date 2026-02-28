@@ -160,7 +160,7 @@ window.RARITIES = {
         { name: 'Mahi-Mahi', image: '/img/peixe/Mahi-Mahifish square.webp', time: 'all' },
         { name: 'Peixe Otário', image: '/img/peixe/PeixeOtario.png', time: 'day' },
         { name: 'Peixe Lhapaço', image: '/img/peixe/peixe-palhaco.png', time: 'all' },
-        { name: 'Carlos: a.Cardume', image: '/img/peixe/Carlosacardume.png', time: 'day' },
+        { name: 'Carlos a Cardume', image: '/img/peixe/Carlosacardume.png', time: 'day' }, // <--- PONTO REMOVIDO!
         { name: 'Betíssimo', image: '/img/peixe/betaMaximo.webp', time: 'all' }
     ]},
     LENDARIO: { id: 'lendario', prob: 0.07, mult: 20, style: 'text-lendario', border: 'border-lendario', name: 'Lendário', variations: [

@@ -1,49 +1,135 @@
 /* ==========================================================================
-   RAGEBAIT FISH - O Peixe Tutor Irritante (Integrado ao RPG)
+   RAGEBAIT FISH V3 - O Tutor Inteligente e Não Obstrutivo
    ========================================================================== */
 
 const RAGE_FISH_STATE = {
     tipsGiven: 0,
     maxTipsBeforeSushi: 5,
     isCustomMode: false,
-    customMessages: [], // Lista de mensagens do jogador
-    currentIndex: 0,    // Qual mensagem ele está falando agora
-    tips: [
-        "Dica: Compre materiais na Loja e use a Forja para criar seus equipamentos.",
-        "Dica: A Mochila é só para OLHAR! Use a Mesa de Trabalho (dentro da Forja) para equipar as coisas.",
-        "Dica: Na Mesa de Trabalho, você precisa ARRASTAR os itens para os quadrados pontilhados!",
-        "Dica: Para pescar um peixe, você precisa jogar a isca na água. Óbvio, não?",
-        "Dica: Se a linha não descer, é porque você não tem vara equipada ou não clicou em PESCAR.",
-        "Dica: Peixes Divinos são mais raros que peixes Comuns. Genial, não?",
-        "Dica: Iscas caras dão lucros muito maiores. É matemática básica.",
-        "Dica: Você sabia que a água é molhada? O gato sabe."
-    ]
+    customMessages: [],
+    currentIndex: 0,
+    currentScreen: 'main', // Pode ser: 'main', 'forge', 'workbench', 'shop'
+    
+    // Dicas separadas por contexto! Ele agora é inteligente.
+    tips: {
+        main: [
+            "Dica: Para pescar um peixe, você precisa jogar a isca na água. Óbvio, não?",
+            "Dica: Se a linha não descer, é porque você não tem vara equipada.",
+            "Dica: Peixes Divinos são mais raros que peixes Comuns. Genial, não?",
+            "Dica: Iscas caras dão lucros muito maiores. É matemática básica.",
+            "Dica: Você sabia que a água é molhada? O gato sabe."
+        ],
+        forge: [
+            "A Forja! Clique em uma planta à esquerda para ver os ingredientes.",
+            "Se o material estiver vermelho, significa que você é pobre e precisa comprar na Loja.",
+            "Lembre-se: Construir a vara NÃO equipa a vara. Use a Mesa de Trabalho ali em cima!",
+            "Faltam moedas? Volte a pescar, preguiçoso!"
+        ],
+        workbench: [
+            "Aqui na Mesa, ARRASTE os itens da direita para os espaços pontilhados na esquerda!",
+            "Você pode combinar varas de Madeira com Chumbadas que dão bônus para Madeira!",
+            "Se a isca acabar, o gato volta a pescar apenas lixo."
+        ],
+        shop: [
+            "Gaste seus Cat Coins aqui. Dinheiro não traz felicidade, mas traz varas de Titânio.",
+            "Materiais Brutos servem apenas para a Forja. Não tente pescar usando um pedaço de Plástico.",
+            "Algumas iscas raras garantem peixes gigantes de 67cm."
+        ]
+    }
 };
 
 // ==========================================
-// 1. CONSTRUÇÃO DOS ELEMENTOS DO PEIXE
+// 1. INJEÇÃO DE CSS (GARANTE QUE NÃO OBSTRUA A TELA)
+// ==========================================
+const fishStyles = document.createElement('style');
+fishStyles.innerHTML = `
+    #rage-fish-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        pointer-events: none; /* Permite clicar através do container */
+    }
+    
+    #rage-fish-img {
+        width: 80px;
+        height: 80px;
+        cursor: pointer;
+        pointer-events: auto; /* Mas o peixe é clicável */
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: floatRage 3s ease-in-out infinite;
+    }
+    
+    #rage-fish-img:hover {
+        transform: scale(1.15) rotate(-5deg);
+    }
+
+    #rage-fish-bubble {
+        background: white;
+        color: #333;
+        padding: 15px;
+        border-radius: 12px 12px 0 12px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        max-width: 250px;
+        margin-bottom: 15px;
+        margin-right: 20px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.3s, transform 0.3s;
+        border: 2px solid #e67e22;
+        pointer-events: auto;
+    }
+
+    /* Setinha do balão apontando pro peixe */
+    #rage-fish-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        right: -2px;
+        border-width: 10px 10px 0 0;
+        border-style: solid;
+        border-color: #e67e22 transparent transparent transparent;
+    }
+
+    @keyframes floatRage {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+`;
+document.head.appendChild(fishStyles);
+
+// ==========================================
+// 2. CONSTRUÇÃO DOS ELEMENTOS DO PEIXE
 // ==========================================
 const fishContainer = document.createElement('div');
 fishContainer.id = 'rage-fish-container';
+
+const fishBubble = document.createElement('div');
+fishBubble.id = 'rage-fish-bubble';
 
 const fishImg = document.createElement('img');
 fishImg.id = 'rage-fish-img';
 fishImg.src = '/img/DicaFish.png'; 
 fishImg.onerror = () => { fishImg.src = 'https://placehold.co/80x80?text=🐟'; };
 
-const fishBubble = document.createElement('div');
-fishBubble.id = 'rage-fish-bubble';
-
 fishContainer.appendChild(fishBubble);
 fishContainer.appendChild(fishImg);
 document.body.appendChild(fishContainer);
 
 // ==========================================
-// 2. CONSTRUÇÃO DA TELA (MODAL) DE MENSAGENS
+// 3. CONSTRUÇÃO DO MODAL DE MENSAGENS (Manteve-se igual)
 // ==========================================
 const fishModal = document.createElement('div');
 fishModal.id = 'fish-modal';
 fishModal.className = 'modal hidden';
+fishModal.style.zIndex = '999999';
 fishModal.innerHTML = `
     <div class="modal-content" style="max-width: 450px;">
         <div class="modal-header" style="background:#e67e22">
@@ -64,7 +150,6 @@ fishModal.innerHTML = `
 `;
 document.body.appendChild(fishModal);
 
-// Lógica do Modal do Peixe
 const btnCloseModal = document.getElementById('close-fish-modal');
 const btnAddMsg = document.getElementById('fish-add-msg');
 const inputMsg = document.getElementById('fish-new-msg');
@@ -98,33 +183,64 @@ function renderCustomMessages() {
     
     RAGE_FISH_STATE.customMessages.forEach((msg, idx) => {
         const item = document.createElement('div');
-        item.className = 'fish-msg-item';
+        item.style.cssText = "display:flex; justify-content:space-between; margin-bottom:8px; background:#f1f1f1; padding:8px; border-radius:5px;";
         item.innerHTML = `
-            <span style="flex:1; word-break: break-word;">${idx + 1}. "${msg}"</span>
-            <button onclick="window.deleteFishMsg(${idx})">X</button>
+            <span style="flex:1; word-break: break-word; font-size:0.85rem;">${idx + 1}. "${msg}"</span>
+            <button onclick="window.deleteFishMsg(${idx})" style="background:#e74c3c; color:white; border:none; border-radius:4px; cursor:pointer; padding:2px 8px;">X</button>
         `;
         listMsg.appendChild(item);
     });
 }
 
 // ==========================================
-// 3. LÓGICA DO BALÃO DE FALA (TORNADA GLOBAL)
+// 4. LÓGICA DO BALÃO DE FALA E MONITORAMENTO DE CONTEXTO
 // ==========================================
 let bubbleTimeout;
 
-// Exposta globalmente para que o crafting.js possa usá-la!
-window.showBubble = function(message, duration = 4000) {
-    fishBubble.innerText = message;
+window.showBubble = function(message, duration = 5000) {
+    fishBubble.innerHTML = message;
     fishBubble.style.opacity = 1;
+    fishBubble.style.transform = 'translateY(0)';
     
     clearTimeout(bubbleTimeout);
     bubbleTimeout = setTimeout(() => {
         fishBubble.style.opacity = 0;
+        fishBubble.style.transform = 'translateY(10px)';
     }, duration);
 };
 
+// Monitora as telas para mudar o "humor" e contexto do peixe
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Forja
+    document.getElementById('open-craft-btn')?.addEventListener('click', () => {
+        RAGE_FISH_STATE.currentScreen = 'forge';
+        if (!RAGE_FISH_STATE.isCustomMode) {
+            window.showBubble("🔥 <b>Forja Ativada!</b><br><br>Selecione uma planta à esquerda.<br><br>⚠️ MUITO IMPORTANTE: Quando terminar de criar, clique no botão amarelo <b>'⚙️ Mesa de Trabalho'</b> ali em cima para EQUIPAR o item!", 8000);
+        }
+    });
+    document.getElementById('close-craft-btn')?.addEventListener('click', () => { RAGE_FISH_STATE.currentScreen = 'main'; });
+
+    // Mesa de Trabalho
+    document.getElementById('open-workbench-btn')?.addEventListener('click', () => {
+        RAGE_FISH_STATE.currentScreen = 'workbench';
+        if (!RAGE_FISH_STATE.isCustomMode) {
+            window.showBubble("⚙️ <b>Mesa de Trabalho!</b><br><br>Clique, segure e <b>ARRASTE</b> os itens das listas na direita para os quadrados escuros na esquerda.", 7000);
+        }
+    });
+    document.getElementById('close-workbench-btn')?.addEventListener('click', () => { RAGE_FISH_STATE.currentScreen = 'main'; }); // Se fechar a mesa volta pro main (mesmo se abriu da forja, não tem problema)
+
+    // Loja
+    document.getElementById('open-shop-btn')?.addEventListener('click', () => {
+        RAGE_FISH_STATE.currentScreen = 'shop';
+        if (!RAGE_FISH_STATE.isCustomMode) {
+            window.showBubble("🛒 <b>Loja!</b><br>Compre materiais brutos aqui para levá-los até a Forja depois.", 5000);
+        }
+    });
+    document.getElementById('close-shop-btn')?.addEventListener('click', () => { RAGE_FISH_STATE.currentScreen = 'main'; });
+});
+
 function giveRandomTip() {
-    // Se o jogador ativou o modo customizado (via botão de sushi)
     if (RAGE_FISH_STATE.isCustomMode) {
         if (RAGE_FISH_STATE.customMessages.length > 0) {
             window.showBubble(RAGE_FISH_STATE.customMessages[RAGE_FISH_STATE.currentIndex]);
@@ -138,65 +254,51 @@ function giveRandomTip() {
         return;
     }
 
-    // Modo Padrão: Dicas aleatórias
-    const randomTip = RAGE_FISH_STATE.tips[Math.floor(Math.random() * RAGE_FISH_STATE.tips.length)];
+    // Puxa dicas específicas dependendo da tela onde o jogador está!
+    const contextTips = RAGE_FISH_STATE.tips[RAGE_FISH_STATE.currentScreen] || RAGE_FISH_STATE.tips.main;
+    const randomTip = contextTips[Math.floor(Math.random() * contextTips.length)];
     window.showBubble(randomTip);
     
-    RAGE_FISH_STATE.tipsGiven++;
-
-    // Desbloqueia o Sushi após X dicas
-    if (RAGE_FISH_STATE.tipsGiven === RAGE_FISH_STATE.maxTipsBeforeSushi && !document.getElementById('sushi-btn')) {
-        unlockSushiFeature();
-    }
-}
-
-// ==========================================
-// 4. DESBLOQUEIO DA FEATURE "SUSHI"
-// ==========================================
-function unlockSushiFeature() {
-    window.showBubble("Ok, ok! Pare de me clicar. Desbloqueando modo Sushi...\nAh, e agora eu estou no oceano. Tente me pescar!", 6000);
-    
-    // 1. Cria o botão de Sushi
-    const sushiBtn = document.createElement('button');
-    sushiBtn.id = 'sushi-btn';
-    sushiBtn.innerText = '🍣 FAZER SUSHI';
-    sushiBtn.onclick = () => {
-        alert("A máquina de Sushi ainda está sendo construída!");
-    };
-    document.getElementById('ui-layer').appendChild(sushiBtn);
-    
-    // Transforma o peixe no modo Customizável
-    RAGE_FISH_STATE.isCustomMode = true;
-
-    // 2. INJETA O PEIXE NO JOGO PARA SER PESCADO (Interação com script.js)
-    if (window.RARITIES && window.GAME_STATE) {
-        const secretFish = { 
-            name: 'Tutor Irritante', 
-            image: '/img/DicaFish.png', 
-            time: 'all' 
-        };
-        
-        // Verifica se já não o adicionámos antes nesta sessão
-        const alreadyExists = window.RARITIES.SECRETO.variations.find(f => f.name === secretFish.name);
-        
-        if (!alreadyExists) {
-            // Empurra ele para a categoria "SECRETO" global
-            window.RARITIES.SECRETO.variations.push(secretFish);
-            
-            // Garante que a imagem está forçada na memória do jogo para o canvas
-            const img = new Image();
-            img.src = secretFish.image;
-            window.GAME_STATE.loadedImages[secretFish.image] = img;
-            
-            console.log("🐟 Tutor injetado nas águas como peixe Secreto!");
+    // Só conta progresso para liberar o Sushi se ele estiver na tela principal
+    if (RAGE_FISH_STATE.currentScreen === 'main') {
+        RAGE_FISH_STATE.tipsGiven++;
+        if (RAGE_FISH_STATE.tipsGiven === RAGE_FISH_STATE.maxTipsBeforeSushi && !document.getElementById('sushi-btn')) {
+            unlockSushiFeature();
         }
     }
 }
 
 // ==========================================
-// 5. INTERAÇÕES E LOOPS
+// 5. DESBLOQUEIO DA FEATURE "SUSHI"
 // ==========================================
-fishContainer.addEventListener('click', () => {
+function unlockSushiFeature() {
+    window.showBubble("Ok, ok! Pare de me clicar. Desbloqueando modo Sushi...<br><br>Ah, e agora eu estou no oceano. Tente me pescar!", 6000);
+    
+    const sushiBtn = document.createElement('button');
+    sushiBtn.id = 'sushi-btn';
+    sushiBtn.innerText = '🍣 FAZER SUSHI';
+    sushiBtn.onclick = () => { alert("A máquina de Sushi ainda está sendo construída!"); };
+    document.getElementById('ui-layer').appendChild(sushiBtn);
+    
+    RAGE_FISH_STATE.isCustomMode = true;
+
+    if (window.RARITIES && window.GAME_STATE) {
+        const secretFish = { name: 'Tutor Irritante', image: '/img/DicaFish.png', time: 'all' };
+        const alreadyExists = window.RARITIES.SECRETO.variations.find(f => f.name === secretFish.name);
+        
+        if (!alreadyExists) {
+            window.RARITIES.SECRETO.variations.push(secretFish);
+            const img = new Image();
+            img.src = secretFish.image;
+            window.GAME_STATE.loadedImages[secretFish.image] = img;
+        }
+    }
+}
+
+// ==========================================
+// 6. INTERAÇÕES E LOOPS
+// ==========================================
+fishImg.addEventListener('click', () => {
     if (RAGE_FISH_STATE.isCustomMode) {
         fishModal.classList.remove('hidden');
         renderCustomMessages();
@@ -205,12 +307,11 @@ fishContainer.addEventListener('click', () => {
     }
 });
 
-// O peixe fala sozinho a cada 15 segundos se estiver calado
+// Loop Inteligente: Ele fala a cada 18 segundos, mas respeita a tela atual.
 setInterval(() => {
     if (fishBubble.style.opacity === "0" || fishBubble.style.opacity === "") {
         giveRandomTip();
     }
-}, 15000);
+}, 18000);
 
-// Fala a primeira dica após 3 segundos do jogo abrir
-setTimeout(giveRandomTip, 3000);
+setTimeout(() => window.showBubble("E aí, pronto para pescar? Espaço para jogar a linha!", 5000), 3000);

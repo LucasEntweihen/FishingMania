@@ -4,11 +4,9 @@
 
 // --- SISTEMA DE ALERTA CUSTOMIZADO ---
 window.customAlert = function(message, isSuccess = false) {
-    // Remove alerta anterior se houver
     const existing = document.getElementById('custom-alert-box');
     if (existing) existing.remove();
 
-    // Cria o fundo escuro
     const overlay = document.createElement('div');
     overlay.id = 'custom-alert-box';
     overlay.style.cssText = `
@@ -17,9 +15,8 @@ window.customAlert = function(message, isSuccess = false) {
         z-index: 9999; opacity: 0; transition: opacity 0.3s ease;
     `;
 
-    // Cria a caixinha do alerta
     const box = document.createElement('div');
-    const bgColor = isSuccess ? '#27ae60' : '#e74c3c'; // Verde pra sucesso, Vermelho pra erro
+    const bgColor = isSuccess ? '#27ae60' : '#e74c3c'; 
     box.style.cssText = `
         background: white; padding: 25px 30px; border-radius: 15px;
         text-align: center; max-width: 400px; width: 90%;
@@ -47,13 +44,11 @@ window.customAlert = function(message, isSuccess = false) {
     overlay.appendChild(box);
     document.body.appendChild(overlay);
 
-    // Animação de entrada
     requestAnimationFrame(() => {
         overlay.style.opacity = '1';
         box.style.transform = 'scale(1)';
     });
 
-    // Função de fechar
     const closeAlert = () => {
         overlay.style.opacity = '0';
         box.style.transform = 'scale(0.8)';
@@ -62,7 +57,7 @@ window.customAlert = function(message, isSuccess = false) {
 
     document.getElementById('custom-alert-btn').addEventListener('click', closeAlert);
     overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeAlert(); // Fecha se clicar fora da caixa
+        if (e.target === overlay) closeAlert(); 
     });
 };
 // -------------------------------------
@@ -233,31 +228,43 @@ window.ForgeV2 = {
         const listContainer = document.getElementById('recipe-list');
         if (!listContainer) return;
 
-        let html = '<h3 style="font-size: 1rem; color: #555; text-align: center; margin-bottom: 10px;">Receitas de Varas</h3>';
+        // Container Flex para deixar lado a lado
+        let html = '<div style="display: flex; gap: 10px;">';
+        
+        // COLUNA 1: VARAS
+        html += '<div style="flex: 1; padding-right: 5px;">';
+        html += '<h3 style="font-size: 1rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 10px;">Receitas de Varas</h3>';
         
         Object.keys(window.CRAFTING_DB.recipes.rods).forEach(id => {
             const recipe = window.CRAFTING_DB.recipes.rods[id];
             const isOwned = window.GAME_STATE.ownedRods.includes(Number(id));
             const bg = isOwned ? '#d4efdf' : '#fff';
             html += `
-                <div style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.9rem;" onclick="window.ForgeV2.selectBlueprint('rod', '${id}')">
+                <div style="padding: 8px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.85rem; transition: background 0.2s;" onclick="window.ForgeV2.selectBlueprint('rod', '${id}')">
                     <strong>${recipe.name}</strong> ${isOwned ? '✅' : ''}
                 </div>
             `;
         });
+        html += '</div>';
 
-        html += '<h3 style="font-size: 1rem; color: #555; text-align: center; margin: 15px 0 10px 0;">Receitas de Chumbadas</h3>';
+        // COLUNA 2: CHUMBADAS
+        html += '<div style="flex: 1; padding-left: 5px; border-left: 1px solid #eee;">';
+        html += '<h3 style="font-size: 1rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 10px;">Receitas de Chumbadas</h3>';
         
         Object.keys(window.CRAFTING_DB.recipes.sinkers).forEach(id => {
             const recipe = window.CRAFTING_DB.recipes.sinkers[id];
             const isOwned = window.GAME_STATE.ownedSinkers.includes(id);
             const bg = isOwned ? '#d4efdf' : '#fff';
             html += `
-                <div style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.9rem;" onclick="window.ForgeV2.selectBlueprint('sinker', '${id}')">
+                <div style="padding: 8px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.85rem; transition: background 0.2s;" onclick="window.ForgeV2.selectBlueprint('sinker', '${id}')">
                     <strong>${recipe.name}</strong> ${isOwned ? '✅' : ''}
                 </div>
             `;
         });
+        html += '</div>';
+
+        // Fecha Container Flex
+        html += '</div>';
 
         listContainer.innerHTML = html;
         document.getElementById('crafting-area').innerHTML = '<div style="text-align:center; color:#999; margin-top: 50px;">Selecione uma planta à esquerda.</div>';
@@ -445,7 +452,6 @@ window.WorkbenchV2 = {
         }
     },
 
-    // Sistema de Drag & Drop Global
     startDrag: function(e, type, id) {
         window.DRAGGED_ITEM = { type, id };
         e.dataTransfer.setData('text/plain', '');
@@ -475,7 +481,6 @@ window.WorkbenchV2 = {
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Controles de Modais Principais
     const bindModal = (openBtnId, closeBtnId, modalId, onOpenFunc) => {
         const openBtn = document.getElementById(openBtnId);
         const closeBtn = document.getElementById(closeBtnId);
@@ -500,7 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const wbCloseBtn = document.getElementById('close-workbench-btn');
     if(wbCloseBtn) wbCloseBtn.addEventListener('click', () => document.getElementById('workbench-modal')?.classList.add('hidden'));
 
-    // Configuração de Abas (Tabs) globais
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('wb-tab-btn')) {
             document.querySelectorAll('.wb-tab-btn').forEach(b => b.classList.remove('active'));
@@ -514,7 +518,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Eventos estáticos de Drag & Drop para as Zonas de Equipamento
     document.querySelectorAll('.equip-slot.dropzone').forEach(zone => {
         zone.addEventListener('dragover', (e) => { 
             e.preventDefault(); 
