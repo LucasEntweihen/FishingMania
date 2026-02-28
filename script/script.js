@@ -330,7 +330,7 @@ elExitBtn.onclick = () => {
 };
 
 /* ==========================================
-   4. CICLO DIA E NOITE
+    4. CICLO DIA E NOITE
    ========================================== */
 const CYCLE_DURATION = 45000;
 let timeInterval;
