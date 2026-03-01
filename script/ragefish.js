@@ -37,9 +37,6 @@ const RAGE_FISH_STATE = {
     }
 };
 
-// ==========================================
-// 1. INJEÇÃO DE CSS
-// ==========================================
 const fishStyles = document.createElement('style');
 fishStyles.innerHTML = `
     #rage-fish-container {
@@ -68,9 +65,6 @@ fishStyles.innerHTML = `
 `;
 document.head.appendChild(fishStyles);
 
-// ==========================================
-// 2. CONSTRUÇÃO DA INTERFACE
-// ==========================================
 const fishContainer = document.createElement('div');
 fishContainer.id = 'rage-fish-container';
 const fishBubble = document.createElement('div');
@@ -131,9 +125,6 @@ function renderCustomMessages() {
     });
 }
 
-// ==========================================
-// 3. SISTEMA GLOBAL E DESTRAVE
-// ==========================================
 let bubbleTimeout;
 window.showBubble = function(message, duration = 5000) {
     fishBubble.innerHTML = message;
@@ -142,27 +133,16 @@ window.showBubble = function(message, duration = 5000) {
     bubbleTimeout = setTimeout(() => { fishBubble.style.opacity = 0; fishBubble.style.transform = 'translateY(10px)'; }, duration);
 };
 
-// O Segredo: Função Global de Liberar Sushi com a opção "silenciosa" (para quando o jogo recarregar)
 window.unlockSushiFeature = function(silent = false) {
     if (!silent) {
         window.showBubble("Ok, ok! Pare de me clicar. Desbloqueando modo Sushi...<br><br>Ah, e agora eu estou no oceano. Tente me pescar!", 6000);
     }
     
-    // Cria o botão se ele ainda não existir na tela
-    if (!document.getElementById('sushi-btn')) {
-        const sushiBtn = document.createElement('button');
-        sushiBtn.id = 'sushi-btn';
-        sushiBtn.innerText = '🍣 FAZER SUSHI';
-        sushiBtn.onclick = () => { 
-            if (window.SushiMode) window.SushiMode.open(); 
-            else alert("Erro: O Modo Sushi não foi carregado corretamente.");
-        };
-        document.getElementById('ui-layer').appendChild(sushiBtn);
-    }
+    // Atualiza o botão que já está na tela para ficar vermelho e clicável
+    if (typeof window.updateUI === 'function') window.updateUI();
     
     RAGE_FISH_STATE.isCustomMode = true;
 
-    // Injeta o Peixe Secreto
     if (window.RARITIES && window.GAME_STATE) {
         const secretFish = { name: 'Tutor Irritante', image: '/img/DicaFish.png', time: 'all' };
         const alreadyExists = window.RARITIES.SECRETO.variations.find(f => f.name === secretFish.name);
@@ -174,22 +154,15 @@ window.unlockSushiFeature = function(silent = false) {
     }
 };
 
-// ==========================================
-// 4. MONITORAMENTO E SALVAMENTO AUTOMÁTICO DO SUSHI
-// ==========================================
-
-// Como o script principal carrega coisas da nuvem devagar, usamos um verificador para checar se você JÁ TINHA o sushi desbloqueado:
 const checkSaveInterval = setInterval(() => {
     if (window.GAME_STATE && typeof window.GAME_STATE.sushiUnlocked !== 'undefined') {
         if (window.GAME_STATE.sushiUnlocked) {
-            window.unlockSushiFeature(true); // silent unlock
+            window.unlockSushiFeature(true);
         }
-        clearInterval(checkSaveInterval); // Para de verificar depois que carregar
+        clearInterval(checkSaveInterval);
     }
 }, 1000);
 
-
-// Dicas contextuais dos menus
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('open-craft-btn')?.addEventListener('click', () => {
         RAGE_FISH_STATE.currentScreen = 'forge';
@@ -225,11 +198,9 @@ function giveRandomTip() {
     const contextTips = RAGE_FISH_STATE.tips[RAGE_FISH_STATE.currentScreen] || RAGE_FISH_STATE.tips.main;
     window.showBubble(contextTips[Math.floor(Math.random() * contextTips.length)]);
     
-    // CONTAGEM PARA LIBERAR O SUSHI PELA PRIMEIRA VEZ
     if (RAGE_FISH_STATE.currentScreen === 'main' && !window.GAME_STATE.sushiUnlocked) {
         RAGE_FISH_STATE.tipsGiven++;
         if (RAGE_FISH_STATE.tipsGiven >= RAGE_FISH_STATE.maxTipsBeforeSushi) {
-            // SALVA NO JOGO QUE O SUSHI FOI LIBERADO PARA SEMPRE
             window.GAME_STATE.sushiUnlocked = true;
             if (typeof window.saveGame === "function") window.saveGame();
             window.unlockSushiFeature(false);

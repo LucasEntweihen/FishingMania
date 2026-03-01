@@ -1,5 +1,5 @@
 // ==========================================================================
-// 1. VERIFICAÇÃO DE MODO CONVIDADO E FIREBASE
+// 1. IMPORTAÇÕES E SETUP DO FIREBASE
 // ==========================================================================
 const urlParams = new URLSearchParams(window.location.search);
 const isGuestMode = urlParams.get('guest') === 'true';
@@ -19,8 +19,7 @@ const firebaseConfig = {
     measurementId: "G-Q96SDKRJ1D"
 };
 
-let app, auth, db;
-let currentUser = null;
+let app, auth, db, currentUser = null;
 
 try {
     app = initializeApp(firebaseConfig);
@@ -31,492 +30,368 @@ try {
 }
 
 // ==========================================================================
-// 2. ESTADO DO JOGO E DADOS GLOBAIS
+// 2. FUNÇÃO INTELIGENTE DE CARREGAMENTO DE DADOS
 // ==========================================================================
-window.GAME_STATE = {
-    coins: 0,
-    currentRodIndex: 0,
-    isFishing: false,
-    rods: [],
-    ownedRods: [0],
-    ownedSinkers: ['chumbo'],
-    currentSinker: 'chumbo',
-    ownedKnives: ['faca_cozinha'],
-    currentKnife: 'faca_cozinha',
-    baitInventory: {},
-    currentBait: null,
-    loadedImages: {},
-    collection: {},
-    collection67: {},
-    isDay: true,
-    materials: {},
-    sushiUnlocked: false 
-};
-
-// AS 20 FACAS DO JOGO (As 5 primeiras NÃO dropam materiais)
-window.KNIVES = [
-    { id: 'faca_cozinha', name: 'Faca de Cozinha', mult: 1.0, desc: 'Saque x1 (S/ Material)', dropsMats: false },
-    { id: 'faca_acougueiro', name: 'Faca de Açougueiro', mult: 1.5, desc: 'Saque x1.5 (S/ Material)', dropsMats: false },
-    { id: 'faca_chef', name: 'Faca de Chef Aprendiz', mult: 2.0, desc: 'Saque x2 (S/ Material)', dropsMats: false },
-    { id: 'cutelo_ferro', name: 'Cutelo de Ferro', mult: 3.0, desc: 'Saque x3 (S/ Material)', dropsMats: false },
-    { id: 'faca_ouro', name: 'Faca Banhada a Ouro', mult: 4.5, desc: 'Saque x4.5 (S/ Material)', dropsMats: false },
-    { id: 'faca_pirata', name: 'Faca do Pirata', mult: 6.0, desc: 'Saque x6', dropsMats: true },
-    { id: 'faca_titanio', name: 'Faca de Titânio', mult: 8.0, desc: 'Saque x8', dropsMats: true },
-    { id: 'cutelo_titanio', name: 'Cutelo Maciço', mult: 12.0, desc: 'Saque x12', dropsMats: true },
-    { id: 'faca_meteorito', name: 'Faca Meteorítica', mult: 18.0, desc: 'Saque x18', dropsMats: true },
-    { id: 'lamina_cometa', name: 'Lâmina do Cometa', mult: 25.0, desc: 'Saque x25', dropsMats: true },
-    { id: 'faca_cristal', name: 'Faca de Cristal Bruto', mult: 35.0, desc: 'Saque x35', dropsMats: true },
-    { id: 'lamina_mistica', name: 'Lâmina Mística', mult: 50.0, desc: 'Saque x50', dropsMats: true },
-    { id: 'faca_sombria', name: 'Faca Sombria', mult: 80.0, desc: 'Saque x80', dropsMats: true },
-    { id: 'cutelo_vazio', name: 'Cutelo do Vazio', mult: 120.0, desc: 'Saque x120', dropsMats: true },
-    { id: 'faca_essencia', name: 'Faca de Essência Pura', mult: 180.0, desc: 'Saque x180', dropsMats: true },
-    { id: 'lamina_divina', name: 'Lâmina Divina', mult: 250.0, desc: 'Saque x250', dropsMats: true },
-    { id: 'faca_estelar', name: 'Faca Estelar', mult: 400.0, desc: 'Saque x400', dropsMats: true },
-    { id: 'faca_neutrons', name: 'Faca de Nêutrons', mult: 600.0, desc: 'Saque x600', dropsMats: true },
-    { id: 'lamina_infinito', name: 'Lâmina do Infinito', mult: 1000.0, desc: 'Saque x1000', dropsMats: true },
-    { id: 'faca_criador', name: 'A Faca do Criador', mult: 2500.0, desc: 'Saque x2500', dropsMats: true }
-];
-
-window.MATERIALS = [
-    { id: 'madeira', name: 'Madeira / Graveto', price: 50, icon: '🪵' },
-    { id: 'fio', name: 'Fio de Nylon', price: 100, icon: '🧵' },
-    { id: 'plastico', name: 'Plástico', price: 500, icon: '🧪' },
-    { id: 'kevlar', name: 'Fio de Kevlar', price: 1200, icon: '🕸️' },
-    { id: 'fibra', name: 'Fibra de Vidro', price: 2000, icon: '🧶' },
-    { id: 'ouro', name: 'Ouro Pirata', price: 5000, icon: '🪙' },
-    { id: 'metal', name: 'Sucata de Metal', price: 8000, icon: '⚙️' },
-    { id: 'titânio', name: 'Liga de Titânio', price: 25000, icon: '🔩' },
-    { id: 'perola', name: 'Pérola Abissal', price: 45000, icon: '🦪' },
-    { id: 'carbono', name: 'Carbono', price: 80000, icon: '🔋' },
-    { id: 'meteorito', name: 'Fragmento de Meteoro', price: 200000, icon: '☄️' },
-    { id: 'cristal', name: 'Cristal Místico', price: 500000, icon: '🔮' },
-    { id: 'materia_escura', name: 'Matéria Escura', price: 1500000, icon: '🌌' },
-    { id: 'essencia', name: 'Essência Divina', price: 5000000, icon: '✨' },
-    { id: 'poeira_cosmica', name: 'Poeira Cósmica', price: 15000000, icon: '💫' }
-];
-
-window.ROD_TEMPLATES = [
-    { name: "Galho Seco", type: "madeira", price: 0, speed: 1.0, luck: 1.0 },
-    { name: "Vara de Bambu", type: "madeira", price: 250, speed: 1.1, luck: 1.15 },
-    { name: "Bambu Reforçado", type: "madeira", price: 800, speed: 1.25, luck: 1.3 },
-    { name: "Caniço de Salgueiro", type: "madeira", price: 2000, speed: 1.35, luck: 1.45 },
-    { name: "Vara de Plástico", type: "fibra", price: 5000, speed: 1.5, luck: 1.6 },
-    { name: "Fibra de Vidro", type: "fibra", price: 12000, speed: 1.7, luck: 1.85 },
-    { name: "Fibra Premium", type: "fibra", price: 25000, speed: 2.0, luck: 2.1 },
-    { name: "Polímero Flexível", type: "fibra", price: 50000, speed: 2.3, luck: 2.4 },
-    { name: "Alumínio Leve", type: "metal", price: 95000, speed: 2.6, luck: 2.7 },
-    { name: "Aço Inoxidável", type: "metal", price: 180000, speed: 3.0, luck: 3.2 },
-    { name: "Liga de Titânio", type: "metal", price: 350000, speed: 3.5, luck: 3.8 },
-    { name: "Vara de Grafeno", type: "metal", price: 700000, speed: 4.0, luck: 4.5 },
-    { name: "Carbono Básico", type: "carbono", price: 1200000, speed: 4.5, luck: 5.0 },
-    { name: "Vara Eletrônica", type: "carbono", price: 2500000, speed: 5.2, luck: 6.0 },
-    { name: "Fibra de Nanotubos", type: "carbono", price: 5000000, speed: 6.0, luck: 7.5 },
-    { name: "Protótipo Militar", type: "carbono", price: 10000000, speed: 7.5, luck: 9.0 },
-    { name: "Vara Oceânica", type: "mistico", price: 25000000, speed: 9.0, luck: 12.0 },
-    { name: "Arpão Antigo", type: "mistico", price: 50000000, speed: 11.0, luck: 16.0 },
-    { name: "Tridente de Netuno", type: "mistico", price: 120000000, speed: 14.0, luck: 22.0 },
-    { name: "Vara Galáctica", type: "divino", price: 300000000, speed: 18.0, luck: 35.0 },
-    { name: "Vara Quântica", type: "divino", price: 750000000, speed: 25.0, luck: 55.0 },
-    { name: "A Vara do Criador", type: "divino", price: 2000000000, speed: 40.0, luck: 100.0 }
-];
-window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
-
-window.SINKERS = [
-    { id: 'chumbo', name: 'Chumbo Padrão', price: 0, desc: 'Padrão.', stats: {} },
-    { id: 'pedra_rio', name: 'Pedra de Rio', price: 1200, desc: '+15% Vel.', stats: { speed: 1.15 } },
-    { id: 'casca_noz', name: 'Casca Leve', price: 3500, desc: 'Sinergia (Madeira): Sorte x1.3', stats: { luck: 1.1 }, synergy: { type: 'madeira', luck: 1.3, desc: "Sorte x1.3" } },
-    { id: 'disco_plastico', name: 'Disco Plano', price: 8000, desc: '+30% Vel.', stats: { speed: 1.3 } },
-    { id: 'bobina_fibra', name: 'Bobina Estabilizada', price: 18000, desc: 'Sinergia (Fibra): Vel x1.6', stats: { luck: 1.2 }, synergy: { type: 'fibra', speed: 1.6, desc: "Vel x1.6" } },
-    { id: 'ferro_velho', name: 'Peso de Sucata', price: 40000, desc: 'Lucro x1.4', stats: { value: 1.4 } },
-    { id: 'anilha_aco', name: 'Anilha de Academia', price: 85000, desc: '+80% Vel.', stats: { speed: 1.8 } },
-    { id: 'magneto', name: 'Imã Industrial', price: 160000, desc: 'Sinergia (Metal): Lucro x2.2', stats: { luck: 1.4 }, synergy: { type: 'metal', value: 2.2, desc: "Lucro x2.2" } },
-    { id: 'peso_tungstenio', name: 'Esfera Pesada', price: 320000, desc: 'Velocidade x2.2', stats: { speed: 2.2 } },
-    { id: 'pepita_luxo', name: 'Pepita Polida', price: 700000, desc: 'Lucro x2.5', stats: { value: 2.5 } },
-    { id: 'nucleo_carbono', name: 'Peso de Fibra', price: 1500000, desc: 'Sinergia (Carbono): +7% 67cm', stats: { speed: 1.5 }, synergy: { type: 'carbono', chance67: 0.07, desc: "+7% chance 67cm" } },
-    { id: 'bateria_ion', name: 'Célula de Energia', price: 4000000, desc: 'Vel x3.0', stats: { speed: 3.0 } },
-    { id: 'prisma_oceano', name: 'Prisma de Coral', price: 10000000, desc: 'Sorte x2.5', stats: { luck: 2.5 } },
-    { id: 'reliquia_abismo', name: 'Artefato Antigo', price: 25000000, desc: 'Sinergia (Místico): Sorte x3.5', stats: { value: 2.0 }, synergy: { type: 'mistico', luck: 3.5, desc: "Sorte x3.5" } },
-    { id: 'fragmento_estelar', name: 'Fragmento de Cometa', price: 60000000, desc: '+15% Chance 67cm', stats: { chance67: 0.15 } },
-    { id: 'antimateria_v2', name: 'Peso de Antimatéria', price: 150000000, desc: 'Vel x5.0 | Lucro x3', stats: { speed: 5.0, value: 3.0 } },
-    { id: 'divindade_ouro', name: 'Ídolo Dourado', price: 400000000, desc: 'Sinergia (Divino): Lucro x10', stats: { luck: 4.0 }, synergy: { type: 'divino', value: 10.0, desc: "Lucro x10" } },
-    { id: 'buraco_negro', name: 'Mini Buraco Negro', price: 1000000000, desc: 'Vel x10, Sorte x10', stats: { speed: 10.0, luck: 10.0, chance67: 0.35 } },
-    { id: 'paradoxo', name: 'Peso Atemporal', price: 2500000000, desc: 'Ignora o tempo (+20% 67cm)', stats: { speed: 15.0, chance67: 0.20 } },
-    { id: 'vazio_absoluto', name: 'Esfera do Nada', price: 5000000000, desc: 'O fim de tudo', stats: { speed: 20.0, luck: 25.0, value: 15.0, chance67: 0.50 } }
-];
-
-window.BAITS = [
-    { id: 'pao', icon: '🍞', name: 'Miolo de Pão', price: 150, qty: 10, desc: 'Sorte x1.1', stats: { luck: 1.1 } },
-    { id: 'minhoca', icon: '🐛', name: 'Minhoca', price: 450, qty: 5, desc: 'Sorte x1.3', stats: { luck: 1.3 } },
-    { id: 'grilo', icon: '🦗', name: 'Grilo Falante', price: 1200, qty: 5, desc: 'Sorte x1.6', stats: { luck: 1.6 } },
-    { id: 'queijo', icon: '🧀', name: 'Queijo Fedido', price: 2500, qty: 5, desc: 'Lucro x1.5', stats: { value: 1.5 } },
-    { id: 'camarao', icon: '🦐', name: 'Camarão', price: 6000, qty: 5, desc: 'Sorte x2.0', stats: { luck: 2.0 } },
-    { id: 'vagalume', icon: '✨', name: 'Vagalume', price: 15000, qty: 5, desc: 'Sorte x2 | +2% 67cm', stats: { luck: 2.0, chance67: 0.02 } },
-    { id: 'isca_metal', icon: '🪝', name: 'Isca de Metal', price: 35000, qty: 5, desc: 'Lucro x3.0', stats: { value: 3.0 } },
-    { id: 'lula', icon: '🦑', name: 'Lula Gigante', price: 80000, qty: 5, desc: 'Sorte x3.5', stats: { luck: 3.5 } },
-    { id: 'sushi', icon: '🍣', name: 'Sushi Premium', price: 200000, qty: 5, desc: 'Sorte x3 | Lucro x3', stats: { luck: 3.0, value: 3.0 } },
-    { id: 'cometa', icon: '☄️', name: 'Pó de Cometa', price: 650000, qty: 3, desc: '+10% Chance 67cm', stats: { chance67: 0.10 } },
-    { id: 'hamburguer', icon: '🍔', name: 'Podrão dos Mares', price: 1500000, qty: 5, desc: 'Lucro Extremo (x6.0)', stats: { value: 6.0 } },
-    { id: 'queijo_azul', icon: '🧀', name: 'Gorgonzola Galáctico', price: 1500000, qty: 5, desc: 'Lucro x8.0', stats: { value: 8.0 } },
-    { id: 'radioativa', icon: '☢️', name: 'Isca Mutante', price: 4500000, qty: 3, desc: 'Atrai Anomalias (Sorte x8)', stats: { luck: 8.0 } },
-    { id: 'lula_neon', icon: '🦑', name: 'Lula de Neon', price: 5000000, qty: 3, desc: 'Atrai Miticos (Sorte x12)', stats: { luck: 12.0 } },
-    { id: 'kraken', icon: '👁️', name: 'Olho do Kraken', price: 12000000, qty: 3, desc: 'Garante Gigantes (+20% 67cm)', stats: { chance67: 0.20 } },
-    { id: 'essencia_deus', icon: '🍷', name: 'Néctar Divino', price: 20000000, qty: 2, desc: 'Sorte x30 | +25% 67cm', stats: { luck: 30.0, chance67: 0.25 } },
-    { id: 'vazio', icon: '🌌', name: 'Essência do Vazio', price: 35000000, qty: 2, desc: 'Sorte Divina (x25.0)', stats: { luck: 25.0 } },
-    { id: 'sol', icon: '☀️', name: 'Fragmento Solar', price: 80000000, qty: 2, desc: 'Astro-Rei (+40% 67cm)', stats: { chance67: 0.40 } },
-    { id: 'supernova', icon: '💥', name: 'Isca Supernova', price: 100000000, qty: 1, desc: 'Lucro x50 | +40% 67cm', stats: { value: 50.0, chance67: 0.40 } },
-    { id: 'definitiva', icon: '👑', name: 'Isca Matadora de Deuses', price: 250000000, qty: 1, desc: 'Poder Máximo.', stats: { luck: 50.0, value: 30.0, chance67: 0.60 } },
-    { id: 'alma_gato', icon: '🐈', name: 'Nona Alma', price: 500000000, qty: 1, desc: 'O impossível acontece.', stats: { luck: 100.0, value: 100.0, chance67: 0.70 } }
-];
-
-window.RARITIES = {
-    COMUM: { id: 'comum', prob: 0.50, mult: 1, style: 'text-comum', border: 'border-comum', name: 'Comum', variations: [
-        { name: 'Peixe Genérico', image: '/img/peixe/Genericfish001.webp', time: 'all' },
-        { name: 'Bombardilo', image: '/img/peixe/bombardilo crocarilho.webp', time: 'day' },
-        { name: 'Ah, peixe legal', image: '/img/peixe/PeixeLegal.avif', time: 'all' },
-        { name: 'Cruel kidfish', image: '/img/peixe/KidFish.png', time: 'night' },
-        { name: 'Pexudo', image: '/img/peixe/peixebala.png', time: 'all' }
-    ]},
-    RARO: { id: 'raro', prob: 0.25, mult: 3, style: 'text-raro', border: 'border-raro', name: 'Raro', variations: [
-        { name: 'Peixe Estranho', image: '/img/peixe/UnderWaterAhhFish.png', time: 'night' },
-        { name: 'Meu çélebro', image: '/img/peixe/tarlalareo fish.png', time: 'all' },
-        { name: 'Cubic Boccacete', image: '/img/peixe/hyt.gif', time: 'day' },
-        { name: 'PUTAPEIXE', image: '/img/peixe/PUTARALHOFISH, porra.png', time: 'all' },
-        { name: 'Peixe Burrinho', image: '/img/peixe/dumbAssFish.png', time: 'all' },
-        { name: 'Meio Peixe', image: '/img/peixe/meio-epixe.gif', time: 'night' }
-    ]},
-    EPICO: { id: 'epico', prob: 0.15, mult: 8, style: 'text-epico', border: 'border-epico', name: 'Épico', variations: [
-        { name: 'Mahi-Mahi', image: '/img/peixe/Mahi-Mahifish square.webp', time: 'all' },
-        { name: 'Peixe Otário', image: '/img/peixe/PeixeOtario.png', time: 'day' },
-        { name: 'Peixe Lhapaço', image: '/img/peixe/peixe-palhaco.png', time: 'all' },
-        { name: 'Carlos a Cardume', image: '/img/peixe/Carlosacardume.png', time: 'day' },
-        { name: 'Betíssimo', image: '/img/peixe/betaMaximo.webp', time: 'all' },
-        { name: 'Lanterna Gay', image: '/img/peixe/angler-cliparte.png', time: 'night' }
-    ]},
-    LENDARIO: { id: 'lendario', prob: 0.07, mult: 20, style: 'text-lendario', border: 'border-lendario', name: 'Lendário', variations: [
-        { name: 'Peixe Motosserra', image: '/img/peixe/Chainsawfish.webp', time: 'night' },
-        { name: 'Grande Olho', image: '/img/peixe/hytal.gif', time: 'day' },
-        { name: 'Peixe Demônio negro', image: '/img/peixe/DemonicAHHfish (1).png', time: 'night' },
-        { name: 'Peixe Entulhado', image: '/img/peixe/EntulhoFish.png', time: 'day' },
-        { name: 'Tenham respeito!', image: '/img/peixe/vcsestaoempublicomaisrespeito.gif', time: 'all' }
-    ]},
-    MITICO: { id: 'mitico', prob: 0.025, mult: 50, style: 'text-mitico', border: 'border-mitico', name: 'Mítico', variations: [
-        { name: 'Jogo do Peixe Retardo', image: '/img/peixe/GameofRetardedfish.png', time: 'night' },
-        { name: 'Peixe Câncer', image: '/img/peixe/PeixeCancer.png', time: 'all' },
-        { name: 'Meus filhos ', image: '/img/peixe/cardume dos meus filhos.png', time: 'all' },
-        { name: 'Peixe das Águas Reais', image: '/img/peixe/aquoso.webp', time: 'day' },
-        { name: 'Darwin?!?!', image: '/img/peixe/darwin.gif', time: 'all' }
-    ]},
-    SECRETO: { id: 'secreto', prob: 0.004, mult: 150, style: 'text-secreto', border: 'border-secreto', name: 'Secreto', variations: [
-        { name: 'Peixe Retardado', image: '/img/peixe/Retardedfish.png', time: 'all' },
-        { name: 'Meu Almoço Delicioso', image: '/img/peixe/receitas-de-peixes-destaque.png', time: 'day' },
-        { name: 'Pai Solteiro', image: '/img/peixe/pai-solteiro.gif', time: 'all' },
-        { name: 'QUE CARA LEGAL!', image: '/img/peixe/coolASSfish.gif', time: 'all' }
-    ]},
-    DIVINO: { id: 'divino', prob: 0.001, mult: 500, style: 'text-divino', border: 'border-divino', name: 'Divino', variations: [
-        { name: 'Quase Arco-íris', image: '/img/peixe/Semi-rainbowfish.png', time: 'day' },
-        { name: 'Golfizza Pescado', image: '/img/peixe/golfizza.gif', time: 'night' },
-        { name: 'Só mais um pouco', image: '/img/peixe/meus porrinhas.png', time: 'night' },
-        { name: 'Ex rei dos mares (fraco)', image: '/img/peixe/CARALHOFODAA.png', time: 'night' }
-    ]},
-    AURUDO: { id: 'aurudo', prob: 0.00001, mult: 50, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
-        { name: 'SHIGERU?', image: '/img/peixe/ShigeruFish.png', time: 'all' },
-        { name: 'SHIGERU DO ORGULHO???', image: '/img/peixe/PrideShigeruFish.png', time: 'night' }
-    ]}
-};
-
-function preloadImages() {
-    Object.values(window.RARITIES).forEach(rarity => {
-        rarity.variations.forEach(fish => {
-            const img = new Image();
-            window.GAME_STATE.loadedImages[fish.image] = img;
-            img.onload = () => {
-                if (fish.image.toLowerCase().endsWith('.gif')) {
-                    setTimeout(() => {
-                        try {
-                            if (!img.naturalWidth) return; 
-                            const offCanvas = document.createElement('canvas');
-                            offCanvas.width = img.naturalWidth;
-                            offCanvas.height = img.naturalHeight;
-                            const oCtx = offCanvas.getContext('2d');
-                            oCtx.drawImage(img, 0, 0);
-                            window.GAME_STATE.loadedImages[fish.image] = offCanvas;
-                        } catch (e) {}
-                    }, 300);
-                }
-            };
-            img.src = fish.image; 
-        });
-    });
-    ['/img/asset/67comum.jpg', '/img/asset/67raro.jpg', '/img/asset/67muitoraro.webp'].forEach(src => {
-        const img = new Image();
-        img.src = src;
-    });
-}
-preloadImages();
-
-// ==========================================================================
-// 3. FERRAMENTAS DE UI E SALVAMENTO SEGURO
-// ==========================================================================
-function safeGet(id) { return document.getElementById(id); }
-
-window.updateUI = function() {
-    if(safeGet('cat-coins')) safeGet('cat-coins').innerText = window.GAME_STATE.coins.toLocaleString();
-    
-    const rod = window.GAME_STATE.rods.find(r => r.id === window.GAME_STATE.currentRodIndex) || window.GAME_STATE.rods[0];
-    if(safeGet('current-rod-display')) safeGet('current-rod-display').innerText = `Vara: ${rod.name}`;
-    
-    const catVisual = safeGet('cat-fisherman');
-    if (catVisual) {
-        const rodVisual = catVisual.querySelector('.rod-visual');
-        if (rodVisual) rodVisual.className = `rod-visual dropzone rod-tier-${rod.id}`;
+async function carregarBancoDeDadosEIniciar() {
+    if (window.CRAFTING_DB && window.KNIVES && window.RARITIES) {
+        console.log("📦 Dados detectados via script direto. Iniciando motor...");
+        iniciarMotorDoJogo();
+        return;
     }
 
-    const sinker = window.SINKERS.find(s => s.id === window.GAME_STATE.currentSinker) || window.SINKERS[0];
-    if(safeGet('sinker-slot')) safeGet('sinker-slot').innerText = `🪨 ${sinker.name}`;
-    if(safeGet('equipped-sinker-visual')) safeGet('equipped-sinker-visual').style.display = (sinker.id !== 'chumbo') ? 'block' : 'none';
+    try {
+        console.log("🌐 Buscando database.json...");
+        const response = await fetch('/json/database.json');
+        if (!response.ok) throw new Error("Erro ao carregar o database.json");
+        const DB = await response.json();
 
-    const baitDisplay = safeGet('bait-slot');
-    const baitVis = safeGet('bait-visual');
-    if (window.GAME_STATE.currentBait) {
-        const bait = window.BAITS.find(b => b.id === window.GAME_STATE.currentBait);
-        if (bait && baitDisplay && baitVis) {
-            baitDisplay.innerText = `${bait.icon} ${bait.name} (x${window.GAME_STATE.baitInventory[bait.id] || 0})`;
-            baitVis.innerText = bait.icon;
-        }
-    } else {
-        if(baitDisplay) baitDisplay.innerText = "🪝 Sem Isca";
-        if(baitVis) baitVis.innerText = "";
+        window.MATERIALS = DB.MATERIALS;
+        window.KNIVES = DB.KNIVES;
+        window.BAITS = DB.BAITS;
+        window.RARITIES = DB.RARITIES;
+        window.ROD_TEMPLATES = DB.ROD_TEMPLATES;
+        window.SINKERS = DB.SINKERS;
+
+        window.CRAFTING_DB = {
+            materials: DB.MATERIALS,
+            recipes: DB.CRAFTING_RECIPES
+        };
+
+        iniciarMotorDoJogo();
+
+    } catch (erro) {
+        console.error("Falha fatal ao carregar o banco de dados:", erro);
+        alert("⚠️ Erro Crítico: O Banco de Dados do jogo não foi encontrado. Se você estiver usando .json, certifique-se de usar um Servidor Local (Live Server).");
     }
 }
 
-window.saveGame = function() {
-    if (isGuestMode) {
-        if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Convidado";
-        return; 
-    }
-    const playerSave = {
-        coins: window.GAME_STATE.coins,
-        currentRodIndex: window.GAME_STATE.currentRodIndex,
-        ownedRods: window.GAME_STATE.ownedRods,
-        ownedSinkers: window.GAME_STATE.ownedSinkers,
-        currentSinker: window.GAME_STATE.currentSinker,
-        ownedKnives: window.GAME_STATE.ownedKnives,
-        currentKnife: window.GAME_STATE.currentKnife,
-        baitInventory: window.GAME_STATE.baitInventory,
-        currentBait: window.GAME_STATE.currentBait,
-        collection: window.GAME_STATE.collection,
-        collection67: window.GAME_STATE.collection67,
-        materials: window.GAME_STATE.materials,
-        sushiUnlocked: window.GAME_STATE.sushiUnlocked
+// ==========================================================================
+// 3. MOTOR PRINCIPAL DO JOGO
+// ==========================================================================
+function iniciarMotorDoJogo() {
+
+    window.GAME_STATE = {
+        coins: 0,
+        currentRodIndex: 0,
+        isFishing: false,
+        rods: [],
+        ownedRods: [0],
+        ownedSinkers: ['chumbo'],
+        currentSinker: 'chumbo',
+        ownedKnives: ['faca_cozinha'],
+        currentKnife: 'faca_cozinha',
+        baitInventory: {},
+        currentBait: null,
+        loadedImages: {},
+        collection: {},
+        collection67: {},
+        isDay: true,
+        materials: {},
+        sushiUnlocked: false 
     };
-    if (currentUser && db) {
-        localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
-        set(ref(db, 'users/' + currentUser.uid), playerSave)
-            .then(() => { if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Salvo"; })
-            .catch((e) => console.error("Erro ao salvar:", e));
-    } else {
-        localStorage.setItem('gatoPescadorSave_visitante', JSON.stringify(playerSave));
-        if(safeGet('save-status')) safeGet('save-status').innerText = "✅ Salvo Local";
-    }
-}
 
-function loadGame() {
-    if (isGuestMode) {
-        if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Modo Convidado";
-        window.updateUI();
-        return; 
+    if (window.ROD_TEMPLATES) {
+        window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
     }
 
-    if (!currentUser || !db) {
-        let localData = localStorage.getItem('gatoPescadorSave_visitante') || localStorage.getItem('gatoPescadorSave');
-        if (localData) {
-            try {
-                Object.assign(window.GAME_STATE, JSON.parse(localData));
+    function preloadImages() {
+        if (!window.RARITIES) return;
+        Object.values(window.RARITIES).forEach(rarity => {
+            rarity.variations.forEach(fish => {
+                const img = new Image();
+                window.GAME_STATE.loadedImages[fish.image] = img;
+                img.onload = () => {
+                    if (fish.image.toLowerCase().endsWith('.gif')) {
+                        setTimeout(() => {
+                            try {
+                                if (!img.naturalWidth) return; 
+                                const offCanvas = document.createElement('canvas');
+                                offCanvas.width = img.naturalWidth;
+                                offCanvas.height = img.naturalHeight;
+                                const oCtx = offCanvas.getContext('2d');
+                                oCtx.drawImage(img, 0, 0);
+                                window.GAME_STATE.loadedImages[fish.image] = offCanvas;
+                            } catch (e) {}
+                        }, 300);
+                    }
+                };
+                img.src = fish.image; 
+            });
+        });
+        ['/img/asset/67comum.jpg', '/img/asset/67raro.jpg', '/img/asset/67muitoraro.webp'].forEach(src => {
+            const img = new Image(); img.src = src;
+        });
+    }
+    preloadImages();
+
+    function safeGet(id) { return document.getElementById(id); }
+
+    window.updateUI = function() {
+        if(safeGet('cat-coins')) safeGet('cat-coins').innerText = window.GAME_STATE.coins.toLocaleString();
+        
+        const rod = window.GAME_STATE.rods.find(r => r.id === window.GAME_STATE.currentRodIndex) || window.GAME_STATE.rods[0];
+        if(safeGet('current-rod-display')) safeGet('current-rod-display').innerText = `Vara: ${rod ? rod.name : 'Nenhuma'}`;
+        
+        const catVisual = safeGet('cat-fisherman');
+        if (catVisual) {
+            const rodVisual = catVisual.querySelector('.rod-visual');
+            if (rodVisual) rodVisual.className = `rod-visual dropzone rod-tier-${rod ? rod.id : 0}`;
+        }
+
+        const sinker = (window.SINKERS || []).find(s => s.id === window.GAME_STATE.currentSinker) || (window.SINKERS ? window.SINKERS[0] : {name: 'Padrão'});
+        if(safeGet('sinker-slot')) safeGet('sinker-slot').innerText = `🪨 ${sinker.name}`;
+        if(safeGet('equipped-sinker-visual')) safeGet('equipped-sinker-visual').style.display = (sinker.id && sinker.id !== 'chumbo') ? 'block' : 'none';
+
+        const baitDisplay = safeGet('bait-slot');
+        const baitVis = safeGet('bait-visual');
+        if (window.GAME_STATE.currentBait && window.BAITS) {
+            const bait = window.BAITS.find(b => b.id === window.GAME_STATE.currentBait);
+            if (bait && baitDisplay && baitVis) {
+                baitDisplay.innerText = `${bait.icon} ${bait.name} (x${window.GAME_STATE.baitInventory[bait.id] || 0})`;
+                baitVis.innerText = bait.icon;
+            }
+        } else {
+            if(baitDisplay) baitDisplay.innerText = "🪝 Sem Isca";
+            if(baitVis) baitVis.innerText = "";
+        }
+
+        // LÓGICA DO BOTÃO SUSHI TRANCADO/DESTRANCADO
+        const sushiBtn = safeGet('sushi-btn');
+        if (sushiBtn) {
+            if (window.GAME_STATE.sushiUnlocked) {
+                sushiBtn.classList.remove('locked');
+            } else {
+                sushiBtn.classList.add('locked');
+            }
+        }
+    };
+
+    window.saveGame = function() {
+        if (isGuestMode) {
+            if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Convidado";
+            return; 
+        }
+        const playerSave = {
+            coins: window.GAME_STATE.coins,
+            currentRodIndex: window.GAME_STATE.currentRodIndex,
+            ownedRods: window.GAME_STATE.ownedRods,
+            ownedSinkers: window.GAME_STATE.ownedSinkers,
+            currentSinker: window.GAME_STATE.currentSinker,
+            ownedKnives: window.GAME_STATE.ownedKnives,
+            currentKnife: window.GAME_STATE.currentKnife,
+            baitInventory: window.GAME_STATE.baitInventory,
+            currentBait: window.GAME_STATE.currentBait,
+            collection: window.GAME_STATE.collection,
+            collection67: window.GAME_STATE.collection67,
+            materials: window.GAME_STATE.materials,
+            sushiUnlocked: window.GAME_STATE.sushiUnlocked
+        };
+        if (currentUser && db) {
+            localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
+            set(ref(db, 'users/' + currentUser.uid), playerSave)
+                .then(() => { if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Salvo"; })
+                .catch((e) => console.error("Erro ao salvar:", e));
+        } else {
+            localStorage.setItem('gatoPescadorSave_visitante', JSON.stringify(playerSave));
+            if(safeGet('save-status')) safeGet('save-status').innerText = "✅ Salvo Local";
+        }
+    };
+
+    function loadGame() {
+        if (isGuestMode) {
+            if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Modo Convidado";
+            window.updateUI();
+            return; 
+        }
+
+        if (!currentUser || !db) {
+            let localData = localStorage.getItem('gatoPescadorSave_visitante') || localStorage.getItem('gatoPescadorSave');
+            if (localData) {
+                try {
+                    Object.assign(window.GAME_STATE, JSON.parse(localData));
+                    if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
+                    if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
+                    if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
+                    if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) {
+                        window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha';
+                    }
+                    if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Visitante";
+                } catch (e) { console.error("Save corrompido"); }
+            }
+            window.updateUI();
+            return;
+        }
+
+        if(safeGet('save-status')) safeGet('save-status').innerText = "🔄 Nuvem...";
+        
+        get(child(ref(db), `users/${currentUser.uid}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                Object.assign(window.GAME_STATE, snapshot.val());
+                window.GAME_STATE.isFishing = false;
                 if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
                 if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
                 if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
                 if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) {
                     window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha';
                 }
-                if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Visitante";
-            } catch (e) { console.error("Save corrompido"); }
-        }
-        window.updateUI();
-        return;
-    }
-
-    if(safeGet('save-status')) safeGet('save-status').innerText = "🔄 Nuvem...";
-    
-    get(child(ref(db), `users/${currentUser.uid}`)).then((snapshot) => {
-        if (snapshot.exists()) {
-            Object.assign(window.GAME_STATE, snapshot.val());
-            window.GAME_STATE.isFishing = false;
-            if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
-            if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
-            if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
-            if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) {
-                window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha';
+                localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(window.GAME_STATE));
+                if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Conectado";
+            } else {
+                let localBackup = localStorage.getItem('gatoPescadorSave_' + currentUser.uid) || localStorage.getItem('gatoPescadorSave');
+                if (localBackup) { try { Object.assign(window.GAME_STATE, JSON.parse(localBackup)); } catch(e){} }
+                window.saveGame();
             }
-            localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(window.GAME_STATE));
-            if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Conectado";
-        } else {
-            let localBackup = localStorage.getItem('gatoPescadorSave_' + currentUser.uid) || localStorage.getItem('gatoPescadorSave');
-            if (localBackup) { try { Object.assign(window.GAME_STATE, JSON.parse(localBackup)); } catch(e){} }
-            window.saveGame();
-        }
-        window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
-        window.updateUI();
-    }).catch((e) => {
-        console.error(e);
-        if(safeGet('save-status')) safeGet('save-status').innerText = "❌ Offline";
-        window.updateUI();
-    });
-}
-
-if(auth) { onAuthStateChanged(auth, (user) => { currentUser = user; if(!isGuestMode) loadGame(); }); }
-setInterval(window.saveGame, 30000);
-
-// ==========================================================================
-// 4. LÓGICA DE PESCA E CÁLCULO
-// ==========================================================================
-window.calculateCatch = function(rod, sinker) {
-    const bait = window.GAME_STATE.currentBait ? window.BAITS.find(b => b.id === window.GAME_STATE.currentBait) : null;
-    let luckFactor = rod.luck;
-    let valueMult = 1;
-    let chance67 = 0.0005;
-
-    if (sinker.stats.luck) luckFactor *= sinker.stats.luck;
-    if (sinker.stats.value) valueMult *= sinker.stats.value;
-    if (sinker.stats.chance67) chance67 += sinker.stats.chance67;
-    if (sinker.synergy && sinker.synergy.type === rod.type) {
-        if (sinker.synergy.luck) luckFactor *= sinker.synergy.luck;
-        if (sinker.synergy.value) valueMult *= sinker.synergy.value;
-        if (sinker.synergy.chance67) chance67 += sinker.synergy.chance67;
+            if (window.ROD_TEMPLATES) window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
+            window.updateUI();
+        }).catch((e) => {
+            console.error(e);
+            if(safeGet('save-status')) safeGet('save-status').innerText = "❌ Offline";
+            window.updateUI();
+        });
     }
-    if (bait) {
-        if (bait.stats.luck) luckFactor *= bait.stats.luck;
-        if (bait.stats.value) valueMult *= bait.stats.value;
-        if (bait.stats.chance67) chance67 += bait.stats.chance67;
-    }
-    if (window.eventLuckMult) luckFactor *= window.eventLuckMult;
 
-    const rand = Math.random();
-    let caughtRarity = window.RARITIES.COMUM;
+    if(auth) { onAuthStateChanged(auth, (user) => { currentUser = user; if(!isGuestMode) loadGame(); }); }
+    setInterval(window.saveGame, 30000);
 
-    if (rand < window.RARITIES.AURUDO.prob * luckFactor) caughtRarity = window.RARITIES.AURUDO;
-    else if (rand < window.RARITIES.DIVINO.prob * luckFactor) caughtRarity = window.RARITIES.DIVINO;
-    else if (rand < window.RARITIES.SECRETO.prob * luckFactor) caughtRarity = window.RARITIES.SECRETO;
-    else if (rand < window.RARITIES.MITICO.prob * luckFactor) caughtRarity = window.RARITIES.MITICO;
-    else if (rand < window.RARITIES.LENDARIO.prob * luckFactor) caughtRarity = window.RARITIES.LENDARIO;
-    else if (rand < window.RARITIES.EPICO.prob * luckFactor) caughtRarity = window.RARITIES.EPICO;
-    else if (rand < window.RARITIES.RARO.prob * luckFactor) caughtRarity = window.RARITIES.RARO;
+    window.calculateCatch = function(rod, sinker) {
+        const bait = window.GAME_STATE.currentBait ? window.BAITS.find(b => b.id === window.GAME_STATE.currentBait) : null;
+        let luckFactor = rod ? rod.luck : 1;
+        let valueMult = 1;
+        let chance67 = 0.0005;
 
-    const validVariations = caughtRarity.variations.filter(v => v.time === 'all' || (window.GAME_STATE.isDay && v.time === 'day') || (!window.GAME_STATE.isDay && v.time === 'night'));
-    let specificFish = validVariations.length > 0 ? validVariations[Math.floor(Math.random() * validVariations.length)] : window.RARITIES.COMUM.variations[0];
-    if (validVariations.length === 0) caughtRarity = window.RARITIES.COMUM;
-
-    const sizeBase = 10 + (Object.keys(window.RARITIES).indexOf(caughtRarity.id.toUpperCase()) * 15);
-    let finalSize = sizeBase + Math.floor(Math.random() * 60);
-    if (Math.random() < chance67) finalSize = 67;
-
-    let finalValue = Math.floor(finalSize * caughtRarity.mult * valueMult);
-    if (window.eventValueMult) finalValue = Math.floor(finalValue * window.eventValueMult);
-
-    return { rarity: caughtRarity, variation: specificFish, size: finalSize, value: finalValue };
-}
-
-window.castLine = function() {
-    if (window.GAME_STATE.isFishing) return;
-
-    if (window.GAME_STATE.currentBait) {
-        if (window.GAME_STATE.baitInventory[window.GAME_STATE.currentBait] > 0) {
-            window.GAME_STATE.baitInventory[window.GAME_STATE.currentBait]--;
-            if (window.GAME_STATE.baitInventory[window.GAME_STATE.currentBait] <= 0) window.GAME_STATE.currentBait = null;
-        } else { window.GAME_STATE.currentBait = null; }
-    }
-    window.updateUI();
-    window.GAME_STATE.isFishing = true;
-    
-    const rod = window.GAME_STATE.rods.find(r => r.id === window.GAME_STATE.currentRodIndex) || window.GAME_STATE.rods[0];
-    const sinker = window.SINKERS.find(s => s.id === window.GAME_STATE.currentSinker) || window.SINKERS[0];
-    
-    const btn = safeGet('cast-btn');
-    if(btn){ btn.disabled = true; btn.innerText = "Descendo..."; }
-    
-    const catIdle = safeGet('cat-fisherman');
-    if(catIdle) catIdle.classList.replace('cat-idle', 'cat-fishing');
-    
-    const fishImg = safeGet('hooked-fish-img');
-    if(fishImg) fishImg.style.display = 'none';
-
-    let targetDepth = Math.max(150, Math.floor((window.innerHeight - 150) * (0.3 + ((rod.id + 1) / 20 * 0.7))));
-    let speedMult = rod.speed;
-    if (sinker.stats.speed) speedMult *= sinker.stats.speed;
-    if (sinker.synergy && sinker.synergy.type === rod.type && sinker.synergy.speed) speedMult *= sinker.synergy.speed;
-
-    const travelTime = (Math.max(400, 2000 - (rod.id * 80)) / (speedMult || 1)) * (window.eventCastTimeMult || 1);
-    const line = safeGet('line-container');
-    if(line) { line.style.transition = `height ${travelTime}ms ease-in`; line.style.height = `${targetDepth}px`; }
-
-    setTimeout(() => {
-        if(btn) btn.innerText = "Fisgou!";
-        const fish = window.calculateCatch(rod, sinker);
-        if(fishImg){ fishImg.src = fish.variation.image; fishImg.style.display = 'block'; }
+        if (sinker.stats && sinker.stats.luck) luckFactor *= sinker.stats.luck;
+        if (sinker.stats && sinker.stats.value) valueMult *= sinker.stats.value;
+        if (sinker.stats && sinker.stats.chance67) chance67 += sinker.stats.chance67;
         
-        const reelTime = travelTime * 0.8;
-        if(line) { line.style.transition = `height ${reelTime}ms ease-out`; line.style.height = `0px`; }
+        if (sinker.synergy && rod && sinker.synergy.type === rod.type) {
+            if (sinker.synergy.luck) luckFactor *= sinker.synergy.luck;
+            if (sinker.synergy.value) valueMult *= sinker.synergy.value;
+            if (sinker.synergy.chance67) chance67 += sinker.synergy.chance67;
+        }
+        if (bait) {
+            if (bait.stats.luck) luckFactor *= bait.stats.luck;
+            if (bait.stats.value) valueMult *= bait.stats.value;
+            if (bait.stats.chance67) chance67 += bait.stats.chance67;
+        }
+        if (window.eventLuckMult) luckFactor *= window.eventLuckMult;
+
+        const rand = Math.random();
+        let caughtRarity = window.RARITIES.COMUM;
+
+        if (rand < window.RARITIES.AURUDO.prob * luckFactor) caughtRarity = window.RARITIES.AURUDO;
+        else if (rand < window.RARITIES.DIVINO.prob * luckFactor) caughtRarity = window.RARITIES.DIVINO;
+        else if (rand < window.RARITIES.SECRETO.prob * luckFactor) caughtRarity = window.RARITIES.SECRETO;
+        else if (rand < window.RARITIES.MITICO.prob * luckFactor) caughtRarity = window.RARITIES.MITICO;
+        else if (rand < window.RARITIES.LENDARIO.prob * luckFactor) caughtRarity = window.RARITIES.LENDARIO;
+        else if (rand < window.RARITIES.EPICO.prob * luckFactor) caughtRarity = window.RARITIES.EPICO;
+        else if (rand < window.RARITIES.RARO.prob * luckFactor) caughtRarity = window.RARITIES.RARO;
+
+        const validVariations = caughtRarity.variations.filter(v => v.time === 'all' || (window.GAME_STATE.isDay && v.time === 'day') || (!window.GAME_STATE.isDay && v.time === 'night'));
+        let specificFish = validVariations.length > 0 ? validVariations[Math.floor(Math.random() * validVariations.length)] : window.RARITIES.COMUM.variations[0];
+        if (validVariations.length === 0) caughtRarity = window.RARITIES.COMUM;
+
+        const sizeBase = 10 + (Object.keys(window.RARITIES).indexOf(caughtRarity.id.toUpperCase()) * 15);
+        let finalSize = sizeBase + Math.floor(Math.random() * 60);
+        if (Math.random() < chance67) finalSize = 67;
+
+        let finalValue = Math.floor(finalSize * caughtRarity.mult * valueMult);
+        if (window.eventValueMult) finalValue = Math.floor(finalValue * window.eventValueMult);
+
+        return { rarity: caughtRarity, variation: specificFish, size: finalSize, value: finalValue };
+    }
+
+    window.castLine = function() {
+        if (window.GAME_STATE.isFishing) return;
+
+        if (window.GAME_STATE.currentBait) {
+            if (window.GAME_STATE.baitInventory[window.GAME_STATE.currentBait] > 0) {
+                window.GAME_STATE.baitInventory[window.GAME_STATE.currentBait]--;
+                if (window.GAME_STATE.baitInventory[window.GAME_STATE.currentBait] <= 0) window.GAME_STATE.currentBait = null;
+            } else { window.GAME_STATE.currentBait = null; }
+        }
+        window.updateUI();
+        window.GAME_STATE.isFishing = true;
+        
+        const rod = window.GAME_STATE.rods.find(r => r.id === window.GAME_STATE.currentRodIndex) || window.GAME_STATE.rods[0];
+        const sinker = window.SINKERS.find(s => s.id === window.GAME_STATE.currentSinker) || window.SINKERS[0];
+        
+        const btn = safeGet('cast-btn');
+        if(btn){ btn.disabled = true; btn.innerText = "Descendo..."; }
+        
+        const catIdle = safeGet('cat-fisherman');
+        if(catIdle) catIdle.classList.replace('cat-idle', 'cat-fishing');
+        
+        const fishImg = safeGet('hooked-fish-img');
+        if(fishImg) fishImg.style.display = 'none';
+
+        let targetDepth = Math.max(150, Math.floor((window.innerHeight - 150) * (0.3 + ((rod.id + 1) / 20 * 0.7))));
+        let speedMult = rod.speed;
+        if (sinker.stats && sinker.stats.speed) speedMult *= sinker.stats.speed;
+        if (sinker.synergy && rod && sinker.synergy.type === rod.type && sinker.synergy.speed) speedMult *= sinker.synergy.speed;
+
+        const travelTime = (Math.max(400, 2000 - (rod.id * 80)) / (speedMult || 1)) * (window.eventCastTimeMult || 1);
+        const line = safeGet('line-container');
+        if(line) { line.style.transition = `height ${travelTime}ms ease-in`; line.style.height = `${targetDepth}px`; }
 
         setTimeout(() => {
-            window.GAME_STATE.coins += fish.value;
-            let sealImage = null;
-
-            if (fish.size === 67) {
-                window.GAME_STATE.collection67[fish.variation.name] = (window.GAME_STATE.collection67[fish.variation.name] || 0) + 1;
-                sealImage = (fish.rarity.id === 'comum' || fish.rarity.id === 'raro') ? '/img/asset/67comum.jpg' : (fish.rarity.id === 'epico' || fish.rarity.id === 'lendario') ? '/img/asset/67raro.jpg' : '/img/asset/67muitoraro.webp';
-            } else {
-                window.GAME_STATE.collection[fish.variation.name] = (window.GAME_STATE.collection[fish.variation.name] || 0) + 1;
-            }
-
-            window.updateUI(); 
-            window.saveGame();
+            if(btn) btn.innerText = "Fisgou!";
+            const fish = window.calculateCatch(rod, sinker);
+            if(fishImg){ fishImg.src = fish.variation.image; fishImg.style.display = 'block'; }
             
-            const div = document.createElement('div');
-            div.className = `catch-popup ${fish.rarity.border}`;
-            let timeIcon = fish.variation.time === 'day' ? '☀️ Dia' : (fish.variation.time === 'night' ? '🌙 Noite' : '🌗 Ambos');
+            const reelTime = travelTime * 0.8;
+            if(line) { line.style.transition = `height ${reelTime}ms ease-out`; line.style.height = `0px`; }
 
-            div.innerHTML = `
-                <div class="fish-visual-container">
-                    <img src="${fish.variation.image}" class="${sealImage ? 'popup-fish-img fish-flash' : 'popup-fish-img'}">
-                    ${sealImage ? `<img src="${sealImage}" class="popup-seal">` : ''}
-                </div>
-                <div class="popup-name">${fish.variation.name}</div>
-                <div class="popup-rarity-text ${fish.rarity.style}">${fish.rarity.name}</div>
-                <div class="popup-info-line">📏 ${fish.size}cm</div>
-                <div class="popup-info-line" style="font-size: 0.75rem;">🕒 ${timeIcon}</div>
-                <div class="popup-value">+${fish.value} 🪙</div>
-            `;
-            document.body.appendChild(div);
-            
-            setTimeout(() => { div.style.transition = "opacity 0.5s"; div.style.opacity = "0"; setTimeout(() => div.remove(), 500); }, 2500);
+            setTimeout(() => {
+                window.GAME_STATE.coins += fish.value;
+                let sealImage = null;
 
-            if(fishImg) fishImg.style.display = 'none';
-            window.GAME_STATE.isFishing = false;
-            if(btn) { btn.disabled = false; btn.innerText = "Pescar (Espaço)"; }
-            if(catIdle) catIdle.classList.replace('cat-fishing', 'cat-idle');
-        }, reelTime);
-    }, travelTime + 1000);
-}
+                if (fish.size === 67) {
+                    window.GAME_STATE.collection67[fish.variation.name] = (window.GAME_STATE.collection67[fish.variation.name] || 0) + 1;
+                    sealImage = (fish.rarity.id === 'comum' || fish.rarity.id === 'raro') ? '/img/asset/67comum.jpg' : (fish.rarity.id === 'epico' || fish.rarity.id === 'lendario') ? '/img/asset/67raro.jpg' : '/img/asset/67muitoraro.webp';
+                } else {
+                    window.GAME_STATE.collection[fish.variation.name] = (window.GAME_STATE.collection[fish.variation.name] || 0) + 1;
+                }
 
-document.addEventListener('keydown', (e) => { 
-    if (e.code === 'Space') { 
-        e.preventDefault(); 
-        if (e.repeat) return;
-        if (!window.GAME_STATE.isFishing) window.castLine(); 
-    } 
-});
+                window.updateUI(); 
+                window.saveGame();
+                
+                const div = document.createElement('div');
+                div.className = `catch-popup ${fish.rarity.border}`;
+                let timeIcon = fish.variation.time === 'day' ? '☀️ Dia' : (fish.variation.time === 'night' ? '🌙 Noite' : '🌗 Ambos');
 
-document.addEventListener('DOMContentLoaded', () => {
+                div.innerHTML = `
+                    <div class="fish-visual-container">
+                        <img src="${fish.variation.image}" class="${sealImage ? 'popup-fish-img fish-flash' : 'popup-fish-img'}">
+                        ${sealImage ? `<img src="${sealImage}" class="popup-seal">` : ''}
+                    </div>
+                    <div class="popup-name">${fish.variation.name}</div>
+                    <div class="popup-rarity-text ${fish.rarity.style}">${fish.rarity.name}</div>
+                    <div class="popup-info-line">📏 ${fish.size}cm</div>
+                    <div class="popup-info-line" style="font-size: 0.75rem;">🕒 ${timeIcon}</div>
+                    <div class="popup-value">+${fish.value} 🪙</div>
+                `;
+                document.body.appendChild(div);
+                
+                setTimeout(() => { div.style.transition = "opacity 0.5s"; div.style.opacity = "0"; setTimeout(() => div.remove(), 500); }, 2500);
+
+                if(fishImg) fishImg.style.display = 'none';
+                window.GAME_STATE.isFishing = false;
+                if(btn) { btn.disabled = false; btn.innerText = "Pescar (Espaço)"; }
+                if(catIdle) catIdle.classList.replace('cat-fishing', 'cat-idle');
+            }, reelTime);
+        }, travelTime + 1000);
+    }
+
+    document.addEventListener('keydown', (e) => { 
+        if (e.code === 'Space') { 
+            e.preventDefault(); 
+            if (e.repeat) return;
+            if (!window.GAME_STATE.isFishing) window.castLine(); 
+        } 
+    });
+
     safeGet('cast-btn')?.addEventListener('click', () => window.castLine());
+    
     safeGet('exit-game-btn')?.addEventListener('click', () => {
         const targetUrl = '../index.html'; 
         if (isGuestMode) { window.location.href = targetUrl; } else { 
@@ -525,409 +400,436 @@ document.addEventListener('DOMContentLoaded', () => {
             window.saveGame(); setTimeout(() => window.location.href = targetUrl, 800); 
         }
     });
+
     safeGet('open-collection-btn')?.addEventListener('click', () => { safeGet('collection-modal')?.classList.remove('hidden'); window.renderCollection(); });
     safeGet('close-collection-btn')?.addEventListener('click', () => safeGet('collection-modal')?.classList.add('hidden'));
     safeGet('open-67-btn')?.addEventListener('click', () => { safeGet('collection-67-modal')?.classList.remove('hidden'); window.renderCollection67(); });
     safeGet('close-67-btn')?.addEventListener('click', () => safeGet('collection-67-modal')?.classList.add('hidden'));
-});
 
-// ==========================================================================
-// 6. SISTEMA DE APRECIAÇÃO
-// ==========================================================================
-window.showFishDetail = function(fish, rarity, count, is67) {
-    const existing = document.getElementById('fish-detail-overlay');
-    if (existing) existing.remove();
+    // NOVO EVENTO: Clique no Botão de Sushi Fixo
+    safeGet('sushi-btn')?.addEventListener('click', () => {
+        if (!window.GAME_STATE.sushiUnlocked) {
+            if(window.customAlert) window.customAlert("🔒 Restaurante Fechado!\n\nVocê precisa irritar o Peixe Tutor (clicando nele várias vezes) para ele te dar a chave da Bancada de Sushi!", false);
+            return;
+        }
+        if (window.SushiMode) window.SushiMode.open();
+    });
 
-    const overlay = document.createElement('div');
-    overlay.id = 'fish-detail-overlay';
-    overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 999999; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(5px);`;
+    window.showFishDetail = function(fish, rarity, count, is67) {
+        const existing = document.getElementById('fish-detail-overlay');
+        if (existing) existing.remove();
 
-    let seal = '';
-    if (is67) {
-        const s = (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
-        seal = `<img src="${s}" style="position:absolute; bottom:-10px; right:-10px; width:90px; height:90px; object-fit:contain; transform:rotate(15deg); filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.6));">`;
-    }
+        const overlay = document.createElement('div');
+        overlay.id = 'fish-detail-overlay';
+        overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 999999; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(5px);`;
 
-    const colors = { 'comum': '#bdc3c7', 'raro': '#2ecc71', 'epico': '#9b59b6', 'lendario': '#f39c12', 'mitico': '#e74c3c', 'secreto': '#2c3e50', 'divino': '#f1c40f', 'aurudo': '#ffd700' };
-    const borderColor = colors[rarity.id] || '#ffffff';
-
-    const box = document.createElement('div');
-    box.style.cssText = `position: relative; background: radial-gradient(circle at center, #2c3e50 0%, #1a252f 100%); padding: 40px; border-radius: 20px; text-align: center; max-width: 600px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px ${borderColor}66; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid ${borderColor};`;
-    box.innerHTML = `
-        <button id="close-detail-btn" style="position:absolute; top:15px; right:20px; background:none; border:none; color:white; font-size:2.5rem; cursor:pointer; opacity:0.7; transition:0.2s;">&times;</button>
-        <div style="position:relative; display:inline-block; margin-bottom:20px;">
-            <img src="${fish.image}" style="max-width:350px; max-height:350px; object-fit:contain; filter:drop-shadow(0 10px 15px rgba(0,0,0,0.6)); animation: floatBigFish 4s ease-in-out infinite;">
-            ${seal}
-        </div>
-        <h2 style="color:white; font-family:'Fredoka', sans-serif; font-size:2.5rem; margin:0; text-shadow:0 2px 4px rgba(0,0,0,0.8); line-height: 1.2;">${fish.name}</h2>
-        <div style="font-size:1.3rem; font-weight:bold; margin-bottom:20px; margin-top:5px; text-transform:uppercase; letter-spacing: 2px;" class="${rarity.style}">${rarity.name}</div>
-        <div style="display:flex; justify-content:center; gap:20px; color:#ccc; font-size:1rem; font-family:'Poppins', sans-serif;">
-            <div style="background:rgba(0,0,0,0.4); padding:10px 20px; border-radius:15px; border: 1px solid rgba(255,255,255,0.1);">📊 Pescados: <b style="color:white;">${count}</b></div>
-            <div style="background:rgba(0,0,0,0.4); padding:10px 20px; border-radius:15px; border: 1px solid rgba(255,255,255,0.1);">🕒 Hábito: <b style="color:white;">${fish.time === 'day' ? '☀️ Dia' : (fish.time === 'night' ? '🌙 Noite' : '🌗 Ambos')}</b></div>
-        </div>
-    `;
-
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
-
-    if (!document.getElementById('float-big-fish-style')) {
-        const style = document.createElement('style');
-        style.id = 'float-big-fish-style';
-        style.innerHTML = `@keyframes floatBigFish { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }`;
-        document.head.appendChild(style);
-    }
-    requestAnimationFrame(() => { overlay.style.opacity = '1'; box.style.transform = 'scale(1)'; });
-
-    const closeDetail = () => { overlay.style.opacity = '0'; box.style.transform = 'scale(0.8)'; setTimeout(() => overlay.remove(), 300); };
-    document.getElementById('close-detail-btn').addEventListener('click', closeDetail);
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDetail(); });
-};
-
-window.renderCollection = function() {
-    const grid = safeGet('collection-grid'); if(!grid) return; grid.innerHTML = ''; let t=0, u=0;
-    Object.values(window.RARITIES).forEach(r => { r.variations.forEach(f => { t++; const c = window.GAME_STATE.collection[f.name] || 0; if(c>0) u++; createCard(grid, f, r, c, false); }); });
-    if(safeGet('collection-progress')) safeGet('collection-progress').innerText = `(${u}/${t})`;
-};
-
-window.renderCollection67 = function() {
-    const grid = safeGet('collection-67-grid'); if(!grid) return; grid.innerHTML = ''; let t=0, u=0;
-    Object.values(window.RARITIES).forEach(r => { r.variations.forEach(f => { t++; const c = window.GAME_STATE.collection67[f.name] || 0; if(c>0) u++; createCard(grid, f, r, c, true); }); });
-    if(safeGet('collection-67-progress')) safeGet('collection-67-progress').innerText = `(${u}/${t})`;
-};
-
-function createCard(container, fish, rarity, count, is67) {
-    const isUnlocked = count > 0; 
-    const div = document.createElement('div'); div.className = `collection-card ${isUnlocked ? 'unlocked' : 'locked'} ${is67 ? 'special-67' : ''}`;
-    let seal = ''; 
-    if(is67 && isUnlocked) { 
-        const s = (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
-        seal = `<img src="${s}" class="collection-seal">`; 
-    }
-    div.innerHTML = `
-        ${isUnlocked ? `<div class="count-badge">x${count}</div>` : ''}
-        <div style="position: absolute; top: 2px; left: 5px; font-size: 0.7rem;">${fish.time === 'day' ? '☀️' : (fish.time === 'night' ? '🌙' : '')}</div>
-        <img src="${fish.image}" class="collection-img">
-        ${seal}
-        <div style="font-size: 0.75rem; font-weight: bold; color: ${isUnlocked ? '#333' : '#999'}">${fish.name}</div>
-        <div style="font-size: 0.65rem; color: ${isUnlocked ? 'green' : '#ccc'}">${rarity.name}</div>
-    `;
-    if (isUnlocked) { div.style.cursor = 'pointer'; div.addEventListener('click', () => window.showFishDetail(fish, rarity, count, is67)); div.onmouseover = () => { div.style.transform = 'scale(1.05)'; }; div.onmouseout = () => { div.style.transform = 'scale(1)'; }; }
-    container.appendChild(div);
-}
-
-const canvas = safeGet('bg-canvas');
-const ctx = canvas ? canvas.getContext('2d') : null;
-const fishes = [];
-
-function resizeCanvas() { if(canvas){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } }
-window.addEventListener('resize', resizeCanvas); resizeCanvas();
-
-class SwimmingFish {
-    constructor() { this.reset(true); }
-    reset(initial = false) {
-        const rands = Math.random(); let r = window.RARITIES.COMUM;
-        if(rands < 0.005) r = window.RARITIES.AURUDO; else if(rands < 0.005) r = window.RARITIES.DIVINO; else if(rands < 0.01) r = window.RARITIES.SECRETO; else if(rands < 0.03) r = window.RARITIES.MITICO; else if(rands < 0.08) r = window.RARITIES.LENDARIO; else if(rands < 0.20) r = window.RARITIES.EPICO; else if(rands < 0.40) r = window.RARITIES.RARO;
-        const valid = r.variations.filter(v => v.time === 'all' || (window.GAME_STATE.isDay && v.time === 'day') || (!window.GAME_STATE.isDay && v.time === 'night'));
-        this.specificImage = (valid.length > 0 ? valid[Math.floor(Math.random() * valid.length)] : r.variations[0]).image;
-        this.depth = Math.random(); this.direction = Math.random() > 0.5 ? 1 : -1;
-        this.y = canvas ? Math.random() * (canvas.height - 200) + 200 : 300;
-        this.width = (40 + Math.min(60, r.mult * 0.8)) * (0.4 + (this.depth * 0.6));
-        this.x = initial && canvas ? Math.random() * canvas.width : (this.direction === 1 ? -300 : (canvas ? canvas.width + 300 : 2000));
-        this.speed = (0.5 + (this.depth * 1.5)) * this.direction; this.opacity = 0.1 + (this.depth * 0.4);
-    }
-    update() { 
-        this.x += (this.speed * (window.eventBgSpeedMult || 1)); 
-        if (canvas && ((this.direction === 1 && this.x > canvas.width + 300) || (this.direction === -1 && this.x < -300))) this.reset(); 
-    }
-    draw() {
-        if(!ctx) return; 
-        const renderable = window.GAME_STATE.loadedImages[this.specificImage];
-        if (!renderable) return;
-        const w = renderable.naturalWidth || renderable.width; const h_orig = renderable.naturalHeight || renderable.height;
-        if (!w || w === 0) return;
-        const h = this.width * (h_orig / w);
-        ctx.save(); ctx.globalAlpha = this.opacity; ctx.translate(this.x, this.y);
-        if (this.direction === -1) ctx.scale(-1, 1);
-        ctx.drawImage(renderable, -this.width / 2, -h / 2, this.width, h); ctx.restore();
-    }
-}
-
-for (let i = 0; i < 25; i++) { fishes.push(new SwimmingFish()); }
-
-function animateBg() { 
-    if(ctx && canvas) { ctx.clearRect(0, 0, canvas.width, canvas.height); fishes.forEach(f => { f.update(); f.draw(); }); } 
-    requestAnimationFrame(animateBg); 
-}
-setInterval(() => { 
-    window.GAME_STATE.isDay = !window.GAME_STATE.isDay; 
-    const gc = safeGet('game-container'); if(gc) gc.className = window.GAME_STATE.isDay ? 'day-mode' : 'night-mode'; 
-    const ti = safeGet('time-indicator'); if(ti) ti.innerText = window.GAME_STATE.isDay ? "☀️ Dia" : "🌙 Noite"; 
-}, 45000);
-setTimeout(() => { window.updateUI(); if(canvas) animateBg(); }, 500);
-
-// ==========================================================================
-// 9. MODO SUSHI V2 (MINIGAME DA FACA COM MULTIPLICADORES)
-// ==========================================================================
-window.SushiMode = {
-    pendingSushi: null, 
-
-    init: function() {
-        const style = document.createElement('style');
-        style.innerHTML = `
-            #sushi-modal .modal-content { background: #fffaf0; border: 4px solid #c0392b; background-image: radial-gradient(#fcdcd3 1px, transparent 1px); background-size: 20px 20px; }
-            #sushi-modal .modal-header { background: linear-gradient(to right, #c0392b, #e74c3c); border-bottom: 3px solid #922b21; }
-            .sushi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 15px; padding: 20px; max-height: 60vh; overflow-y: auto; }
-            .sushi-card { background: white; border: 2px solid #e0e0e0; border-radius: 12px; padding: 15px 10px; text-align: center; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; }
-            .sushi-card:hover { border-color: #c0392b; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(192,57,43,0.2); }
-            .sushi-btn-cut { background: #c0392b; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: 'Fredoka', sans-serif; transition: 0.2s; width: 100%; box-shadow: 0 4px 0 #922b21; text-transform: uppercase; letter-spacing: 1px;}
-            .sushi-btn-cut:hover { background: #e74c3c; transform: translateY(2px); box-shadow: 0 2px 0 #922b21; }
-            .sushi-btn-cut:active { transform: translateY(4px); box-shadow: none; }
-            .sushi-reward-preview { font-size: 0.75rem; color: #7f8c8d; margin-top: 8px; font-weight: bold; line-height: 1.3;}
-        `;
-        document.head.appendChild(style);
-
-        const modal = document.createElement('div');
-        modal.id = 'sushi-modal';
-        modal.className = 'modal hidden';
-        modal.style.zIndex = '99999'; 
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 850px; width: 95%;">
-                <div class="modal-header">
-                    <h2 style="margin: 0; color: white; font-family: 'Fredoka', sans-serif;">🍣 Restaurante de Sushi</h2>
-                    <button onclick="document.getElementById('sushi-modal').classList.add('hidden')" class="close-btn">&times;</button>
-                </div>
-                <div style="padding: 15px; text-align: center; background: white; border-bottom: 2px dashed #ccc;">
-                    <h3 id="sushi-knife-title" style="margin:0; color:#c0392b; font-family:'Fredoka', sans-serif;">Faca Equipada: Nenhuma</h3>
-                    <p style="margin:5px 0 0 0; color:#555; font-size:0.9rem;">O Chef transforma peixes em uma injeção gigante de moedas e materiais. Melhore sua faca na Forja para ganhar multiplicadores absurdos!</p>
-                </div>
-                <div id="sushi-grid" class="sushi-grid"></div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-
-        const miniModal = document.createElement('div');
-        miniModal.id = 'sushi-minigame-modal';
-        miniModal.className = 'modal hidden';
-        miniModal.style.zIndex = '999999'; 
-        miniModal.innerHTML = `
-            <div class="modal-content" style="max-width: 500px; background: #2c3e50; border: 4px solid #e74c3c;">
-                <button onclick="document.getElementById('sushi-minigame-modal').classList.add('hidden')" class="close-btn" style="position:absolute; top:10px; right:15px;">&times;</button>
-                <h2 style="color: white; font-family: 'Fredoka'; text-align: center; margin-bottom: 5px;">🔪 Filete o Peixe!</h2>
-                <p style="color: #ccc; text-align: center; margin-bottom: 20px; font-size: 0.9rem;">Passe a faca 4 vezes sobre a imagem.</p>
-                
-                <div id="sushi-cut-area" style="position: relative; width: 300px; height: 300px; margin: 0 auto; border: 2px dashed #7f8c8d; border-radius: 10px; background: rgba(255,255,255,0.05); cursor: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22><text y=%2224%22 font-size=%2224%22>🔪</text></svg>') 0 24, crosshair;">
-                    <img id="sushi-cut-img" src="" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); transition: transform 0.1s;">
-                    <canvas id="sushi-cut-canvas" width="300" height="300" style="position: absolute; top:0; left:0; z-index: 10;"></canvas>
-                </div>
-                
-                <div style="text-align: center; margin-top: 20px;">
-                    <span id="sushi-cut-counter" style="color: #e74c3c; font-size: 1.5rem; font-weight: bold; font-family: 'Fredoka';">Cortes: 0 / 4</span>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(miniModal);
-
-        this.setupCanvas();
-    },
-
-    open: function() {
-        this.renderGrid();
-        document.getElementById('sushi-modal').classList.remove('hidden');
-    },
-
-    getLootTable: function(rarityId) {
-        const tables = {
-            'comum': { coins: 50, mats: ['madeira', 'fio'], matQty: 1 },
-            'raro': { coins: 250, mats: ['plastico', 'kevlar'], matQty: 1 },
-            'epico': { coins: 1000, mats: ['fibra', 'ouro'], matQty: 2 },
-            'lendario': { coins: 4000, mats: ['metal', 'titânio'], matQty: 2 },
-            'mitico': { coins: 15000, mats: ['perola', 'carbono'], matQty: 3 },
-            'secreto': { coins: 60000, mats: ['meteorito', 'cristal'], matQty: 3 },
-            'divino': { coins: 300000, mats: ['materia_escura', 'essencia'], matQty: 4 },
-            'aurudo': { coins: 10000000, mats: ['poeira_cosmica'], matQty: 5 }
-        };
-        return tables[rarityId] || tables['comum'];
-    },
-
-    renderGrid: function() {
-        const grid = document.getElementById('sushi-grid');
-        if(!grid) return;
-        grid.innerHTML = '';
-        let hasFish = false;
-
-        const currentKnifeId = window.GAME_STATE.currentKnife || 'faca_cozinha';
-        const knifeData = window.KNIVES.find(k => k.id === currentKnifeId) || window.KNIVES[0];
-        const multiplier = knifeData.mult;
-        const dropsMats = knifeData.dropsMats;
-
-        document.getElementById('sushi-knife-title').innerText = `🔪 Faca Equipada: ${knifeData.name} (Saque x${multiplier})`;
-
-        const addFishCards = (collection, is67) => {
-            Object.keys(collection).forEach(fishName => {
-                const count = collection[fishName];
-                if (count > 0) {
-                    hasFish = true;
-                    
-                    let foundRarity = null;
-                    let foundFish = null;
-                    Object.values(window.RARITIES).forEach(r => {
-                        const f = r.variations.find(v => v.name === fishName);
-                        if (f) { foundRarity = r; foundFish = f; }
-                    });
-                    if (!foundFish) return;
-
-                    const lootPreview = this.getLootTable(foundRarity.id);
-                    let expectedCoins = Math.floor(lootPreview.coins * multiplier);
-                    let expectedMats = Math.floor(lootPreview.matQty * multiplier);
-                    
-                    if (is67) {
-                        expectedCoins *= 3;
-                        expectedMats *= 2;
-                    }
-                    
-                    // Lógica Visual: Se a faca não extrai materiais, mostra aviso
-                    let matPreviewText = dropsMats 
-                        ? `<br>📦 +${expectedMats} Mat. Tier ${foundRarity.name}` 
-                        : `<br><span style="color:#e74c3c; font-size:0.65rem;">(Faca não extrai materiais)</span>`;
-
-                    const div = document.createElement('div');
-                    div.className = 'sushi-card';
-                    div.innerHTML = `
-                        <div style="position: absolute; top: -5px; right: -5px; background: #333; color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.8rem; font-weight: bold; border: 2px solid white; z-index: 5;">Estoque: ${count}</div>
-                        <img src="${foundFish.image}" style="width: 70px; height: 70px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));">
-                        <div style="font-size: 0.9rem; font-weight: bold; color: #333; line-height: 1.1; height: 32px; overflow: hidden; display: flex; align-items: center; justify-content: center;">${fishName} ${is67 ? '🏆' : ''}</div>
-                        <div class="${foundRarity.style}" style="font-size: 0.7rem; text-transform: uppercase; font-weight: 800; margin-bottom: 5px;">${foundRarity.name}</div>
-                        
-                        <div class="sushi-reward-preview">
-                            <span style="color:#e67e22;">💰 +${expectedCoins.toLocaleString()}</span>${matPreviewText}
-                        </div>
-
-                        <button class="sushi-btn-cut" onclick="window.SushiMode.startMinigame('${fishName.replace(/'/g, "\\'")}', ${is67}, '${foundRarity.id}', '${foundFish.image}')">🔪 FILETAR</button>
-                    `;
-                    grid.appendChild(div);
-                }
-            });
-        };
-
-        if (window.GAME_STATE) { addFishCards(window.GAME_STATE.collection, false); addFishCards(window.GAME_STATE.collection67, true); }
-        if (!hasFish) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 50px; font-size: 1.3rem; font-family: Fredoka, sans-serif;">Você não tem nenhum peixe na sua coleção. Volte a pescar!</div>';
-    },
-
-    setupCanvas: function() {
-        const canvas = document.getElementById('sushi-cut-canvas');
-        const ctx = canvas.getContext('2d');
-        let isDragging = false;
-        let startX = 0, startY = 0;
-        let cuts = 0;
-
-        const startCut = (e) => {
-            isDragging = true;
-            const rect = canvas.getBoundingClientRect();
-            startX = (e.clientX || e.touches[0].clientX) - rect.left;
-            startY = (e.clientY || e.touches[0].clientY) - rect.top;
-        };
-
-        const endCut = (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            const rect = canvas.getBoundingClientRect();
-            const endX = (e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0)) - rect.left;
-            const endY = (e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0)) - rect.top;
-
-            const dist = Math.hypot(endX - startX, endY - startY);
-            if (dist > 40) {
-                ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
-                ctx.strokeStyle = "rgba(231, 76, 60, 0.9)"; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
-                ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.stroke();
-
-                cuts++;
-                document.getElementById('sushi-cut-counter').innerText = `Cortes: ${cuts} / 4`;
-                document.getElementById('sushi-cut-img').style.transform = `scale(${1 + (cuts * 0.05)})`;
-
-                if (cuts >= 4) {
-                    setTimeout(() => { window.SushiMode.finishMinigame(); }, 300);
-                }
-            }
-        };
-
-        canvas.addEventListener('mousedown', startCut);
-        canvas.addEventListener('mouseup', endCut);
-        canvas.addEventListener('mouseleave', () => { isDragging = false; });
-        canvas.addEventListener('touchstart', startCut, {passive: true});
-        canvas.addEventListener('touchend', endCut, {passive: true});
-
-        this.resetCanvas = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            cuts = 0;
-            document.getElementById('sushi-cut-counter').innerText = `Cortes: 0 / 4`;
-            document.getElementById('sushi-cut-img').style.transform = `scale(1)`;
-        };
-    },
-
-    startMinigame: function(fishName, is67, rarityId, imageSrc) {
-        this.pendingSushi = { fishName, is67, rarityId };
-        document.getElementById('sushi-modal').classList.add('hidden'); 
-        this.resetCanvas();
-        document.getElementById('sushi-cut-img').src = imageSrc;
-        document.getElementById('sushi-minigame-modal').classList.remove('hidden'); 
-    },
-
-    finishMinigame: function() {
-        document.getElementById('sushi-minigame-modal').classList.add('hidden');
-        
-        if (!this.pendingSushi) return;
-        const { fishName, is67, rarityId } = this.pendingSushi;
-        this.pendingSushi = null;
-
-        const collectionTarget = is67 ? window.GAME_STATE.collection67 : window.GAME_STATE.collection;
-        if (!collectionTarget[fishName] || collectionTarget[fishName] <= 0) return;
-
-        collectionTarget[fishName]--;
-
-        const currentKnifeId = window.GAME_STATE.currentKnife || 'faca_cozinha';
-        const knifeData = window.KNIVES.find(k => k.id === currentKnifeId) || window.KNIVES[0];
-        const multiplier = knifeData.mult;
-        const dropsMats = knifeData.dropsMats;
-
-        const loot = this.getLootTable(rarityId);
-        
-        let coinReward = Math.floor(loot.coins * multiplier);
-        let matRewardQty = Math.floor(loot.matQty * multiplier);
-        
+        let seal = '';
         if (is67) {
-            coinReward *= 3;
-            matRewardQty *= 2;
+            const s = (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
+            seal = `<img src="${s}" style="position:absolute; bottom:-10px; right:-10px; width:90px; height:90px; object-fit:contain; transform:rotate(15deg); filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.6));">`;
         }
 
-        const matRewardId = loot.mats[Math.floor(Math.random() * loot.mats.length)]; 
+        const colors = { 'comum': '#bdc3c7', 'raro': '#2ecc71', 'epico': '#9b59b6', 'lendario': '#f39c12', 'mitico': '#e74c3c', 'secreto': '#2c3e50', 'divino': '#f1c40f', 'aurudo': '#ffd700' };
+        const borderColor = colors[rarity.id] || '#ffffff';
 
-        window.GAME_STATE.coins += coinReward;
-        
-        let rewardMessage = `🪙 +${coinReward.toLocaleString()} Cat Coins`;
+        const box = document.createElement('div');
+        box.style.cssText = `position: relative; background: radial-gradient(circle at center, #2c3e50 0%, #1a252f 100%); padding: 40px; border-radius: 20px; text-align: center; max-width: 600px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px ${borderColor}66; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid ${borderColor};`;
+        box.innerHTML = `
+            <button id="close-detail-btn" style="position:absolute; top:15px; right:20px; background:none; border:none; color:white; font-size:2.5rem; cursor:pointer; opacity:0.7; transition:0.2s;">&times;</button>
+            <div style="position:relative; display:inline-block; margin-bottom:20px;">
+                <img src="${fish.image}" style="max-width:350px; max-height:350px; object-fit:contain; filter:drop-shadow(0 10px 15px rgba(0,0,0,0.6)); animation: floatBigFish 4s ease-in-out infinite;">
+                ${seal}
+            </div>
+            <h2 style="color:white; font-family:'Fredoka', sans-serif; font-size:2.5rem; margin:0; text-shadow:0 2px 4px rgba(0,0,0,0.8); line-height: 1.2;">${fish.name}</h2>
+            <div style="font-size:1.3rem; font-weight:bold; margin-bottom:20px; margin-top:5px; text-transform:uppercase; letter-spacing: 2px;" class="${rarity.style}">${rarity.name}</div>
+            <div style="display:flex; justify-content:center; gap:20px; color:#ccc; font-size:1rem; font-family:'Poppins', sans-serif;">
+                <div style="background:rgba(0,0,0,0.4); padding:10px 20px; border-radius:15px; border: 1px solid rgba(255,255,255,0.1);">📊 Pescados: <b style="color:white;">${count}</b></div>
+                <div style="background:rgba(0,0,0,0.4); padding:10px 20px; border-radius:15px; border: 1px solid rgba(255,255,255,0.1);">🕒 Hábito: <b style="color:white;">${fish.time === 'day' ? '☀️ Dia' : (fish.time === 'night' ? '🌙 Noite' : '🌗 Ambos')}</b></div>
+            </div>
+        `;
 
-        if (dropsMats) {
-            window.GAME_STATE.materials[matRewardId] = (window.GAME_STATE.materials[matRewardId] || 0) + matRewardQty;
-            let matIcon = '📦'; let matName = matRewardId;
-            if (window.CRAFTING_DB && window.CRAFTING_DB.materials) {
-                const matInfo = window.CRAFTING_DB.materials.find(m => m.id === matRewardId);
-                if (matInfo) { matIcon = matInfo.icon; matName = matInfo.name; }
-            }
-            rewardMessage += `\n${matIcon} +${matRewardQty.toLocaleString()} ${matName}`;
-        } else {
-            rewardMessage += `\n❌ Sem materiais (Faca muito fraca)`;
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        if (!document.getElementById('float-big-fish-style')) {
+            const style = document.createElement('style');
+            style.id = 'float-big-fish-style';
+            style.innerHTML = `@keyframes floatBigFish { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }`;
+            document.head.appendChild(style);
         }
+        requestAnimationFrame(() => { overlay.style.opacity = '1'; box.style.transform = 'scale(1)'; });
 
-        if(window.updateUI) window.updateUI();
-        if(window.saveGame) window.saveGame();
+        const closeDetail = () => { overlay.style.opacity = '0'; box.style.transform = 'scale(0.8)'; setTimeout(() => overlay.remove(), 300); };
+        document.getElementById('close-detail-btn').addEventListener('click', closeDetail);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDetail(); });
+    };
 
-        if(window.customAlert) {
-            window.customAlert(`🔪 Perfeito!\n\nVocê filetou o ${fishName}!\n\nRecompensas (Faca x${multiplier}):\n${rewardMessage}`, true);
+    window.renderCollection = function() {
+        if (!window.RARITIES) return;
+        const grid = safeGet('collection-grid'); if(!grid) return; grid.innerHTML = ''; let t=0, u=0;
+        Object.values(window.RARITIES).forEach(r => { r.variations.forEach(f => { t++; const c = window.GAME_STATE.collection[f.name] || 0; if(c>0) u++; createCard(grid, f, r, c, false); }); });
+        if(safeGet('collection-progress')) safeGet('collection-progress').innerText = `(${u}/${t})`;
+    };
+
+    window.renderCollection67 = function() {
+        if (!window.RARITIES) return;
+        const grid = safeGet('collection-67-grid'); if(!grid) return; grid.innerHTML = ''; let t=0, u=0;
+        Object.values(window.RARITIES).forEach(r => { r.variations.forEach(f => { t++; const c = window.GAME_STATE.collection67[f.name] || 0; if(c>0) u++; createCard(grid, f, r, c, true); }); });
+        if(safeGet('collection-67-progress')) safeGet('collection-67-progress').innerText = `(${u}/${t})`;
+    };
+
+    function createCard(container, fish, rarity, count, is67) {
+        const isUnlocked = count > 0; 
+        const div = document.createElement('div'); div.className = `collection-card ${isUnlocked ? 'unlocked' : 'locked'} ${is67 ? 'special-67' : ''}`;
+        let seal = ''; 
+        if(is67 && isUnlocked) { 
+            const s = (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
+            seal = `<img src="${s}" class="collection-seal">`; 
         }
-
-        this.renderGrid();
-        document.getElementById('sushi-modal').classList.remove('hidden'); 
+        div.innerHTML = `
+            ${isUnlocked ? `<div class="count-badge">x${count}</div>` : ''}
+            <div style="position: absolute; top: 2px; left: 5px; font-size: 0.7rem;">${fish.time === 'day' ? '☀️' : (fish.time === 'night' ? '🌙' : '')}</div>
+            <img src="${fish.image}" class="collection-img">
+            ${seal}
+            <div style="font-size: 0.75rem; font-weight: bold; color: ${isUnlocked ? '#333' : '#999'}">${fish.name}</div>
+            <div style="font-size: 0.65rem; color: ${isUnlocked ? 'green' : '#ccc'}">${rarity.name}</div>
+        `;
+        if (isUnlocked) { div.style.cursor = 'pointer'; div.addEventListener('click', () => window.showFishDetail(fish, rarity, count, is67)); div.onmouseover = () => { div.style.transform = 'scale(1.05)'; }; div.onmouseout = () => { div.style.transform = 'scale(1)'; }; }
+        container.appendChild(div);
     }
-};
 
-document.addEventListener('DOMContentLoaded', () => { window.SushiMode.init(); });
+    const canvas = safeGet('bg-canvas');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    const fishes = [];
+
+    function resizeCanvas() { if(canvas){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } }
+    window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+    class SwimmingFish {
+        constructor() { this.reset(true); }
+        reset(initial = false) {
+            const rands = Math.random(); let r = window.RARITIES ? window.RARITIES.COMUM : null;
+            if (!r) return;
+            if(rands < 0.005) r = window.RARITIES.AURUDO; else if(rands < 0.005) r = window.RARITIES.DIVINO; else if(rands < 0.01) r = window.RARITIES.SECRETO; else if(rands < 0.03) r = window.RARITIES.MITICO; else if(rands < 0.08) r = window.RARITIES.LENDARIO; else if(rands < 0.20) r = window.RARITIES.EPICO; else if(rands < 0.40) r = window.RARITIES.RARO;
+            const valid = r.variations.filter(v => v.time === 'all' || (window.GAME_STATE.isDay && v.time === 'day') || (!window.GAME_STATE.isDay && v.time === 'night'));
+            this.specificImage = (valid.length > 0 ? valid[Math.floor(Math.random() * valid.length)] : r.variations[0]).image;
+            this.depth = Math.random(); this.direction = Math.random() > 0.5 ? 1 : -1;
+            this.y = canvas ? Math.random() * (canvas.height - 200) + 200 : 300;
+            this.width = (40 + Math.min(60, r.mult * 0.8)) * (0.4 + (this.depth * 0.6));
+            this.x = initial && canvas ? Math.random() * canvas.width : (this.direction === 1 ? -300 : (canvas ? canvas.width + 300 : 2000));
+            this.speed = (0.5 + (this.depth * 1.5)) * this.direction; this.opacity = 0.1 + (this.depth * 0.4);
+        }
+        update() { 
+            this.x += (this.speed * (window.eventBgSpeedMult || 1)); 
+            if (canvas && ((this.direction === 1 && this.x > canvas.width + 300) || (this.direction === -1 && this.x < -300))) this.reset(); 
+        }
+        draw() {
+            if(!ctx) return; 
+            const renderable = window.GAME_STATE.loadedImages[this.specificImage];
+            if (!renderable) return;
+            const w = renderable.naturalWidth || renderable.width; const h_orig = renderable.naturalHeight || renderable.height;
+            if (!w || w === 0) return;
+            const h = this.width * (h_orig / w);
+            ctx.save(); ctx.globalAlpha = this.opacity; ctx.translate(this.x, this.y);
+            if (this.direction === -1) ctx.scale(-1, 1);
+            ctx.drawImage(renderable, -this.width / 2, -h / 2, this.width, h); ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < 25; i++) { fishes.push(new SwimmingFish()); }
+
+    function animateBg() { 
+        if(ctx && canvas) { ctx.clearRect(0, 0, canvas.width, canvas.height); fishes.forEach(f => { f.update(); f.draw(); }); } 
+        requestAnimationFrame(animateBg); 
+    }
+    setInterval(() => { 
+        window.GAME_STATE.isDay = !window.GAME_STATE.isDay; 
+        const gc = safeGet('game-container'); if(gc) gc.className = window.GAME_STATE.isDay ? 'day-mode' : 'night-mode'; 
+        const ti = safeGet('time-indicator'); if(ti) ti.innerText = window.GAME_STATE.isDay ? "☀️ Dia" : "🌙 Noite"; 
+    }, 45000);
+    setTimeout(() => { window.updateUI(); if(canvas) animateBg(); }, 500);
+
+    // ==========================================================================
+    // INICIALIZADOR DO SUSHI (CHAMADO APENAS UMA VEZ DE FORMA SEGURA)
+    // ==========================================================================
+    window.SushiMode = {
+        pendingSushi: null, 
+
+        init: function() {
+            if (document.getElementById('sushi-modal')) return;
+
+            // ESTILIZAÇÃO DO BOTÃO TRANCADO INJETADO AQUI
+            const style = document.createElement('style');
+            style.innerHTML = `
+                #sushi-btn.locked {
+                    background: #7f8c8d !important;
+                    color: #bdc3c7 !important;
+                    border-color: #95a5a6 !important;
+                    cursor: not-allowed !important;
+                    transform: none !important;
+                    box-shadow: none !important;
+                    filter: grayscale(100%);
+                }
+                #sushi-modal .modal-content { background: #fffaf0; border: 4px solid #c0392b; background-image: radial-gradient(#fcdcd3 1px, transparent 1px); background-size: 20px 20px; }
+                #sushi-modal .modal-header { background: linear-gradient(to right, #c0392b, #e74c3c); border-bottom: 3px solid #922b21; }
+                .sushi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 15px; padding: 20px; max-height: 60vh; overflow-y: auto; }
+                .sushi-card { background: white; border: 2px solid #e0e0e0; border-radius: 12px; padding: 15px 10px; text-align: center; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; }
+                .sushi-card:hover { border-color: #c0392b; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(192,57,43,0.2); }
+                .sushi-btn-cut { background: #c0392b; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: 'Fredoka', sans-serif; transition: 0.2s; width: 100%; box-shadow: 0 4px 0 #922b21; text-transform: uppercase; letter-spacing: 1px;}
+                .sushi-btn-cut:hover { background: #e74c3c; transform: translateY(2px); box-shadow: 0 2px 0 #922b21; }
+                .sushi-btn-cut:active { transform: translateY(4px); box-shadow: none; }
+                .sushi-reward-preview { font-size: 0.75rem; color: #7f8c8d; margin-top: 8px; font-weight: bold; line-height: 1.3;}
+            `;
+            document.head.appendChild(style);
+
+            const modal = document.createElement('div');
+            modal.id = 'sushi-modal';
+            modal.className = 'modal hidden';
+            modal.style.zIndex = '99999'; 
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 850px; width: 95%;">
+                    <div class="modal-header">
+                        <h2 style="margin: 0; color: white; font-family: 'Fredoka', sans-serif;">🍣 Restaurante de Sushi</h2>
+                        <button onclick="document.getElementById('sushi-modal').classList.add('hidden')" class="close-btn">&times;</button>
+                    </div>
+                    <div style="padding: 15px; text-align: center; background: white; border-bottom: 2px dashed #ccc;">
+                        <h3 id="sushi-knife-title" style="margin:0; color:#c0392b; font-family:'Fredoka', sans-serif;">Faca Equipada: Nenhuma</h3>
+                        <p style="margin:5px 0 0 0; color:#555; font-size:0.9rem;">O Chef transforma peixes em uma injeção gigante de moedas e materiais. Melhore sua faca na Forja para ganhar multiplicadores absurdos!</p>
+                    </div>
+                    <div id="sushi-grid" class="sushi-grid"></div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            const miniModal = document.createElement('div');
+            miniModal.id = 'sushi-minigame-modal';
+            miniModal.className = 'modal hidden';
+            miniModal.style.zIndex = '999999'; 
+            miniModal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px; background: #2c3e50; border: 4px solid #e74c3c;">
+                    <button onclick="document.getElementById('sushi-minigame-modal').classList.add('hidden'); document.getElementById('sushi-modal').classList.remove('hidden'); window.SushiMode.pendingSushi = null;" class="close-btn" style="position:absolute; top:10px; right:15px;">&times;</button>
+                    <h2 style="color: white; font-family: 'Fredoka'; text-align: center; margin-bottom: 5px;">🔪 Filete o Peixe!</h2>
+                    <p style="color: #ccc; text-align: center; margin-bottom: 20px; font-size: 0.9rem;">Passe a faca 4 vezes sobre a imagem.</p>
+                    
+                    <div id="sushi-cut-area" style="position: relative; width: 300px; height: 300px; margin: 0 auto; border: 2px dashed #7f8c8d; border-radius: 10px; background: rgba(255,255,255,0.05); cursor: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22><text y=%2224%22 font-size=%2224%22>🔪</text></svg>') 0 24, crosshair;">
+                        <img id="sushi-cut-img" src="" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); transition: transform 0.1s;">
+                        <canvas id="sushi-cut-canvas" width="300" height="300" style="position: absolute; top:0; left:0; z-index: 10;"></canvas>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <span id="sushi-cut-counter" style="color: #e74c3c; font-size: 1.5rem; font-weight: bold; font-family: 'Fredoka';">Cortes: 0 / 4</span>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(miniModal);
+
+            this.setupCanvas();
+        },
+
+        open: function() {
+            this.renderGrid();
+            const sm = document.getElementById('sushi-modal');
+            if(sm) sm.classList.remove('hidden');
+        },
+
+        getLootTable: function(rarityId) {
+            const tables = {
+                'comum': { coins: 50, mats: ['madeira', 'fio'], matQty: 1 },
+                'raro': { coins: 250, mats: ['plastico', 'kevlar'], matQty: 1 },
+                'epico': { coins: 1000, mats: ['fibra', 'ouro'], matQty: 2 },
+                'lendario': { coins: 4000, mats: ['metal', 'titânio'], matQty: 2 },
+                'mitico': { coins: 15000, mats: ['perola', 'carbono'], matQty: 3 },
+                'secreto': { coins: 60000, mats: ['meteorito', 'cristal'], matQty: 3 },
+                'divino': { coins: 300000, mats: ['materia_escura', 'essencia'], matQty: 4 },
+                'aurudo': { coins: 10000000, mats: ['poeira_cosmica'], matQty: 5 }
+            };
+            return tables[rarityId] || tables['comum'];
+        },
+
+        renderGrid: function() {
+            const grid = document.getElementById('sushi-grid');
+            if(!grid || !window.KNIVES) return;
+            grid.innerHTML = '';
+            let hasFish = false;
+
+            const currentKnifeId = window.GAME_STATE.currentKnife || 'faca_cozinha';
+            const knifeData = window.KNIVES.find(k => k.id === currentKnifeId) || window.KNIVES[0];
+            const multiplier = knifeData.mult;
+            const dropsMats = knifeData.dropsMats;
+
+            document.getElementById('sushi-knife-title').innerText = `🔪 Faca Equipada: ${knifeData.name} (Saque x${multiplier})`;
+
+            const addFishCards = (collection, is67) => {
+                Object.keys(collection).forEach(fishName => {
+                    const count = collection[fishName];
+                    if (count > 0) {
+                        hasFish = true;
+                        
+                        let foundRarity = null;
+                        let foundFish = null;
+                        Object.values(window.RARITIES).forEach(r => {
+                            const f = r.variations.find(v => v.name === fishName);
+                            if (f) { foundRarity = r; foundFish = f; }
+                        });
+                        if (!foundFish) return;
+
+                        const lootPreview = this.getLootTable(foundRarity.id);
+                        let expectedCoins = Math.floor(lootPreview.coins * multiplier);
+                        let expectedMats = Math.floor(lootPreview.matQty * multiplier);
+                        
+                        if (is67) {
+                            expectedCoins *= 3;
+                            expectedMats *= 2;
+                        }
+                        
+                        let matPreviewText = dropsMats 
+                            ? `<br>📦 +${expectedMats} Mat. Tier ${foundRarity.name}` 
+                            : `<br><span style="color:#e74c3c; font-size:0.65rem;">(Faca não extrai materiais)</span>`;
+
+                        const div = document.createElement('div');
+                        div.className = 'sushi-card';
+                        
+                        const safeFishName = fishName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                        div.innerHTML = `
+                            <div style="position: absolute; top: -5px; right: -5px; background: #333; color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.8rem; font-weight: bold; border: 2px solid white; z-index: 5;">Estoque: ${count}</div>
+                            <img src="${foundFish.image}" style="width: 70px; height: 70px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));">
+                            <div style="font-size: 0.9rem; font-weight: bold; color: #333; line-height: 1.1; height: 32px; overflow: hidden; display: flex; align-items: center; justify-content: center;">${fishName} ${is67 ? '🏆' : ''}</div>
+                            <div class="${foundRarity.style}" style="font-size: 0.7rem; text-transform: uppercase; font-weight: 800; margin-bottom: 5px;">${foundRarity.name}</div>
+                            
+                            <div class="sushi-reward-preview">
+                                <span style="color:#e67e22;">💰 +${expectedCoins.toLocaleString()}</span>${matPreviewText}
+                            </div>
+
+                            <button class="sushi-btn-cut" onclick="window.SushiMode.startMinigame('${safeFishName}', ${is67}, '${foundRarity.id}', '${foundFish.image}')">🔪 FILETAR</button>
+                        `;
+                        grid.appendChild(div);
+                    }
+                });
+            };
+
+            if (window.GAME_STATE && window.RARITIES) { 
+                addFishCards(window.GAME_STATE.collection, false); 
+                addFishCards(window.GAME_STATE.collection67, true); 
+            }
+            if (!hasFish) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 50px; font-size: 1.3rem; font-family: Fredoka, sans-serif;">Você não tem nenhum peixe na sua coleção. Volte a pescar!</div>';
+        },
+
+        setupCanvas: function() {
+            const canvas = document.getElementById('sushi-cut-canvas');
+            const ctx = canvas.getContext('2d');
+            let isDragging = false;
+            let startX = 0, startY = 0;
+            let cuts = 0;
+
+            const startCut = (e) => {
+                isDragging = true;
+                const rect = canvas.getBoundingClientRect();
+                startX = (e.clientX || e.touches[0].clientX) - rect.left;
+                startY = (e.clientY || e.touches[0].clientY) - rect.top;
+            };
+
+            const endCut = (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                const rect = canvas.getBoundingClientRect();
+                const endX = (e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0)) - rect.left;
+                const endY = (e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0)) - rect.top;
+
+                const dist = Math.hypot(endX - startX, endY - startY);
+                if (dist > 40) {
+                    ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = "rgba(231, 76, 60, 0.9)"; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.stroke();
+
+                    cuts++;
+                    document.getElementById('sushi-cut-counter').innerText = `Cortes: ${cuts} / 4`;
+                    document.getElementById('sushi-cut-img').style.transform = `scale(${1 + (cuts * 0.05)})`;
+
+                    if (cuts >= 4) {
+                        setTimeout(() => { window.SushiMode.finishMinigame(); }, 300);
+                    }
+                }
+            };
+
+            canvas.addEventListener('mousedown', startCut);
+            canvas.addEventListener('mouseup', endCut);
+            canvas.addEventListener('mouseleave', () => { isDragging = false; });
+            canvas.addEventListener('touchstart', startCut, {passive: true});
+            canvas.addEventListener('touchend', endCut, {passive: true});
+
+            this.resetCanvas = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                cuts = 0;
+                document.getElementById('sushi-cut-counter').innerText = `Cortes: 0 / 4`;
+                document.getElementById('sushi-cut-img').style.transform = `scale(1)`;
+            };
+        },
+
+        startMinigame: function(fishName, is67, rarityId, imageSrc) {
+            this.pendingSushi = { fishName, is67, rarityId };
+            document.getElementById('sushi-modal').classList.add('hidden'); 
+            this.resetCanvas();
+            document.getElementById('sushi-cut-img').src = imageSrc;
+            document.getElementById('sushi-minigame-modal').classList.remove('hidden'); 
+        },
+
+        finishMinigame: function() {
+            document.getElementById('sushi-minigame-modal').classList.add('hidden');
+            
+            if (!this.pendingSushi) return;
+            const { fishName, is67, rarityId } = this.pendingSushi;
+            this.pendingSushi = null;
+
+            const collectionTarget = is67 ? window.GAME_STATE.collection67 : window.GAME_STATE.collection;
+            if (!collectionTarget[fishName] || collectionTarget[fishName] <= 0) return;
+
+            collectionTarget[fishName]--;
+
+            const currentKnifeId = window.GAME_STATE.currentKnife || 'faca_cozinha';
+            const knifeData = window.KNIVES.find(k => k.id === currentKnifeId) || window.KNIVES[0];
+            const multiplier = knifeData.mult;
+            const dropsMats = knifeData.dropsMats;
+
+            const loot = this.getLootTable(rarityId);
+            
+            let coinReward = Math.floor(loot.coins * multiplier);
+            let matRewardQty = Math.floor(loot.matQty * multiplier);
+            
+            if (is67) { coinReward *= 3; matRewardQty *= 2; }
+
+            const matRewardId = loot.mats[Math.floor(Math.random() * loot.mats.length)]; 
+
+            window.GAME_STATE.coins += coinReward;
+            
+            let rewardMessage = `🪙 +${coinReward.toLocaleString()} Cat Coins`;
+
+            if (dropsMats) {
+                window.GAME_STATE.materials[matRewardId] = (window.GAME_STATE.materials[matRewardId] || 0) + matRewardQty;
+                let matIcon = '📦'; let matName = matRewardId;
+                if (window.CRAFTING_DB && window.CRAFTING_DB.materials) {
+                    const matInfo = window.CRAFTING_DB.materials.find(m => m.id === matRewardId);
+                    if (matInfo) { matIcon = matInfo.icon; matName = matInfo.name; }
+                }
+                rewardMessage += `\n${matIcon} +${matRewardQty.toLocaleString()} ${matName}`;
+            } else {
+                rewardMessage += `\n❌ Sem materiais (Faca muito fraca)`;
+            }
+
+            if(window.updateUI) window.updateUI();
+            if(window.saveGame) window.saveGame();
+
+            if(window.customAlert) {
+                window.customAlert(`🔪 Perfeito!\n\nVocê filetou o ${fishName}!\n\nRecompensas (Faca x${multiplier}):\n${rewardMessage}`, true);
+            }
+
+            this.renderGrid();
+            document.getElementById('sushi-modal').classList.remove('hidden'); 
+        }
+    };
+
+    window.SushiMode.init();
+}
+
+carregarBancoDeDadosEIniciar();
