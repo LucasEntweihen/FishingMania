@@ -12,7 +12,8 @@ window.customAlert = function(message, isSuccess = false) {
     overlay.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
-        z-index: 9999; opacity: 0; transition: opacity 0.3s ease;
+        z-index: 9999999; /* <-- CAMADA MÁXIMA PARA NUNCA FICAR ATRÁS DE NADA */
+        opacity: 0; transition: opacity 0.3s ease;
     `;
 
     const box = document.createElement('div');
@@ -132,7 +133,6 @@ window.CRAFTING_DB = {
 window.MATERIALS = window.CRAFTING_DB.materials;
 let ACTIVE_BLUEPRINT = { type: null, id: null };
 
-// 2. CURA DO JOGO
 function fixGameState() {
     if (!window.GAME_STATE) window.GAME_STATE = {};
     if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
@@ -142,9 +142,6 @@ function fixGameState() {
     window.GAME_STATE.ownedRods = window.GAME_STATE.ownedRods.map(Number);
 }
 
-// ==========================================
-// MÓDULO 1: LOJA
-// ==========================================
 window.ShopV2 = {
     render: function() {
         fixGameState();
@@ -219,19 +216,14 @@ window.ShopV2 = {
     }
 };
 
-// ==========================================
-// MÓDULO 2: FORJA
-// ==========================================
 window.ForgeV2 = {
     renderLists: function() {
         fixGameState();
         const listContainer = document.getElementById('recipe-list');
         if (!listContainer) return;
 
-        // Container Flex para deixar lado a lado
         let html = '<div style="display: flex; gap: 10px;">';
         
-        // COLUNA 1: VARAS
         html += '<div style="flex: 1; padding-right: 5px;">';
         html += '<h3 style="font-size: 1rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 10px;">Receitas de Varas</h3>';
         
@@ -247,7 +239,6 @@ window.ForgeV2 = {
         });
         html += '</div>';
 
-        // COLUNA 2: CHUMBADAS
         html += '<div style="flex: 1; padding-left: 5px; border-left: 1px solid #eee;">';
         html += '<h3 style="font-size: 1rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 10px;">Receitas de Chumbadas</h3>';
         
@@ -263,7 +254,6 @@ window.ForgeV2 = {
         });
         html += '</div>';
 
-        // Fecha Container Flex
         html += '</div>';
 
         listContainer.innerHTML = html;
@@ -334,12 +324,10 @@ window.ForgeV2 = {
             return;
         }
 
-        // Subtrai Materiais
         Object.keys(recipe.req).forEach(matId => {
             window.GAME_STATE.materials[matId] -= recipe.req[matId];
         });
 
-        // Adiciona ao Inventário
         if (type === 'rod') {
             window.GAME_STATE.ownedRods.push(Number(id));
         } else {
@@ -348,17 +336,14 @@ window.ForgeV2 = {
 
         if(typeof window.saveGame === "function") window.saveGame();
         
-        // Mensagem Customizada de Sucesso
-        window.customAlert(`Você forjou com sucesso a\n[ ${recipe.name} ]!\n\nAbra a Mesa de Trabalho para equipá-la.`, true);
+        // --- COLCHETES REMOVIDOS AQUI! ---
+        window.customAlert(`Você forjou com sucesso:\n${recipe.name}!\n\nAbra a Mesa de Trabalho para equipá-la.`, true);
         
         this.renderLists();
         this.selectBlueprint(type, id);
     }
 };
 
-// ==========================================
-// MÓDULO 3: MOCHILA E MESA DE TRABALHO
-// ==========================================
 window.BackpackV2 = {
     render: function(tab) {
         fixGameState();
@@ -476,9 +461,6 @@ window.WorkbenchV2 = {
     }
 };
 
-// ==========================================
-// MÓDULO 4: INICIALIZAÇÃO DE EVENTOS
-// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     
     const bindModal = (openBtnId, closeBtnId, modalId, onOpenFunc) => {
