@@ -31,14 +31,14 @@ try {
 }
 
 // ==========================================================================
-// 2. ESTADO DO JOGO E DADOS GLOBAIS (AS LISTAS COMPLETAS)
+// 2. ESTADO DO JOGO E DADOS GLOBAIS
 // ==========================================================================
 window.GAME_STATE = {
     coins: 0,
     currentRodIndex: 0,
     isFishing: false,
     rods: [],
-    ownedRods: [0], // 0 é a vara inicial (Galho Seco)
+    ownedRods: [0],
     ownedSinkers: ['chumbo'],
     currentSinker: 'chumbo',
     baitInventory: {},
@@ -47,7 +47,7 @@ window.GAME_STATE = {
     collection: {},
     collection67: {},
     isDay: true,
-    materials: {} // Inventário de materiais para o Crafting
+    materials: {} 
 };
 
 window.MATERIALS = [
@@ -92,7 +92,6 @@ window.ROD_TEMPLATES = [
     { name: "Vara Quântica", type: "divino", price: 750000000, speed: 25.0, luck: 55.0 },
     { name: "A Vara do Criador", type: "divino", price: 2000000000, speed: 40.0, luck: 100.0 }
 ];
-// Gera os IDs dinamicamente baseados no índice do template
 window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
 
 window.SINKERS = [
@@ -153,51 +152,89 @@ window.RARITIES = {
     RARO: { id: 'raro', prob: 0.25, mult: 3, style: 'text-raro', border: 'border-raro', name: 'Raro', variations: [
         { name: 'Peixe Estranho', image: '/img/peixe/UnderWaterAhhFish.png', time: 'night' },
         { name: 'Meu çélebro', image: '/img/peixe/tarlalareo fish.png', time: 'all' },
+        { name: 'Cubic Boccacete', image: '/img/peixe/hyt.gif', time: 'day' },
         { name: 'PUTAPEIXE', image: '/img/peixe/PUTARALHOFISH, porra.png', time: 'all' },
-        { name: 'Peixe Burrinho', image: '/img/peixe/dumbAssFish.png', time: 'all' }
+        { name: 'Peixe Burrinho', image: '/img/peixe/dumbAssFish.png', time: 'all' },
+        { name: 'Meio Peixe', image: '/img/peixe/meio-epixe.gif', time: 'night' }
     ]},
     EPICO: { id: 'epico', prob: 0.15, mult: 8, style: 'text-epico', border: 'border-epico', name: 'Épico', variations: [
         { name: 'Mahi-Mahi', image: '/img/peixe/Mahi-Mahifish square.webp', time: 'all' },
         { name: 'Peixe Otário', image: '/img/peixe/PeixeOtario.png', time: 'day' },
         { name: 'Peixe Lhapaço', image: '/img/peixe/peixe-palhaco.png', time: 'all' },
-        { name: 'Carlos a Cardume', image: '/img/peixe/Carlosacardume.png', time: 'day' }, // <--- PONTO REMOVIDO!
-        { name: 'Betíssimo', image: '/img/peixe/betaMaximo.webp', time: 'all' }
+        { name: 'Carlos a Cardume', image: '/img/peixe/Carlosacardume.png', time: 'day' },
+        { name: 'Betíssimo', image: '/img/peixe/betaMaximo.webp', time: 'all' },
+        { name: 'Lanterna Gay', image: '/img/peixe/angler-cliparte.png', time: 'night' }
     ]},
     LENDARIO: { id: 'lendario', prob: 0.07, mult: 20, style: 'text-lendario', border: 'border-lendario', name: 'Lendário', variations: [
         { name: 'Peixe Motosserra', image: '/img/peixe/Chainsawfish.webp', time: 'night' },
+        { name: 'Grande Olho', image: '/img/peixe/hytal.gif', time: 'day' },
         { name: 'Peixe Demônio negro', image: '/img/peixe/DemonicAHHfish (1).png', time: 'night' },
-        { name: 'Peixe Entulhado', image: '/img/peixe/EntulhoFish.png', time: 'day' }
+        { name: 'Peixe Entulhado', image: '/img/peixe/EntulhoFish.png', time: 'day' },
+        { name: 'Tenham respeito!', image: '/img/peixe/vcsestaoempublicomaisrespeito.gif', time: 'all' }
     ]},
     MITICO: { id: 'mitico', prob: 0.025, mult: 50, style: 'text-mitico', border: 'border-mitico', name: 'Mítico', variations: [
         { name: 'Jogo do Peixe Retardo', image: '/img/peixe/GameofRetardedfish.png', time: 'night' },
         { name: 'Peixe Câncer', image: '/img/peixe/PeixeCancer.png', time: 'all' },
         { name: 'Meus filhos ', image: '/img/peixe/cardume dos meus filhos.png', time: 'all' },
-        { name: 'Peixe das Águas Reais', image: '/img/peixe/aquoso.webp', time: 'day' }
+        { name: 'Peixe das Águas Reais', image: '/img/peixe/aquoso.webp', time: 'day' },
+        { name: 'Darwin?!?!', image: '/img/peixe/darwin.gif', time: 'all' }
     ]},
     SECRETO: { id: 'secreto', prob: 0.004, mult: 150, style: 'text-secreto', border: 'border-secreto', name: 'Secreto', variations: [
         { name: 'Peixe Retardado', image: '/img/peixe/Retardedfish.png', time: 'all' },
-        { name: 'Meu Almoço Delicioso', image: '/img/peixe/receitas-de-peixes-destaque.png', time: 'day' }
+        { name: 'Meu Almoço Delicioso', image: '/img/peixe/receitas-de-peixes-destaque.png', time: 'day' },
+        { name: 'Pai Solteiro', image: '/img/peixe/pai-solteiro.gif', time: 'all' },
+        { name: 'QUE CARA LEGAL!', image: '/img/peixe/coolASSfish.gif', time: 'all' }
     ]},
     DIVINO: { id: 'divino', prob: 0.001, mult: 500, style: 'text-divino', border: 'border-divino', name: 'Divino', variations: [
         { name: 'Quase Arco-íris', image: '/img/peixe/Semi-rainbowfish.png', time: 'day' },
+        { name: 'Golfizza Pescado', image: '/img/peixe/golfizza.gif', time: 'night' },
         { name: 'Só mais um pouco', image: '/img/peixe/meus porrinhas.png', time: 'night' },
         { name: 'Ex rei dos mares (fraco)', image: '/img/peixe/CARALHOFODAA.png', time: 'night' }
     ]},
-    AURUDO: { id: 'aurudo', prob: 0.0001, mult: 5000, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
+    AURUDO: { id: 'aurudo', prob: 0.00001, mult: 50, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
         { name: 'SHIGERU?', image: '/img/peixe/ShigeruFish.png', time: 'all' },
         { name: 'SHIGERU DO ORGULHO???', image: '/img/peixe/PrideShigeruFish.png', time: 'night' }
     ]}
 };
 
-// PRÉ-CARREGAMENTO DAS IMAGENS PARA O CANVAS
+// ==========================================================================
+// MÁGICA ANTILAG PARA O CANVAS (CACHE INTELIGENTE)
+// ==========================================================================
 function preloadImages() {
     Object.values(window.RARITIES).forEach(rarity => {
         rarity.variations.forEach(fish => {
             const img = new Image();
-            img.src = fish.image;
+            
+            // 1. Já salva a imagem nativa no cache para garantir que ela exista e não pisque
             window.GAME_STATE.loadedImages[fish.image] = img;
+
+            img.onload = () => {
+                // 2. Se for um GIF, ele causa lag no canvas. Vamos criar uma versão estática.
+                if (fish.image.toLowerCase().endsWith('.gif')) {
+                    // Espera 300ms para garantir que o navegador renderizou o 1º frame do GIF
+                    setTimeout(() => {
+                        try {
+                            if (!img.naturalWidth) return; // Proteção extra
+                            const offCanvas = document.createElement('canvas');
+                            offCanvas.width = img.naturalWidth;
+                            offCanvas.height = img.naturalHeight;
+                            const oCtx = offCanvas.getContext('2d');
+                            oCtx.drawImage(img, 0, 0);
+                            
+                            // Substitui a imagem animada pela imagem estática no cache
+                            window.GAME_STATE.loadedImages[fish.image] = offCanvas;
+                        } catch (e) {
+                            console.error("Erro ao converter GIF: ", e);
+                        }
+                    }, 300);
+                }
+                // Imagens normais (.png, .webp) continuam apenas como Image(), pois não causam lag.
+            };
+
+            img.src = fish.image; // Dispara o carregamento
         });
     });
+    
     ['/img/asset/67comum.jpg', '/img/asset/67raro.jpg', '/img/asset/67muitoraro.webp'].forEach(src => {
         const img = new Image();
         img.src = src;
@@ -215,7 +252,6 @@ function safeGet(id) {
 window.updateUI = function() {
     if(safeGet('cat-coins')) safeGet('cat-coins').innerText = window.GAME_STATE.coins.toLocaleString();
     
-    // Atualiza a Vara Visual
     const rod = window.GAME_STATE.rods.find(r => r.id === window.GAME_STATE.currentRodIndex) || window.GAME_STATE.rods[0];
     if(safeGet('current-rod-display')) safeGet('current-rod-display').innerText = `Vara: ${rod.name}`;
     
@@ -225,14 +261,12 @@ window.updateUI = function() {
         if (rodVisual) rodVisual.className = `rod-visual dropzone rod-tier-${rod.id}`;
     }
 
-    // Atualiza o Sinker Visual
     const sinker = window.SINKERS.find(s => s.id === window.GAME_STATE.currentSinker) || window.SINKERS[0];
     if(safeGet('sinker-slot')) safeGet('sinker-slot').innerText = `🪨 ${sinker.name}`;
     if(safeGet('equipped-sinker-visual')) {
         safeGet('equipped-sinker-visual').style.display = (sinker.id !== 'chumbo') ? 'block' : 'none';
     }
 
-    // Atualiza a Isca Visual
     const baitDisplay = safeGet('bait-slot');
     const baitVis = safeGet('bait-visual');
     if (window.GAME_STATE.currentBait) {
@@ -263,7 +297,7 @@ window.saveGame = function() {
         currentBait: window.GAME_STATE.currentBait,
         collection: window.GAME_STATE.collection,
         collection67: window.GAME_STATE.collection67,
-        materials: window.GAME_STATE.materials // SALVA OS MATERIAIS
+        materials: window.GAME_STATE.materials 
     };
 
     if (currentUser && db) {
@@ -289,12 +323,8 @@ function loadGame() {
         if (localData) {
             try {
                 Object.assign(window.GAME_STATE, JSON.parse(localData));
-                
-                // PROTEÇÃO: Cria a chave "materials" se o jogador for antigo
                 if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
-                // PROTEÇÃO: Garante que a primeira vara sempre exista
                 if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
-
                 if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Visitante";
             } catch (e) { console.error("Save corrompido"); }
         }
@@ -309,9 +339,7 @@ function loadGame() {
             Object.assign(window.GAME_STATE, snapshot.val());
             window.GAME_STATE.isFishing = false;
             
-            // PROTEÇÃO: Cria a chave "materials" se o jogador for antigo
             if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
-            // PROTEÇÃO: Garante que a primeira vara sempre exista
             if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
 
             localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(window.GAME_STATE));
@@ -321,7 +349,6 @@ function loadGame() {
             if (localBackup) { try { Object.assign(window.GAME_STATE, JSON.parse(localBackup)); } catch(e){} }
             window.saveGame();
         }
-        // Garante que as varas estão mapeadas de acordo com as novas atualizações de código
         window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
         window.updateUI();
     }).catch((e) => {
@@ -349,7 +376,6 @@ window.calculateCatch = function(rod, sinker) {
     let valueMult = 1;
     let chance67 = 0.0005;
 
-    // Sinker Stats & Sinergia
     if (sinker.stats.luck) luckFactor *= sinker.stats.luck;
     if (sinker.stats.value) valueMult *= sinker.stats.value;
     if (sinker.stats.chance67) chance67 += sinker.stats.chance67;
@@ -360,14 +386,12 @@ window.calculateCatch = function(rod, sinker) {
         if (sinker.synergy.chance67) chance67 += sinker.synergy.chance67;
     }
 
-    // Bait Stats
     if (bait) {
         if (bait.stats.luck) luckFactor *= bait.stats.luck;
         if (bait.stats.value) valueMult *= bait.stats.value;
         if (bait.stats.chance67) chance67 += bait.stats.chance67;
     }
 
-    // Modificador de Eventos (events.js)
     if (window.eventLuckMult) luckFactor *= window.eventLuckMult;
 
     const rand = Math.random();
@@ -403,7 +427,6 @@ window.calculateCatch = function(rod, sinker) {
 window.castLine = function() {
     if (window.GAME_STATE.isFishing) return;
 
-    // Consumo de Isca
     if (window.GAME_STATE.currentBait) {
         if (window.GAME_STATE.baitInventory[window.GAME_STATE.currentBait] > 0) {
             window.GAME_STATE.baitInventory[window.GAME_STATE.currentBait]--;
@@ -468,7 +491,6 @@ window.castLine = function() {
             window.updateUI(); 
             window.saveGame();
             
-            // Cria o Popup Dinâmico
             const div = document.createElement('div');
             div.className = `catch-popup ${fish.rarity.border}`;
             let timeIcon = fish.variation.time === 'day' ? '☀️ Dia' : (fish.variation.time === 'night' ? '🌙 Noite' : '🌗 Ambos');
@@ -508,19 +530,14 @@ window.castLine = function() {
 // ==========================================================================
 document.addEventListener('keydown', (e) => { 
     if (e.code === 'Space') { 
-        e.preventDefault(); // Evita que a página role para baixo
-        
-        // A MÁGICA ESTÁ AQUI: Se a tecla estiver sendo segurada, não faz nada!
-        if (e.repeat) return; 
-
-        // Só tenta pescar se o gato já não estiver pescando
+        e.preventDefault(); 
+        if (e.repeat) return; // TRAVA ANTILAG DO ESPAÇO SEGURADO
         if (!window.GAME_STATE.isFishing) {
             window.castLine(); 
         }
     } 
 });
 
-// Vinculando de forma segura
 document.addEventListener('DOMContentLoaded', () => {
     safeGet('cast-btn')?.addEventListener('click', () => window.castLine());
 
@@ -536,7 +553,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ligar Botões das Coleções
     safeGet('open-collection-btn')?.addEventListener('click', () => { 
         safeGet('collection-modal')?.classList.remove('hidden'); 
         window.renderCollection(); 
@@ -554,7 +570,89 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Expondo a renderização da coleção para os botões do HTML chamarem
+// ==========================================================================
+// 6. SISTEMA DE APRECIAÇÃO DE PEIXES (MODAL GIGANTE)
+// ==========================================================================
+window.showFishDetail = function(fish, rarity, count, is67) {
+    const existing = document.getElementById('fish-detail-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'fish-detail-overlay';
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center;
+        z-index: 999999; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(5px);
+    `;
+
+    let seal = '';
+    if (is67) {
+        const s = (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
+        seal = `<img src="${s}" style="position:absolute; bottom:-10px; right:-10px; width:90px; height:90px; object-fit:contain; transform:rotate(15deg); filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.6));">`;
+    }
+
+    // Identifica a cor da borda de acordo com a raridade
+    const colors = {
+        'comum': '#bdc3c7', 'raro': '#2ecc71', 'epico': '#9b59b6',
+        'lendario': '#f39c12', 'mitico': '#e74c3c', 'secreto': '#2c3e50',
+        'divino': '#f1c40f', 'aurudo': '#ffd700'
+    };
+    const borderColor = colors[rarity.id] || '#ffffff';
+
+    const box = document.createElement('div');
+    box.style.cssText = `
+        position: relative; background: radial-gradient(circle at center, #2c3e50 0%, #1a252f 100%);
+        padding: 40px; border-radius: 20px; text-align: center; max-width: 600px; width: 90%;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px ${borderColor}66; 
+        transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 4px solid ${borderColor};
+    `;
+
+    box.innerHTML = `
+        <button id="close-detail-btn" style="position:absolute; top:15px; right:20px; background:none; border:none; color:white; font-size:2.5rem; cursor:pointer; opacity:0.7; transition:0.2s;">&times;</button>
+        <div style="position:relative; display:inline-block; margin-bottom:20px;">
+            <img src="${fish.image}" style="max-width:350px; max-height:350px; object-fit:contain; filter:drop-shadow(0 10px 15px rgba(0,0,0,0.6)); animation: floatBigFish 4s ease-in-out infinite;">
+            ${seal}
+        </div>
+        <h2 style="color:white; font-family:'Fredoka', sans-serif; font-size:2.5rem; margin:0; text-shadow:0 2px 4px rgba(0,0,0,0.8); line-height: 1.2;">${fish.name}</h2>
+        <div style="font-size:1.3rem; font-weight:bold; margin-bottom:20px; margin-top:5px; text-transform:uppercase; letter-spacing: 2px;" class="${rarity.style}">${rarity.name}</div>
+        <div style="display:flex; justify-content:center; gap:20px; color:#ccc; font-size:1rem; font-family:'Poppins', sans-serif;">
+            <div style="background:rgba(0,0,0,0.4); padding:10px 20px; border-radius:15px; border: 1px solid rgba(255,255,255,0.1);">📊 Pescados: <b style="color:white;">${count}</b></div>
+            <div style="background:rgba(0,0,0,0.4); padding:10px 20px; border-radius:15px; border: 1px solid rgba(255,255,255,0.1);">🕒 Hábito: <b style="color:white;">${fish.time === 'day' ? '☀️ Dia' : (fish.time === 'night' ? '🌙 Noite' : '🌗 Ambos')}</b></div>
+        </div>
+    `;
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    // Injeta a animação flutuante se não existir
+    if (!document.getElementById('float-big-fish-style')) {
+        const style = document.createElement('style');
+        style.id = 'float-big-fish-style';
+        style.innerHTML = `@keyframes floatBigFish { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }`;
+        document.head.appendChild(style);
+    }
+
+    requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        box.style.transform = 'scale(1)';
+    });
+
+    const closeDetail = () => {
+        overlay.style.opacity = '0';
+        box.style.transform = 'scale(0.8)';
+        setTimeout(() => overlay.remove(), 300);
+    };
+
+    document.getElementById('close-detail-btn').addEventListener('click', closeDetail);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeDetail();
+    });
+};
+
+// ==========================================================================
+// 7. RENDERIZAÇÃO DAS COLEÇÕES
+// ==========================================================================
 window.renderCollection = function() {
     const grid = safeGet('collection-grid'); 
     if(!grid) return; 
@@ -610,11 +708,21 @@ function createCard(container, fish, rarity, count, is67) {
         <div style="font-size: 0.75rem; font-weight: bold; color: ${isUnlocked ? '#333' : '#999'}">${fish.name}</div>
         <div style="font-size: 0.65rem; color: ${isUnlocked ? 'green' : '#ccc'}">${rarity.name}</div>
     `;
+
+    if (isUnlocked) {
+        div.style.cursor = 'pointer';
+        div.addEventListener('click', () => {
+            window.showFishDetail(fish, rarity, count, is67);
+        });
+        div.onmouseover = () => { div.style.transform = 'scale(1.05)'; };
+        div.onmouseout = () => { div.style.transform = 'scale(1)'; };
+    }
+
     container.appendChild(div);
 }
 
 // ==========================================================================
-// 6. BACKGROUND ANIMADO E CICLO DO TEMPO
+// 8. BACKGROUND ANIMADO E CÁLCULOS ROBUSTOS PARA O CANVAS
 // ==========================================================================
 const canvas = safeGet('bg-canvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
@@ -660,17 +768,24 @@ class SwimmingFish {
             this.reset(); 
         }
     }
+    
     draw() {
         if(!ctx) return; 
-        const img = window.GAME_STATE.loadedImages[this.specificImage];
-        if (!img || !img.complete || img.naturalWidth === 0) return;
+        const renderable = window.GAME_STATE.loadedImages[this.specificImage];
+        if (!renderable) return;
         
-        const h = this.width * (img.naturalHeight / img.naturalWidth);
+        const w = renderable.naturalWidth || renderable.width;
+        const h_orig = renderable.naturalHeight || renderable.height;
+        
+        if (!w || w === 0) return;
+        
+        const h = this.width * (h_orig / w);
         ctx.save(); 
         ctx.globalAlpha = this.opacity; 
         ctx.translate(this.x, this.y);
         if (this.direction === -1) ctx.scale(-1, 1);
-        ctx.drawImage(img, -this.width / 2, -h / 2, this.width, h); 
+        
+        ctx.drawImage(renderable, -this.width / 2, -h / 2, this.width, h); 
         ctx.restore();
     }
 }
