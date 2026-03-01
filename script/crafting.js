@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CRAFTING V2 - RECONSTRUÍDO DO ZERO (ARQUITETURA BLINDADA) + COMPRAS EM LOTE
+   CRAFTING V3 - LABORATÓRIO DE ISCAS COM BOOSTS, FORJA E MUSEU
    ========================================================================== */
 
 window.customAlert = function(message, isSuccess = false) {
@@ -58,95 +58,6 @@ window.customAlert = function(message, isSuccess = false) {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAlert(); });
 };
 
-window.CRAFTING_DB = {
-    materials: [
-        { id: 'madeira', name: 'Madeira / Graveto', price: 50, icon: '🪵' },
-        { id: 'fio', name: 'Fio de Nylon', price: 100, icon: '🧵' },
-        { id: 'plastico', name: 'Plástico', price: 500, icon: '🧪' },
-        { id: 'kevlar', name: 'Fio de Kevlar', price: 1200, icon: '🕸️' },
-        { id: 'fibra', name: 'Fibra de Vidro', price: 2000, icon: '🧶' },
-        { id: 'ouro', name: 'Ouro Pirata', price: 5000, icon: '🪙' },
-        { id: 'metal', name: 'Sucata de Metal', price: 8000, icon: '⚙️' },
-        { id: 'titânio', name: 'Liga de Titânio', price: 25000, icon: '🔩' },
-        { id: 'perola', name: 'Pérola Abissal', price: 45000, icon: '🦪' },
-        { id: 'carbono', name: 'Carbono', price: 80000, icon: '🔋' },
-        { id: 'meteorito', name: 'Fragmento de Meteoro', price: 200000, icon: '☄️' },
-        { id: 'cristal', name: 'Cristal Místico', price: 500000, icon: '🔮' },
-        { id: 'materia_escura', name: 'Matéria Escura', price: 1500000, icon: '🌌' },
-        { id: 'essencia', name: 'Essência Divina', price: 5000000, icon: '✨' },
-        { id: 'poeira_cosmica', name: 'Poeira Cósmica', price: 15000000, icon: '💫' }
-    ],
-    recipes: {
-        rods: {
-            1: { name: "Vara de Bambu", req: { madeira: 2, fio: 1 } },
-            2: { name: "Bambu Reforçado", req: { madeira: 5, fio: 3 } },
-            3: { name: "Caniço de Salgueiro", req: { madeira: 10, fio: 5 } },
-            4: { name: "Vara de Plástico", req: { plastico: 3, fio: 2 } },
-            5: { name: "Fibra de Vidro", req: { fibra: 2, plastico: 2, fio: 3 } },
-            6: { name: "Fibra Premium", req: { fibra: 5, plastico: 4, kevlar: 1 } },
-            7: { name: "Polímero Flexível", req: { fibra: 10, plastico: 10, kevlar: 3 } },
-            8: { name: "Alumínio Leve", req: { metal: 3, fio: 5, ouro: 1 } },
-            9: { name: "Aço Inoxidável", req: { metal: 8, plastico: 2, ouro: 2 } },
-            10: { name: "Liga de Titânio", req: { titânio: 4, metal: 5, ouro: 5 } },
-            11: { name: "Vara de Grafeno", req: { titânio: 8, metal: 10, perola: 1 } },
-            12: { name: "Carbono Básico", req: { carbono: 2, plastico: 5, perola: 3 } },
-            13: { name: "Vara Eletrônica", req: { carbono: 4, metal: 10, perola: 5 } },
-            14: { name: "Fibra de Nanotubos", req: { carbono: 8, fibra: 15, meteorito: 1 } },
-            15: { name: "Protótipo Militar", req: { carbono: 15, titânio: 15, meteorito: 3 } },
-            16: { name: "Vara Oceânica", req: { cristal: 3, titânio: 5, perola: 10 } },
-            17: { name: "Arpão Antigo", req: { cristal: 8, madeira: 50, ouro: 20 } },
-            18: { name: "Tridente de Netuno", req: { cristal: 15, titânio: 20, materia_escura: 1 } },
-            19: { name: "Vara Galáctica", req: { essencia: 1, cristal: 20, materia_escura: 3 } },
-            20: { name: "Vara Quântica", req: { essencia: 3, carbono: 50, materia_escura: 10 } },
-            21: { name: "A Vara do Criador", req: { essencia: 10, cristal: 50, poeira_cosmica: 3 } }
-        },
-        sinkers: {
-            'pedra_rio': { name: "Pedra de Rio", req: { fio: 1 } },
-            'casca_noz': { name: "Casca Leve", req: { madeira: 2, fio: 1 } },
-            'disco_plastico': { name: "Disco Plano", req: { plastico: 2 } },
-            'bobina_fibra': { name: "Bobina Estabilizada", req: { fibra: 2, plastico: 1, kevlar: 1 } },
-            'ferro_velho': { name: "Peso de Sucata", req: { metal: 2 } },
-            'anilha_aco': { name: "Anilha de Academia", req: { metal: 5, ouro: 1 } },
-            'magneto': { name: "Imã Industrial", req: { metal: 8, kevlar: 2 } },
-            'peso_tungstenio': { name: "Esfera Pesada", req: { titânio: 2, metal: 5 } },
-            'pepita_luxo': { name: "Pepita Polida", req: { titânio: 5, ouro: 10 } },
-            'nucleo_carbono': { name: "Peso de Fibra", req: { carbono: 2, fibra: 3, kevlar: 5 } },
-            'bateria_ion': { name: "Célula de Energia", req: { carbono: 5, metal: 10, perola: 2 } },
-            'prisma_oceano': { name: "Prisma de Coral", req: { cristal: 2, plastico: 5, perola: 5 } },
-            'reliquia_abismo': { name: "Artefato Antigo", req: { cristal: 5, titânio: 5, meteorito: 2 } },
-            'fragmento_estelar': { name: "Fragmento de Cometa", req: { cristal: 10, meteorito: 5 } },
-            'antimateria_v2': { name: "Peso de Antimatéria", req: { essencia: 1, carbono: 20, materia_escura: 2 } },
-            'divindade_ouro': { name: "Ídolo Dourado", req: { essencia: 3, ouro: 50, cristal: 5 } },
-            'buraco_negro': { name: "Mini Buraco Negro", req: { essencia: 5, titânio: 30, materia_escura: 5 } },
-            'paradoxo': { name: "Peso Atemporal", req: { essencia: 8, cristal: 30, poeira_cosmica: 1 } },
-            'vazio_absoluto': { name: "Esfera do Nada", req: { essencia: 15, carbono: 100, poeira_cosmica: 5 } }
-        },
-        knives: {
-            'faca_cozinha': { name: "Faca de Cozinha", req: { madeira: 2, metal: 2 } },
-            'faca_acougueiro': { name: "Faca de Açougueiro", req: { madeira: 3, metal: 5 } },
-            'faca_chef': { name: "Faca de Chef Aprendiz", req: { madeira: 5, metal: 12 } },
-            'cutelo_ferro': { name: "Cutelo de Ferro", req: { madeira: 10, metal: 25 } },
-            'faca_ouro': { name: "Faca Banhada a Ouro", req: { madeira: 15, ouro: 5 } },
-            'faca_pirata': { name: "Faca do Pirata", req: { madeira: 20, ouro: 15 } },
-            'faca_titanio': { name: "Faca de Titânio", req: { madeira: 30, titânio: 5 } },
-            'cutelo_titanio': { name: "Cutelo Maciço", req: { madeira: 40, titânio: 15, metal: 50 } },
-            'faca_meteorito': { name: "Faca Meteorítica", req: { madeira: 60, meteorito: 3 } },
-            'lamina_cometa': { name: "Lâmina do Cometa", req: { madeira: 80, meteorito: 10, titânio: 20 } },
-            'faca_cristal': { name: "Faca de Cristal Bruto", req: { madeira: 120, cristal: 3 } },
-            'lamina_mistica': { name: "Lâmina Mística", req: { madeira: 150, cristal: 10 } },
-            'faca_sombria': { name: "Faca Sombria", req: { madeira: 200, materia_escura: 3 } },
-            'cutelo_vazio': { name: "Cutelo do Vazio", req: { madeira: 250, materia_escura: 8, meteorito: 25 } },
-            'faca_essencia': { name: "Faca de Essência Pura", req: { madeira: 350, essencia: 2 } },
-            'lamina_divina': { name: "Lâmina Divina", req: { madeira: 500, essencia: 5 } },
-            'faca_estelar': { name: "Faca Estelar", req: { madeira: 800, poeira_cosmica: 2 } },
-            'faca_neutrons': { name: "Faca de Nêutrons", req: { madeira: 1200, poeira_cosmica: 5 } },
-            'lamina_infinito': { name: "Lâmina do Infinito", req: { madeira: 2500, poeira_cosmica: 15 } },
-            'faca_criador': { name: "A Faca do Criador", req: { madeira: 5000, poeira_cosmica: 30, essencia: 20 } }
-        }
-    }
-};
-
-window.MATERIALS = window.CRAFTING_DB.materials;
 let ACTIVE_BLUEPRINT = { type: null, id: null };
 
 function fixGameState() {
@@ -156,24 +67,34 @@ function fixGameState() {
     if (!window.GAME_STATE.ownedSinkers) window.GAME_STATE.ownedSinkers = ['chumbo'];
     if (!window.GAME_STATE.ownedKnives) window.GAME_STATE.ownedKnives = ['faca_cozinha'];
     if (!window.GAME_STATE.baitInventory) window.GAME_STATE.baitInventory = {};
+    if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
+    if (!window.GAME_STATE.baitBoosts) window.GAME_STATE.baitBoosts = {}; // Registro de melhorias de isca
     window.GAME_STATE.ownedRods = window.GAME_STATE.ownedRods.map(Number);
 }
 
+// ==========================================================================
+// 1. A LOJA (Apenas Materiais Base e Boosts)
+// ==========================================================================
 window.ShopV2 = {
     render: function() {
         fixGameState();
         const container = document.getElementById('shop-container');
-        if (!container) return;
+        if (!container || !window.MATERIALS) return;
 
-        let html = '<div class="shop-section-title">🧱 Materiais Brutos</div>';
-        window.CRAFTING_DB.materials.forEach(mat => {
+        let html = '<div class="shop-section-title">🧱 Materiais e Boosts</div>';
+        window.MATERIALS.forEach(mat => {
+            if (mat.price === 0) return; // Não vende itens de sucata
+
             const count = window.GAME_STATE.materials[mat.id] || 0;
             const badge = count > 0 ? `<div class="stack-count">x${count}</div>` : '';
             const ownedClass = count > 0 ? 'owned' : '';
             
-            // Botões de Compra Múltipla Adicionados
+            // Destaque visual se for Boost
+            const isBoost = mat.id.startsWith('boost_');
+            const bgStyle = isBoost ? 'background: #fff3e0; border-color: #f39c12;' : '';
+
             html += `
-                <div class="gear-card ${ownedClass}" style="transition:transform 0.2s;">
+                <div class="gear-card ${ownedClass}" style="transition:transform 0.2s; ${bgStyle}">
                     ${badge}
                     <div style="font-size:2rem">${mat.icon}</div>
                     <div style="font-weight:bold; font-size:0.9rem;">${mat.name}</div>
@@ -188,29 +109,6 @@ window.ShopV2 = {
             `;
         });
 
-        html += '<div class="shop-section-title">🪝 Iscas Prontas</div>';
-        if (window.BAITS) {
-            window.BAITS.forEach(b => {
-                const count = window.GAME_STATE.baitInventory[b.id] || 0;
-                const badge = count > 0 ? `<div class="stack-count">x${count}</div>` : '';
-                const ownedClass = count > 0 ? 'owned' : '';
-                
-                html += `
-                    <div class="gear-card ${ownedClass}" style="transition:transform 0.2s;">
-                        ${badge}
-                        <div style="font-size:1.5rem">${b.icon}</div>
-                        <div>${b.name}</div>
-                        <div style="font-size:0.7rem;color:#555">${b.desc}</div>
-                        <div style="font-weight:bold;font-size:0.8rem;color:#e67e22; margin-top:5px;">💰 ${b.price.toLocaleString()} (x${b.qty})</div>
-                        
-                        <div style="display:flex; gap:5px; margin-top:10px; justify-content:center;">
-                            <button onclick="window.ShopV2.buyBait('${b.id}', ${b.price}, ${b.qty}, 1)" style="flex:1; padding:5px 0; background:#9b59b6; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:0.75rem; transition:0.2s;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='#9b59b6'">x1</button>
-                            <button onclick="window.ShopV2.buyBait('${b.id}', ${b.price}, ${b.qty}, 10)" style="flex:1; padding:5px 0; background:#9b59b6; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:0.75rem; transition:0.2s;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='#9b59b6'">x10</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
         container.innerHTML = html;
     },
 
@@ -226,19 +124,6 @@ window.ShopV2 = {
         }
     },
 
-    buyBait: function(baitId, basePrice, qtyPerPack, quantityMultiplier = 1) {
-        fixGameState();
-        const totalCost = basePrice * quantityMultiplier;
-        const totalQty = qtyPerPack * quantityMultiplier;
-        if (window.GAME_STATE.coins >= totalCost) { 
-            window.GAME_STATE.coins -= totalCost; 
-            window.GAME_STATE.baitInventory[baitId] = (window.GAME_STATE.baitInventory[baitId] || 0) + totalQty; 
-            this.finishPurchase(); 
-        } else { 
-            window.customAlert(`Você precisa de ${totalCost.toLocaleString()} Cat Coins para comprar ${quantityMultiplier} pacotes desta isca.`, false); 
-        }
-    },
-
     finishPurchase: function() {
         if (document.getElementById('cat-coins')) document.getElementById('cat-coins').innerText = window.GAME_STATE.coins.toLocaleString();
         if (typeof window.saveGame === "function") window.saveGame();
@@ -246,44 +131,47 @@ window.ShopV2 = {
     }
 };
 
+// ==========================================================================
+// 2. FORJA DE EQUIPAMENTOS (Sem iscas)
+// ==========================================================================
 window.ForgeV2 = {
     renderLists: function() {
         fixGameState();
         const listContainer = document.getElementById('recipe-list');
-        if (!listContainer) return;
+        if (!listContainer || !window.CRAFTING_DB) return;
 
-        let html = '<div style="display: flex; gap: 8px;">';
+        let html = '<div style="display: flex; gap: 4px;">';
         
-        // COLUNA 1: VARAS
-        html += '<div style="flex: 1; padding-right: 4px;">';
-        html += '<h3 style="font-size: 0.9rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 10px;">🎣 Varas</h3>';
+        // Varas
+        html += '<div style="flex: 1;">';
+        html += '<h3 style="font-size: 0.85rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 8px;">🎣 Varas</h3>';
         Object.keys(window.CRAFTING_DB.recipes.rods).forEach(id => {
             const recipe = window.CRAFTING_DB.recipes.rods[id];
             const isOwned = window.GAME_STATE.ownedRods.includes(Number(id));
             const bg = isOwned ? '#d4efdf' : '#fff';
-            html += `<div style="padding: 6px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.75rem; transition: background 0.2s;" onclick="window.ForgeV2.selectBlueprint('rod', '${id}')"><strong>${recipe.name}</strong> ${isOwned ? '✅' : ''}</div>`;
+            html += `<div style="padding: 6px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.7rem; transition: background 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="window.ForgeV2.selectBlueprint('rod', '${id}')"><strong>${recipe.name}</strong> ${isOwned ? '✅' : ''}</div>`;
         });
         html += '</div>';
 
-        // COLUNA 2: CHUMBADAS
-        html += '<div style="flex: 1; padding: 0 4px; border-left: 1px solid #eee; border-right: 1px solid #eee;">';
-        html += '<h3 style="font-size: 0.9rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 10px;">🪨 Pesos</h3>';
+        // Pesos
+        html += '<div style="flex: 1; border-left: 1px solid #eee; padding-left: 4px;">';
+        html += '<h3 style="font-size: 0.85rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 8px;">🪨 Pesos</h3>';
         Object.keys(window.CRAFTING_DB.recipes.sinkers).forEach(id => {
             const recipe = window.CRAFTING_DB.recipes.sinkers[id];
             const isOwned = window.GAME_STATE.ownedSinkers.includes(id);
             const bg = isOwned ? '#d4efdf' : '#fff';
-            html += `<div style="padding: 6px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.75rem; transition: background 0.2s;" onclick="window.ForgeV2.selectBlueprint('sinker', '${id}')"><strong>${recipe.name}</strong> ${isOwned ? '✅' : ''}</div>`;
+            html += `<div style="padding: 6px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.7rem; transition: background 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="window.ForgeV2.selectBlueprint('sinker', '${id}')"><strong>${recipe.name}</strong> ${isOwned ? '✅' : ''}</div>`;
         });
         html += '</div>';
 
-        // COLUNA 3: FACAS
-        html += '<div style="flex: 1; padding-left: 4px;">';
-        html += '<h3 style="font-size: 0.9rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 10px;">🔪 Facas</h3>';
+        // Facas
+        html += '<div style="flex: 1; border-left: 1px solid #eee; padding-left: 4px;">';
+        html += '<h3 style="font-size: 0.85rem; color: #555; text-align: center; margin-top: 0; margin-bottom: 8px;">🔪 Facas</h3>';
         Object.keys(window.CRAFTING_DB.recipes.knives).forEach(id => {
             const recipe = window.CRAFTING_DB.recipes.knives[id];
             const isOwned = window.GAME_STATE.ownedKnives.includes(id);
             const bg = isOwned ? '#d4efdf' : '#fff';
-            html += `<div style="padding: 6px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.75rem; transition: background 0.2s;" onclick="window.ForgeV2.selectBlueprint('knife', '${id}')"><strong>${recipe.name}</strong> ${isOwned ? '✅' : ''}</div>`;
+            html += `<div style="padding: 6px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; cursor: pointer; background: ${bg}; font-family: 'Poppins', sans-serif; font-size: 0.7rem; transition: background 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="window.ForgeV2.selectBlueprint('knife', '${id}')"><strong>${recipe.name}</strong> ${isOwned ? '✅' : ''}</div>`;
         });
         html += '</div>';
 
@@ -309,7 +197,7 @@ window.ForgeV2 = {
         Object.keys(recipe.req).forEach(matId => {
             const needed = recipe.req[matId];
             const have = window.GAME_STATE.materials[matId] || 0;
-            const matData = window.CRAFTING_DB.materials.find(m => m.id === matId);
+            const matData = window.MATERIALS.find(m => m.id === matId);
             const hasEnough = have >= needed;
             
             if (!hasEnough) canCraft = false;
@@ -332,7 +220,7 @@ window.ForgeV2 = {
             buttonHtml = `<button onclick="window.ForgeV2.craftItem()" style="margin-top: 20px; padding: 12px 30px; font-size: 1.2rem; font-family: 'Fredoka', sans-serif; font-weight: bold; background: ${btnColor}; color: white; border: none; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">${btnText}</button>`;
         }
 
-        area.innerHTML = `<h2 style="color: #8e44ad; margin-bottom: 20px; font-family: 'Fredoka', sans-serif; text-align:center;">Planta: ${recipe.name}</h2><div style="width: 100%; max-width: 300px;">${reqHtml}</div>${buttonHtml}`;
+        area.innerHTML = `<h2 style="color: #8e44ad; margin-bottom: 5px; font-family: 'Fredoka', sans-serif; text-align:center;">Planta: ${recipe.name}</h2><div style="width: 100%; max-width: 300px; margin-top:20px;">${reqHtml}</div>${buttonHtml}`;
     },
 
     craftItem: function() {
@@ -349,7 +237,7 @@ window.ForgeV2 = {
         let canCraft = true;
         Object.keys(recipe.req).forEach(matId => { if ((window.GAME_STATE.materials[matId] || 0) < recipe.req[matId]) canCraft = false; });
 
-        if (!canCraft) { window.customAlert("Faltam materiais!\nVerifique na Loja e compre os itens que estão em vermelho na planta.", false); return; }
+        if (!canCraft) { window.customAlert("Faltam materiais!\nVá comprar os itens em falta.", false); return; }
 
         Object.keys(recipe.req).forEach(matId => { window.GAME_STATE.materials[matId] -= recipe.req[matId]; });
 
@@ -366,6 +254,266 @@ window.ForgeV2 = {
     }
 };
 
+// ==========================================================================
+// 3. LABORATÓRIO DE ISCAS (MISTURADOR QUÍMICO COM BOOSTS)
+// ==========================================================================
+window.BaitLab = {
+    slot1: null,
+    slot2: null,
+    slot3: null, // SLOT DO BOOST EXCLUSIVO
+    
+    renderLists: function() {
+        fixGameState();
+        const listContainer = document.getElementById('bait-recipe-list');
+        if (!listContainer || !window.BAITS) return;
+
+        let html = '<h3 style="font-size: 0.9rem; color: #27ae60; text-align: center; margin-top: 0; margin-bottom: 15px;">Guia de Receitas</h3>';
+        window.BAITS.forEach(bait => {
+            // Conta quantas iscas o player já fez e os níveis de boost
+            const invCount = window.GAME_STATE.baitInventory[bait.id] || 0;
+            const boostData = window.GAME_STATE.baitBoosts[bait.id] || {luck:0, value:0};
+            let boostText = '';
+            if (boostData.luck > 0) boostText += `🍀 Lvl ${boostData.luck} `;
+            if (boostData.value > 0) boostText += `🌟 Lvl ${boostData.value}`;
+
+            html += `
+                <div style="padding: 8px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 8px; cursor: pointer; background: #fff; font-family: 'Poppins', sans-serif; transition: background 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onclick="window.BaitLab.showRecipe('${bait.id}')">
+                    <div style="font-weight:bold; font-size: 0.8rem; color: #2c3e50;">${bait.icon} ${bait.name}</div>
+                    <div style="font-size:0.65rem; color:#7f8c8d; margin-top:2px;">Estoque: ${invCount}x | ${boostText}</div>
+                </div>
+            `;
+        });
+        listContainer.innerHTML = html;
+    },
+
+    showRecipe: function(baitId) {
+        const bait = window.BAITS.find(b => b.id === baitId);
+        const reqKeys = Object.keys(bait.req);
+        const resultArea = document.getElementById('bait-craft-result');
+        
+        const mat1 = window.MATERIALS.find(m => m.id === reqKeys[0]);
+        const mat2 = window.MATERIALS.find(m => m.id === reqKeys[1]);
+
+        resultArea.innerHTML = `
+            <div style="color:#27ae60; font-weight:bold; font-size:1.1rem; font-family:'Fredoka', sans-serif; margin-bottom:5px;">📖 ${bait.icon} ${bait.name}</div>
+            <div style="font-size:0.8rem; color:#555;">Arraste os extratos para os tubos:</div>
+            <div style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
+                <div style="background:#f0fdf4; padding:5px 10px; border-radius:8px; font-size:0.8rem; border:1px solid #2ecc71;">${mat1.icon} ${bait.req[reqKeys[0]]}x ${mat1.name}</div>
+                <div style="background:#f0fdf4; padding:5px 10px; border-radius:8px; font-size:0.8rem; border:1px solid #2ecc71;">${mat2.icon} ${bait.req[reqKeys[1]]}x ${mat2.name}</div>
+            </div>
+            <div style="font-size:0.7rem; color:#e67e22; margin-top:10px;">(Dica: Arraste um Soro na 3ª esfera para um Upgrade Permanente!)</div>
+        `;
+    },
+
+    renderInventory: function() {
+        fixGameState();
+        const inv = document.getElementById('bait-mat-inventory');
+        if (!inv || !window.MATERIALS) return;
+        
+        let html = '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:flex-start;">';
+        window.MATERIALS.forEach(mat => {
+            const count = window.GAME_STATE.materials[mat.id] || 0;
+            // Exibe extratos de isca E os novos Boosts no mesmo inventário
+            if (count > 0 && (mat.price === 0 || mat.id.startsWith('boost_'))) {
+                const droptype = mat.id.startsWith('boost_') ? 'boost-mat' : 'bait-mat';
+                const bgStyle = mat.id.startsWith('boost_') ? 'background: #fff3e0; border-color: #f39c12;' : '';
+                
+                html += `
+                <div class="gear-card draggable-item" draggable="true" ondragstart="window.BaitLab.startDrag(event, '${mat.id}', '${droptype}')" style="width: 75px; padding:6px 2px; ${bgStyle}">
+                    <div class="stack-count">x${count}</div>
+                    <div style="font-size:1.6rem">${mat.icon}</div>
+                    <div style="font-size:0.55rem; font-weight:bold; color:#333; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${mat.name}">${mat.name}</div>
+                </div>`;
+            }
+        });
+        html += '</div>';
+        
+        inv.innerHTML = html === '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:flex-start;"></div>' 
+            ? '<div style="text-align:center; color:#999; margin-top:20px; font-family:Poppins; font-size:0.85rem;">Seu estoque está vazio.<br>Vá pescar Lixos para obter extratos ou compre Boosts na Loja!</div>' 
+            : html;
+    },
+    
+    startDrag: function(e, matId, type) {
+        window.DRAGGED_BAIT_MAT = { id: matId, type: type };
+        e.dataTransfer.setData('text/plain', matId);
+    },
+    
+    handleDrop: function(e, slotNum) {
+        e.preventDefault();
+        const zone = document.getElementById(`bait-slot-${slotNum}`);
+        if(zone) zone.classList.remove('drag-over');
+
+        if (window.DRAGGED_BAIT_MAT) {
+            // Regra: Tubo 1 e 2 só aceitam extratos (bait-mat)
+            if ((slotNum === 1 || slotNum === 2) && window.DRAGGED_BAIT_MAT.type === 'bait-mat') {
+                if (slotNum === 1) this.slot1 = window.DRAGGED_BAIT_MAT.id;
+                if (slotNum === 2) this.slot2 = window.DRAGGED_BAIT_MAT.id;
+            }
+            // Regra: Esfera 3 só aceita Boosts (boost-mat)
+            else if (slotNum === 3 && window.DRAGGED_BAIT_MAT.type === 'boost-mat') {
+                this.slot3 = window.DRAGGED_BAIT_MAT.id;
+            }
+            this.updateUI();
+        }
+        window.DRAGGED_BAIT_MAT = null;
+    },
+    
+    removeSlot: function(slotNum) {
+        if (slotNum === 1) this.slot1 = null;
+        if (slotNum === 2) this.slot2 = null;
+        if (slotNum === 3) this.slot3 = null;
+        this.updateUI();
+    },
+    
+    updateUI: function() {
+        this.renderInventory();
+        this.renderLists();
+        
+        const updateSlot = (num, matId) => {
+            const content = document.getElementById(`bait-content-${num}`);
+            if (!content) return;
+            if (matId) {
+                const mat = window.MATERIALS.find(m => m.id === matId);
+                content.innerHTML = `<div style="font-size:2.5rem; cursor:pointer; filter:drop-shadow(0 4px 4px rgba(0,0,0,0.2));" onclick="window.BaitLab.removeSlot(${num})" title="Clique para remover">${mat.icon}</div><div style="font-size:0.6rem; font-weight:bold; color:#2c3e50; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${mat.name}</div>`;
+            } else {
+                content.innerHTML = `<div style="font-size:1.2rem; color:#ccc;">Vazio</div>`;
+            }
+        };
+
+        updateSlot(1, this.slot1);
+        updateSlot(2, this.slot2);
+        updateSlot(3, this.slot3);
+
+        this.checkRecipe();
+    },
+    
+    checkRecipe: function() {
+        const resultArea = document.getElementById('bait-craft-result');
+        if (!resultArea) return;
+
+        if (!this.slot1 || !this.slot2) {
+            return; // Se falta material, deixa o texto padrão da receita que o jogador clicou (ou vazio)
+        }
+
+        if (this.slot1 === this.slot2) {
+            resultArea.innerHTML = `<div style="color:#e74c3c; margin-top: 20px; font-weight:bold; font-family:'Poppins', sans-serif;">❌ Reação nula. Os compostos devem ser diferentes!</div>`;
+            return;
+        }
+
+        const validBait = window.BAITS.find(b => {
+            const reqKeys = Object.keys(b.req);
+            return reqKeys.length === 2 && reqKeys.includes(this.slot1) && reqKeys.includes(this.slot2);
+        });
+
+        if (validBait) {
+            const req1 = validBait.req[this.slot1];
+            const req2 = validBait.req[this.slot2];
+            const have1 = window.GAME_STATE.materials[this.slot1] || 0;
+            const have2 = window.GAME_STATE.materials[this.slot2] || 0;
+            const haveBoost = this.slot3 ? (window.GAME_STATE.materials[this.slot3] || 0) : 0;
+            
+            const canCraft = (have1 >= req1) && (have2 >= req2) && (!this.slot3 || haveBoost >= 1);
+            const btnColor = canCraft ? '#27ae60' : '#7f8c8d';
+
+            let boostMsg = "";
+            if (this.slot3 === 'boost_sorte') boostMsg = "<div style='color:#e67e22; font-weight:bold; font-size:0.8rem; margin-bottom:10px;'>🍀 Boost Conectado: +50 Sorte Base Permanente!</div>";
+            if (this.slot3 === 'boost_lucro') boostMsg = "<div style='color:#f1c40f; font-weight:bold; font-size:0.8rem; margin-bottom:10px;'>🌟 Boost Conectado: +0.2x Lucro Permanente!</div>";
+
+            resultArea.innerHTML = `
+                <h3 style="margin:0; color:#27ae60; font-family:'Fredoka', sans-serif; font-size:1.5rem;">${validBait.icon} ${validBait.name}</h3>
+                <div style="font-size:0.8rem; color:#555; margin-bottom:5px; font-weight:bold;">${validBait.desc} <span style="color:#e67e22;">(Rende: ${validBait.qty}x)</span></div>
+                ${boostMsg}
+                <div style="display:flex; justify-content:center; gap:20px; font-size:0.75rem; margin-bottom:15px; font-weight:bold;">
+                    <div style="color:${have1 >= req1 ? '#27ae60' : '#e74c3c'}">Req: ${req1} (Tem: ${have1})</div>
+                    <div style="color:${have2 >= req2 ? '#27ae60' : '#e74c3c'}">Req: ${req2} (Tem: ${have2})</div>
+                </div>
+                
+                <button ${!canCraft ? 'disabled' : ''} onclick="window.BaitLab.craft('${validBait.id}')" style="background:${btnColor}; color:white; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:1rem; font-family:'Fredoka', sans-serif; cursor:${canCraft?'pointer':'not-allowed'}; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                    ${canCraft ? '🧪 SINTETIZAR ISCA' : '❌ MATERIAIS INSUFICIENTES'}
+                </button>
+            `;
+        } else {
+            resultArea.innerHTML = `<div style="color:#e74c3c; margin-top: 30px; font-weight:bold; font-size:1.1rem; font-family:'Fredoka', sans-serif;">💥 Falha Química!<br><span style="font-size:0.8rem; color:#777;">Combinação desconhecida. Tente misturar outros extratos.</span></div>`;
+        }
+    },
+    
+    craft: function(baitId) {
+        const bait = window.BAITS.find(b => b.id === baitId);
+        if (!bait) return;
+
+        // Deduz materiais normais
+        Object.keys(bait.req).forEach(matId => {
+            window.GAME_STATE.materials[matId] -= bait.req[matId];
+        });
+
+        // Deduz e aplica o Boost na árvore de Upgrades Permanentes
+        let extraMsg = "";
+        if (this.slot3) {
+            window.GAME_STATE.materials[this.slot3] -= 1;
+            
+            if (!window.GAME_STATE.baitBoosts) window.GAME_STATE.baitBoosts = {};
+            if (!window.GAME_STATE.baitBoosts[baitId]) window.GAME_STATE.baitBoosts[baitId] = { luck: 0, value: 0 };
+            
+            if (this.slot3 === 'boost_sorte') {
+                window.GAME_STATE.baitBoosts[baitId].luck += 1;
+                extraMsg = `\n🌟 Isca Aprimorada Permanentemente: +50 Sorte Base!`;
+            } else if (this.slot3 === 'boost_lucro') {
+                window.GAME_STATE.baitBoosts[baitId].value += 1;
+                extraMsg = `\n🌟 Isca Aprimorada Permanentemente: +0.2x Lucro Base!`;
+            }
+            this.slot3 = null; // Limpa a esfera após usar o boost
+        }
+
+        window.GAME_STATE.baitInventory[baitId] = (window.GAME_STATE.baitInventory[baitId] || 0) + bait.qty;
+
+        if(window.saveGame) window.saveGame();
+        
+        window.customAlert(`🧪 Sucesso Químico!\n\nA reação gerou ${bait.qty}x [${bait.name}]!${extraMsg}\n\nAbra a Mesa de Trabalho para usar.`, true);
+        
+        this.updateUI();
+    }
+};
+
+// ==========================================================================
+// 4. MUSEU DO LIXO (CATÁLOGO DE SUCATAS)
+// ==========================================================================
+window.ScrapCatalog = {
+    render: function() {
+        fixGameState();
+        const grid = document.getElementById('scrap-grid');
+        if (!grid || !window.SUCATAS) return;
+        grid.innerHTML = '';
+        
+        let unlocked = 0;
+        
+        window.SUCATAS.forEach(scrap => {
+            const count = window.GAME_STATE.scrapCollection[scrap.id] || 0;
+            const isUnlocked = count > 0;
+            if (isUnlocked) unlocked++;
+
+            const matInfo = window.MATERIALS.find(m => m.id === scrap.matReward);
+            const matDisplay = matInfo ? `${matInfo.icon} ${matInfo.name}` : scrap.matReward;
+
+            const div = document.createElement('div');
+            div.className = `collection-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+            
+            div.innerHTML = `
+                ${isUnlocked ? `<div class="count-badge" style="background:#7f8c8d;">x${count}</div>` : ''}
+                <img src="${scrap.image}" class="collection-img" style="${isUnlocked ? 'filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));' : ''}" onerror="this.src='https://placehold.co/80x80?text=🗑️'">
+                <div style="font-size: 0.8rem; font-weight: bold; color: ${isUnlocked ? '#333' : '#999'}">${scrap.name}</div>
+                <div style="font-size: 0.65rem; color: #27ae60; font-weight:bold; margin-top:5px; line-height:1.2;">♻️ Gera:<br>${matDisplay}</div>
+            `;
+            grid.appendChild(div);
+        });
+        
+        const progress = document.getElementById('scrap-progress');
+        if (progress) progress.innerText = `(${unlocked}/${window.SUCATAS.length})`;
+    }
+};
+
+// ==========================================================================
+// 5. MOCHILA E MESA DE TRABALHO
+// ==========================================================================
 window.BackpackV2 = {
     render: function(tab) {
         fixGameState();
@@ -375,7 +523,7 @@ window.BackpackV2 = {
         let html = '';
         
         if (tab === 'mat') {
-            window.CRAFTING_DB.materials.forEach(mat => { 
+            window.MATERIALS.forEach(mat => { 
                 const count = window.GAME_STATE.materials[mat.id] || 0; 
                 if (count > 0) html += `<div class="gear-card"><div class="stack-count">x${count}</div><div style="font-size:2rem">${mat.icon}</div><div style="font-size:0.8rem; font-weight:bold; margin-top:5px;">${mat.name}</div></div>`;
             });
@@ -452,7 +600,7 @@ window.WorkbenchV2 = {
             });
         }
 
-        grid.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #999;">Vá forjar ou comprar itens.</div>';
+        grid.innerHTML = html || '<div style="grid-column: 1/-1; text-align: center; color: #999;">Vá forjar ou pescar mais itens.</div>';
     },
 
     updateSlotsUI: function() {
@@ -501,6 +649,9 @@ window.WorkbenchV2 = {
     }
 };
 
+// ==========================================================================
+// 6. EVENT LISTENERS E MODAIS
+// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
     
     const bindModal = (openBtnId, closeBtnId, modalId, onOpenFunc) => {
@@ -513,8 +664,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bindModal('open-shop-btn', 'close-shop-btn', 'shop-modal', () => window.ShopV2.render());
     bindModal('open-craft-btn', 'close-craft-btn', 'craft-modal', () => window.ForgeV2.renderLists());
-    bindModal('open-backpack-btn', 'close-backpack-btn', 'backpack-modal', () => window.BackpackV2.render('mat'));
+    bindModal('open-scrap-btn', 'close-scrap-btn', 'scrap-modal', () => window.ScrapCatalog.render());
     
+    // Laboratório de Iscas
+    bindModal('open-bait-forge-btn', 'close-bait-forge-btn', 'bait-forge-modal', () => {
+        window.BaitLab.slot1 = null;
+        window.BaitLab.slot2 = null;
+        window.BaitLab.slot3 = null;
+        window.BaitLab.updateUI();
+    });
+
     const wbOpenBtn = document.getElementById('open-workbench-btn');
     if(wbOpenBtn) {
         wbOpenBtn.addEventListener('click', () => {
@@ -536,20 +695,30 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.classList.add('active');
             window.WorkbenchV2.render(e.target.dataset.tab);
         }
-        if (e.target.classList.contains('bp-tab-btn')) {
-            document.querySelectorAll('.bp-tab-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            window.BackpackV2.render(e.target.dataset.tab);
-        }
     });
 
-    document.querySelectorAll('.equip-slot.dropzone').forEach(zone => {
+    // Drag & Drop
+    document.querySelectorAll('.dropzone').forEach(zone => {
         zone.addEventListener('dragover', (e) => { 
             e.preventDefault(); 
-            if (window.DRAGGED_ITEM && window.DRAGGED_ITEM.type === zone.dataset.droptype) zone.classList.add('drag-over'); 
+            // Permite drag da mesa de trabalho normal
+            if (window.DRAGGED_ITEM && window.DRAGGED_ITEM.type === zone.dataset.droptype) {
+                zone.classList.add('drag-over'); 
+            }
+            // Permite drag do laboratório de iscas (Ingredientes ou Boost)
+            if (window.DRAGGED_BAIT_MAT && window.DRAGGED_BAIT_MAT.type === zone.dataset.droptype) {
+                zone.classList.add('drag-over');
+            }
         });
         zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-        zone.addEventListener('drop', (e) => window.WorkbenchV2.handleDrop(e, zone));
+        zone.addEventListener('drop', (e) => {
+            if (zone.dataset.droptype === 'bait-mat' || zone.dataset.droptype === 'boost-mat') {
+                const slotNum = zone.id === 'bait-slot-1' ? 1 : (zone.id === 'bait-slot-2' ? 2 : 3);
+                window.BaitLab.handleDrop(e, slotNum);
+            } else {
+                window.WorkbenchV2.handleDrop(e, zone);
+            }
+        });
     });
 
 });

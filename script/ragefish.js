@@ -1,12 +1,13 @@
 /* ==========================================================================
-   RAGEBAIT FISH V4 - Tutor Inteligente + Persistência do Sushi Mode
+   RAGEBAIT FISH V5 - Correções de Catálogo e Mensagens Customizadas
    ========================================================================== */
 
 const RAGE_FISH_STATE = {
     tipsGiven: 0,
     maxTipsBeforeSushi: 5,
     isCustomMode: false,
-    customMessages: [],
+    // Agora ele SALVA as mensagens no seu navegador para não esquecer!
+    customMessages: JSON.parse(localStorage.getItem('gatoPescador_customMsg')) || [],
     currentIndex: 0,
     currentScreen: 'main',
     
@@ -101,13 +102,29 @@ fishModal.innerHTML = `
 document.body.appendChild(fishModal);
 
 document.getElementById('close-fish-modal').onclick = () => fishModal.classList.add('hidden');
-document.getElementById('fish-add-msg').onclick = () => {
-    const txt = document.getElementById('fish-new-msg').value.trim();
-    if (txt) { RAGE_FISH_STATE.customMessages.push(txt); document.getElementById('fish-new-msg').value = ''; renderCustomMessages(); }
-};
+
+// Suporte para o clique no botão e na tecla ENTER
+function addCustomMessage() {
+    const input = document.getElementById('fish-new-msg');
+    const txt = input.value.trim();
+    if (txt) { 
+        RAGE_FISH_STATE.customMessages.push(txt); 
+        localStorage.setItem('gatoPescador_customMsg', JSON.stringify(RAGE_FISH_STATE.customMessages));
+        input.value = ''; 
+        renderCustomMessages(); 
+        
+        // Faz o peixe falar a mensagem IMEDIATAMENTE para você ver que funcionou!
+        window.showBubble(txt, 4000);
+    }
+}
+document.getElementById('fish-add-msg').onclick = addCustomMessage;
+document.getElementById('fish-new-msg').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addCustomMessage();
+});
 
 window.deleteFishMsg = function(index) {
     RAGE_FISH_STATE.customMessages.splice(index, 1);
+    localStorage.setItem('gatoPescador_customMsg', JSON.stringify(RAGE_FISH_STATE.customMessages));
     if (RAGE_FISH_STATE.currentIndex >= RAGE_FISH_STATE.customMessages.length) RAGE_FISH_STATE.currentIndex = 0;
     renderCustomMessages();
 };
@@ -138,20 +155,26 @@ window.unlockSushiFeature = function(silent = false) {
         window.showBubble("Ok, ok! Pare de me clicar. Desbloqueando modo Sushi...<br><br>Ah, e agora eu estou no oceano. Tente me pescar!", 6000);
     }
     
-    // Atualiza o botão que já está na tela para ficar vermelho e clicável
     if (typeof window.updateUI === 'function') window.updateUI();
     
     RAGE_FISH_STATE.isCustomMode = true;
 
-    if (window.RARITIES && window.GAME_STATE) {
-        const secretFish = { name: 'Tutor Irritante', image: '/img/DicaFish.png', time: 'all' };
-        const alreadyExists = window.RARITIES.SECRETO.variations.find(f => f.name === secretFish.name);
-        if (!alreadyExists) {
-            window.RARITIES.SECRETO.variations.push(secretFish);
-            const img = new Image(); img.src = secretFish.image;
-            window.GAME_STATE.loadedImages[secretFish.image] = img;
+    // TENTATIVA ROBUSTA: Fica tentando colocar o peixe no catálogo a cada 1 segundo até a Enciclopédia existir
+    const injectFishInterval = setInterval(() => {
+        if (window.RARITIES && window.RARITIES.SECRETO && window.GAME_STATE) {
+            
+            // CORREÇÃO CRÍTICA DO CATÁLOGO: events: [] agora está presente
+            const secretFish = { name: 'Tutor Irritante', image: '/img/DicaFish.png', time: 'all', events: [] };
+            const alreadyExists = window.RARITIES.SECRETO.variations.find(f => f.name === secretFish.name);
+            
+            if (!alreadyExists) {
+                window.RARITIES.SECRETO.variations.push(secretFish);
+                const img = new Image(); img.src = secretFish.image;
+                window.GAME_STATE.loadedImages[secretFish.image] = img;
+            }
+            clearInterval(injectFishInterval); // Sucesso! Para de tentar.
         }
-    }
+    }, 1000);
 };
 
 const checkSaveInterval = setInterval(() => {
@@ -210,7 +233,10 @@ function giveRandomTip() {
 
 fishImg.addEventListener('click', () => {
     if (RAGE_FISH_STATE.isCustomMode) {
-        fishModal.classList.remove('hidden'); renderCustomMessages();
+        fishModal.classList.remove('hidden'); 
+        renderCustomMessages();
+        // Foca automaticamente no input pra digitar mais rápido
+        setTimeout(() => document.getElementById('fish-new-msg').focus(), 100);
     } else {
         giveRandomTip();
     }
