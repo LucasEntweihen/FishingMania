@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="/style/style.css">
+    <link rel="stylesheet" href="/style/style2.css">
 </head>
 <body>
 
@@ -76,7 +77,7 @@
             </div>
 
             <div id="craft-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 750px; max-height: 85vh;">
+                <div class="modal-content" style="max-width: 900px; max-height: 85vh;">
                     <div class="modal-header" style="background: #8e44ad;">
                         <h2>🔨 Forja de Itens</h2>
                         <div style="display: flex; gap: 10px; align-items: center;">
@@ -84,9 +85,9 @@
                             <button id="close-craft-btn" class="close-btn">&times;</button>
                         </div>
                     </div>
-                    <div style="display: flex; height: 500px;">
-                        <div style="width: 40%; border-right: 2px solid #eee; overflow-y: auto; background: #f9f9f9; padding: 10px;" id="recipe-list"></div>
-                        <div style="width: 60%; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;" id="crafting-area">
+                    <div style="display: flex; height: 550px;">
+                        <div style="width: 60%; border-right: 2px solid #eee; overflow-y: auto; background: #f9f9f9; padding: 10px;" id="recipe-list"></div>
+                        <div style="width: 40%; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto;" id="crafting-area">
                             <div style="font-size: 4rem; color: #ccc; margin-bottom: 20px;">🔥</div>
                             <h3 style="color: #333; margin-bottom: 10px;">Selecione uma planta</h3>
                             <p style="color: #777; font-size: 0.9rem; text-align: center;">Escolha na lista ao lado para ver os materiais e forjar.</p>
@@ -96,15 +97,15 @@
             </div>
 
             <div id="workbench-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 800px; max-height: 85vh;">
+                <div class="modal-content" style="max-width: 850px; max-height: 85vh;">
                     <div class="modal-header" style="background: #2c3e50;">
                         <h2>⚙️ Mesa de Trabalho (Montagem)</h2>
                         <button id="close-workbench-btn" class="close-btn">&times;</button>
                     </div>
                     <div style="display: flex; height: 500px;">
-                        <div style="width: 45%; background: #ecf0f1; padding: 20px; display: flex; flex-direction: column; gap: 15px; border-right: 2px solid #ccc; overflow-y: auto;">
-                            <h3 style="text-align: center; color: #333; font-family: 'Fredoka', sans-serif;">Seu Equipamento</h3>
-                            <p style="font-size: 0.75rem; text-align: center; color: #666; margin-top:-10px;">Arraste os itens da direita para as caixas abaixo</p>
+                        <div style="width: 40%; background: #ecf0f1; padding: 20px; display: flex; flex-direction: column; gap: 10px; border-right: 2px solid #ccc; overflow-y: auto;">
+                            <h3 style="text-align: center; color: #333; font-family: 'Fredoka', sans-serif; margin-bottom: 0;">Seu Equipamento</h3>
+                            <p style="font-size: 0.7rem; text-align: center; color: #666; margin-top: 0;">Arraste os itens para as caixas</p>
                             
                             <div class="equip-slot dropzone" data-droptype="rod" id="wb-rod-slot">
                                 <div class="slot-title">🎣 Vara de Pesca</div>
@@ -115,6 +116,11 @@
                                 <div class="slot-title">🪨 Chumbada</div>
                                 <div class="slot-content" id="wb-sinker-content">Vazio</div>
                             </div>
+
+                            <div class="equip-slot dropzone" data-droptype="knife" id="wb-knife-slot">
+                                <div class="slot-title">🔪 Faca de Sushi</div>
+                                <div class="slot-content" id="wb-knife-content">Vazio</div>
+                            </div>
                             
                             <div class="equip-slot dropzone" data-droptype="bait" id="wb-bait-slot">
                                 <div class="slot-title">🪝 Isca (Consumível)</div>
@@ -122,35 +128,33 @@
                             </div>
                         </div>
                         
-                        <div style="width: 55%; display: flex; flex-direction: column;">
+                        <div style="width: 60%; display: flex; flex-direction: column;">
                             <div class="backpack-tabs">
                                 <button class="wb-tab-btn active" data-tab="rod">Varas</button>
-                                <button class="wb-tab-btn" data-tab="sink">Chumbadas</button>
+                                <button class="wb-tab-btn" data-tab="sink">Chumbos</button>
+                                <button class="wb-tab-btn" data-tab="knife">Facas</button>
                                 <button class="wb-tab-btn" data-tab="bait">Iscas</button>
                             </div>
-                            <div id="workbench-grid" class="shop-grid" style="flex: 1; align-content: flex-start;">
-                                </div>
+                            <div id="workbench-grid" class="shop-grid" style="flex: 1; align-content: flex-start;"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="backpack-modal" class="modal hidden">
-                <div class="modal-content" style="width: 400px; position: relative;">
+                <div class="modal-content" style="width: 450px; position: relative;">
                     <div class="modal-header" style="background: #d35400;">
                         <h2>🎒 Sua Mochila</h2>
                         <button id="close-backpack-btn" class="close-btn">&times;</button>
                     </div>
                     <div class="backpack-tabs">
-                        <button class="bp-tab-btn active" data-tab="mat">Materiais</button>
+                        <button class="bp-tab-btn active" data-tab="mat">Mats</button>
                         <button class="bp-tab-btn" data-tab="rod">Varas</button>
-                        <button class="bp-tab-btn" data-tab="sink">Chumbadas</button>
+                        <button class="bp-tab-btn" data-tab="sink">Pesos</button>
+                        <button class="bp-tab-btn" data-tab="knife">Facas</button>
                         <button class="bp-tab-btn" data-tab="bait">Iscas</button>
                     </div>
                     <div id="backpack-grid" class="shop-grid" style="min-height: 250px;"></div>
-                    <p style="font-size: 0.75rem; text-align: center; color: #666; padding: 8px; background: #eee; margin: 0; border-top: 1px solid #ddd;">
-                        Modo de Visualização. Use a Forja para montar itens.
-                    </p>
                 </div>
             </div>
 

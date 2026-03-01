@@ -41,6 +41,8 @@ window.GAME_STATE = {
     ownedRods: [0],
     ownedSinkers: ['chumbo'],
     currentSinker: 'chumbo',
+    ownedKnives: ['faca_cozinha'],
+    currentKnife: 'faca_cozinha',
     baitInventory: {},
     currentBait: null,
     loadedImages: {},
@@ -48,8 +50,32 @@ window.GAME_STATE = {
     collection67: {},
     isDay: true,
     materials: {},
-    sushiUnlocked: false // <-- Nova Flag para Salvar o Desbloqueio do Sushi!
+    sushiUnlocked: false 
 };
+
+// AS 20 FACAS DO JOGO (As 5 primeiras NÃO dropam materiais)
+window.KNIVES = [
+    { id: 'faca_cozinha', name: 'Faca de Cozinha', mult: 1.0, desc: 'Saque x1 (S/ Material)', dropsMats: false },
+    { id: 'faca_acougueiro', name: 'Faca de Açougueiro', mult: 1.5, desc: 'Saque x1.5 (S/ Material)', dropsMats: false },
+    { id: 'faca_chef', name: 'Faca de Chef Aprendiz', mult: 2.0, desc: 'Saque x2 (S/ Material)', dropsMats: false },
+    { id: 'cutelo_ferro', name: 'Cutelo de Ferro', mult: 3.0, desc: 'Saque x3 (S/ Material)', dropsMats: false },
+    { id: 'faca_ouro', name: 'Faca Banhada a Ouro', mult: 4.5, desc: 'Saque x4.5 (S/ Material)', dropsMats: false },
+    { id: 'faca_pirata', name: 'Faca do Pirata', mult: 6.0, desc: 'Saque x6', dropsMats: true },
+    { id: 'faca_titanio', name: 'Faca de Titânio', mult: 8.0, desc: 'Saque x8', dropsMats: true },
+    { id: 'cutelo_titanio', name: 'Cutelo Maciço', mult: 12.0, desc: 'Saque x12', dropsMats: true },
+    { id: 'faca_meteorito', name: 'Faca Meteorítica', mult: 18.0, desc: 'Saque x18', dropsMats: true },
+    { id: 'lamina_cometa', name: 'Lâmina do Cometa', mult: 25.0, desc: 'Saque x25', dropsMats: true },
+    { id: 'faca_cristal', name: 'Faca de Cristal Bruto', mult: 35.0, desc: 'Saque x35', dropsMats: true },
+    { id: 'lamina_mistica', name: 'Lâmina Mística', mult: 50.0, desc: 'Saque x50', dropsMats: true },
+    { id: 'faca_sombria', name: 'Faca Sombria', mult: 80.0, desc: 'Saque x80', dropsMats: true },
+    { id: 'cutelo_vazio', name: 'Cutelo do Vazio', mult: 120.0, desc: 'Saque x120', dropsMats: true },
+    { id: 'faca_essencia', name: 'Faca de Essência Pura', mult: 180.0, desc: 'Saque x180', dropsMats: true },
+    { id: 'lamina_divina', name: 'Lâmina Divina', mult: 250.0, desc: 'Saque x250', dropsMats: true },
+    { id: 'faca_estelar', name: 'Faca Estelar', mult: 400.0, desc: 'Saque x400', dropsMats: true },
+    { id: 'faca_neutrons', name: 'Faca de Nêutrons', mult: 600.0, desc: 'Saque x600', dropsMats: true },
+    { id: 'lamina_infinito', name: 'Lâmina do Infinito', mult: 1000.0, desc: 'Saque x1000', dropsMats: true },
+    { id: 'faca_criador', name: 'A Faca do Criador', mult: 2500.0, desc: 'Saque x2500', dropsMats: true }
+];
 
 window.MATERIALS = [
     { id: 'madeira', name: 'Madeira / Graveto', price: 50, icon: '🪵' },
@@ -274,12 +300,14 @@ window.saveGame = function() {
         ownedRods: window.GAME_STATE.ownedRods,
         ownedSinkers: window.GAME_STATE.ownedSinkers,
         currentSinker: window.GAME_STATE.currentSinker,
+        ownedKnives: window.GAME_STATE.ownedKnives,
+        currentKnife: window.GAME_STATE.currentKnife,
         baitInventory: window.GAME_STATE.baitInventory,
         currentBait: window.GAME_STATE.currentBait,
         collection: window.GAME_STATE.collection,
         collection67: window.GAME_STATE.collection67,
         materials: window.GAME_STATE.materials,
-        sushiUnlocked: window.GAME_STATE.sushiUnlocked // SALVANDO A FLAG DO SUSHI
+        sushiUnlocked: window.GAME_STATE.sushiUnlocked
     };
     if (currentUser && db) {
         localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
@@ -307,6 +335,9 @@ function loadGame() {
                 if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
                 if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
                 if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
+                if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) {
+                    window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha';
+                }
                 if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Visitante";
             } catch (e) { console.error("Save corrompido"); }
         }
@@ -323,6 +354,9 @@ function loadGame() {
             if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
             if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
             if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
+            if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) {
+                window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha';
+            }
             localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(window.GAME_STATE));
             if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Conectado";
         } else {
@@ -473,9 +507,6 @@ window.castLine = function() {
     }, travelTime + 1000);
 }
 
-// ==========================================================================
-// 5. EVENT LISTENERS
-// ==========================================================================
 document.addEventListener('keydown', (e) => { 
     if (e.code === 'Space') { 
         e.preventDefault(); 
@@ -635,13 +666,12 @@ setInterval(() => {
 setTimeout(() => { window.updateUI(); if(canvas) animateBg(); }, 500);
 
 // ==========================================================================
-// 9. MODO SUSHI V2 (MINIGAME DA FACA 🔪)
+// 9. MODO SUSHI V2 (MINIGAME DA FACA COM MULTIPLICADORES)
 // ==========================================================================
 window.SushiMode = {
-    pendingSushi: null, // Guarda as infos do peixe sendo cortado
+    pendingSushi: null, 
 
     init: function() {
-        // Estilos do menu principal de Sushi
         const style = document.createElement('style');
         style.innerHTML = `
             #sushi-modal .modal-content { background: #fffaf0; border: 4px solid #c0392b; background-image: radial-gradient(#fcdcd3 1px, transparent 1px); background-size: 20px 20px; }
@@ -656,7 +686,6 @@ window.SushiMode = {
         `;
         document.head.appendChild(style);
 
-        // Tela da Loja de Sushi
         const modal = document.createElement('div');
         modal.id = 'sushi-modal';
         modal.className = 'modal hidden';
@@ -668,19 +697,18 @@ window.SushiMode = {
                     <button onclick="document.getElementById('sushi-modal').classList.add('hidden')" class="close-btn">&times;</button>
                 </div>
                 <div style="padding: 15px; text-align: center; background: white; border-bottom: 2px dashed #ccc;">
-                    <h3 style="margin:0; color:#c0392b; font-family:'Fredoka', sans-serif;">Filete os peixes do seu estoque!</h3>
-                    <p style="margin:5px 0 0 0; color:#555; font-size:0.9rem;">O Chef transforma peixes em uma injeção gigante de <b>Cat Coins</b> e <b>Materiais Brutos</b>.</p>
+                    <h3 id="sushi-knife-title" style="margin:0; color:#c0392b; font-family:'Fredoka', sans-serif;">Faca Equipada: Nenhuma</h3>
+                    <p style="margin:5px 0 0 0; color:#555; font-size:0.9rem;">O Chef transforma peixes em uma injeção gigante de moedas e materiais. Melhore sua faca na Forja para ganhar multiplicadores absurdos!</p>
                 </div>
                 <div id="sushi-grid" class="sushi-grid"></div>
             </div>
         `;
         document.body.appendChild(modal);
 
-        // Tela do MINIGAME DE CORTAR 
         const miniModal = document.createElement('div');
         miniModal.id = 'sushi-minigame-modal';
         miniModal.className = 'modal hidden';
-        miniModal.style.zIndex = '999999'; // Camada altíssima
+        miniModal.style.zIndex = '999999'; 
         miniModal.innerHTML = `
             <div class="modal-content" style="max-width: 500px; background: #2c3e50; border: 4px solid #e74c3c;">
                 <button onclick="document.getElementById('sushi-minigame-modal').classList.add('hidden')" class="close-btn" style="position:absolute; top:10px; right:15px;">&times;</button>
@@ -699,7 +727,6 @@ window.SushiMode = {
         `;
         document.body.appendChild(miniModal);
 
-        // Prepara a lógica da faca/canvas
         this.setupCanvas();
     },
 
@@ -710,14 +737,14 @@ window.SushiMode = {
 
     getLootTable: function(rarityId) {
         const tables = {
-            'comum': { coins: 300, mats: ['madeira', 'fio'], matQty: 1 },
-            'raro': { coins: 1500, mats: ['plastico', 'kevlar'], matQty: 2 },
-            'epico': { coins: 6000, mats: ['fibra', 'ouro'], matQty: 2 },
-            'lendario': { coins: 20000, mats: ['metal', 'titânio'], matQty: 3 },
-            'mitico': { coins: 75000, mats: ['perola', 'carbono'], matQty: 3 },
-            'secreto': { coins: 300000, mats: ['meteorito', 'cristal'], matQty: 4 },
-            'divino': { coins: 1500000, mats: ['materia_escura', 'essencia'], matQty: 5 },
-            'aurudo': { coins: 50000000, mats: ['poeira_cosmica'], matQty: 8 }
+            'comum': { coins: 50, mats: ['madeira', 'fio'], matQty: 1 },
+            'raro': { coins: 250, mats: ['plastico', 'kevlar'], matQty: 1 },
+            'epico': { coins: 1000, mats: ['fibra', 'ouro'], matQty: 2 },
+            'lendario': { coins: 4000, mats: ['metal', 'titânio'], matQty: 2 },
+            'mitico': { coins: 15000, mats: ['perola', 'carbono'], matQty: 3 },
+            'secreto': { coins: 60000, mats: ['meteorito', 'cristal'], matQty: 3 },
+            'divino': { coins: 300000, mats: ['materia_escura', 'essencia'], matQty: 4 },
+            'aurudo': { coins: 10000000, mats: ['poeira_cosmica'], matQty: 5 }
         };
         return tables[rarityId] || tables['comum'];
     },
@@ -727,6 +754,13 @@ window.SushiMode = {
         if(!grid) return;
         grid.innerHTML = '';
         let hasFish = false;
+
+        const currentKnifeId = window.GAME_STATE.currentKnife || 'faca_cozinha';
+        const knifeData = window.KNIVES.find(k => k.id === currentKnifeId) || window.KNIVES[0];
+        const multiplier = knifeData.mult;
+        const dropsMats = knifeData.dropsMats;
+
+        document.getElementById('sushi-knife-title').innerText = `🔪 Faca Equipada: ${knifeData.name} (Saque x${multiplier})`;
 
         const addFishCards = (collection, is67) => {
             Object.keys(collection).forEach(fishName => {
@@ -743,9 +777,19 @@ window.SushiMode = {
                     if (!foundFish) return;
 
                     const lootPreview = this.getLootTable(foundRarity.id);
-                    const expectedCoins = is67 ? lootPreview.coins * 3 : lootPreview.coins;
-                    const expectedMats = is67 ? lootPreview.matQty * 2 : lootPreview.matQty;
+                    let expectedCoins = Math.floor(lootPreview.coins * multiplier);
+                    let expectedMats = Math.floor(lootPreview.matQty * multiplier);
                     
+                    if (is67) {
+                        expectedCoins *= 3;
+                        expectedMats *= 2;
+                    }
+                    
+                    // Lógica Visual: Se a faca não extrai materiais, mostra aviso
+                    let matPreviewText = dropsMats 
+                        ? `<br>📦 +${expectedMats} Mat. Tier ${foundRarity.name}` 
+                        : `<br><span style="color:#e74c3c; font-size:0.65rem;">(Faca não extrai materiais)</span>`;
+
                     const div = document.createElement('div');
                     div.className = 'sushi-card';
                     div.innerHTML = `
@@ -755,8 +799,7 @@ window.SushiMode = {
                         <div class="${foundRarity.style}" style="font-size: 0.7rem; text-transform: uppercase; font-weight: 800; margin-bottom: 5px;">${foundRarity.name}</div>
                         
                         <div class="sushi-reward-preview">
-                            <span style="color:#e67e22;">💰 +${expectedCoins.toLocaleString()}</span><br>
-                            📦 +${expectedMats} Mat. Tier ${foundRarity.name}
+                            <span style="color:#e67e22;">💰 +${expectedCoins.toLocaleString()}</span>${matPreviewText}
                         </div>
 
                         <button class="sushi-btn-cut" onclick="window.SushiMode.startMinigame('${fishName.replace(/'/g, "\\'")}', ${is67}, '${foundRarity.id}', '${foundFish.image}')">🔪 FILETAR</button>
@@ -791,10 +834,8 @@ window.SushiMode = {
             const endX = (e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0)) - rect.left;
             const endY = (e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0)) - rect.top;
 
-            // Se o arraste foi maior que 40 pixels (um corte genuíno)
             const dist = Math.hypot(endX - startX, endY - startY);
             if (dist > 40) {
-                // Desenha a "marca da faca" vermelha com branco
                 ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
                 ctx.strokeStyle = "rgba(231, 76, 60, 0.9)"; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
@@ -802,8 +843,6 @@ window.SushiMode = {
 
                 cuts++;
                 document.getElementById('sushi-cut-counter').innerText = `Cortes: ${cuts} / 4`;
-                
-                // Faz a imagem do peixe pular um pouquinho a cada corte
                 document.getElementById('sushi-cut-img').style.transform = `scale(${1 + (cuts * 0.05)})`;
 
                 if (cuts >= 4) {
@@ -828,10 +867,10 @@ window.SushiMode = {
 
     startMinigame: function(fishName, is67, rarityId, imageSrc) {
         this.pendingSushi = { fishName, is67, rarityId };
-        document.getElementById('sushi-modal').classList.add('hidden'); // Esconde a lista
+        document.getElementById('sushi-modal').classList.add('hidden'); 
         this.resetCanvas();
         document.getElementById('sushi-cut-img').src = imageSrc;
-        document.getElementById('sushi-minigame-modal').classList.remove('hidden'); // Mostra a faca
+        document.getElementById('sushi-minigame-modal').classList.remove('hidden'); 
     },
 
     finishMinigame: function() {
@@ -846,32 +885,48 @@ window.SushiMode = {
 
         collectionTarget[fishName]--;
 
+        const currentKnifeId = window.GAME_STATE.currentKnife || 'faca_cozinha';
+        const knifeData = window.KNIVES.find(k => k.id === currentKnifeId) || window.KNIVES[0];
+        const multiplier = knifeData.mult;
+        const dropsMats = knifeData.dropsMats;
+
         const loot = this.getLootTable(rarityId);
-        const coinReward = is67 ? loot.coins * 3 : loot.coins;
+        
+        let coinReward = Math.floor(loot.coins * multiplier);
+        let matRewardQty = Math.floor(loot.matQty * multiplier);
+        
+        if (is67) {
+            coinReward *= 3;
+            matRewardQty *= 2;
+        }
+
         const matRewardId = loot.mats[Math.floor(Math.random() * loot.mats.length)]; 
-        const matRewardQty = is67 ? loot.matQty * 2 : loot.matQty;
 
         window.GAME_STATE.coins += coinReward;
-        window.GAME_STATE.materials[matRewardId] = (window.GAME_STATE.materials[matRewardId] || 0) + matRewardQty;
+        
+        let rewardMessage = `🪙 +${coinReward.toLocaleString()} Cat Coins`;
+
+        if (dropsMats) {
+            window.GAME_STATE.materials[matRewardId] = (window.GAME_STATE.materials[matRewardId] || 0) + matRewardQty;
+            let matIcon = '📦'; let matName = matRewardId;
+            if (window.CRAFTING_DB && window.CRAFTING_DB.materials) {
+                const matInfo = window.CRAFTING_DB.materials.find(m => m.id === matRewardId);
+                if (matInfo) { matIcon = matInfo.icon; matName = matInfo.name; }
+            }
+            rewardMessage += `\n${matIcon} +${matRewardQty.toLocaleString()} ${matName}`;
+        } else {
+            rewardMessage += `\n❌ Sem materiais (Faca muito fraca)`;
+        }
 
         if(window.updateUI) window.updateUI();
         if(window.saveGame) window.saveGame();
 
-        let matIcon = '📦';
-        let matName = matRewardId;
-        if (window.CRAFTING_DB && window.CRAFTING_DB.materials) {
-            const matInfo = window.CRAFTING_DB.materials.find(m => m.id === matRewardId);
-            if (matInfo) { matIcon = matInfo.icon; matName = matInfo.name; }
-        }
-
         if(window.customAlert) {
-            window.customAlert(`🔪 Perfeito!\n\nVocê filetou o ${fishName}!\n\nRecompensas:\n🪙 +${coinReward.toLocaleString()} Cat Coins\n${matIcon} +${matRewardQty} ${matName}`, true);
-        } else {
-            alert(`Sushi Feito! Recebeu ${coinReward} moedas e ${matRewardQty}x ${matName}`);
+            window.customAlert(`🔪 Perfeito!\n\nVocê filetou o ${fishName}!\n\nRecompensas (Faca x${multiplier}):\n${rewardMessage}`, true);
         }
 
         this.renderGrid();
-        document.getElementById('sushi-modal').classList.remove('hidden'); // Volta pra lista
+        document.getElementById('sushi-modal').classList.remove('hidden'); 
     }
 };
 
