@@ -112,14 +112,14 @@ window.MATERIALS = window.CRAFTING_DB.materials;
 window.SUCATAS = [
     { id: 'lata_velha', name: 'Lata Enferrujada', image: '/img/sucata/lata.png', coinPenalty: 0, matReward: 'restos_comida', matQty: 1 },
     { id: 'bota_furada', name: 'Bota Furada', image: '/img/sucata/bota.png', coinPenalty: 0, matReward: 'inseto_morto', matQty: 1 },
-    { id: 'garrafa_pet', name: 'Garrafa PET', image: '/img/sucata/garrafa.png', coinPenalty: 0, matReward: 'geleia_estranha', matQty: 1 },
-    { id: 'pneu_careca', name: 'Pneu Careca', image: '/img/sucata/pneu.png', coinPenalty: 0, matReward: 'biomassa_brilhante', matQty: 1 },
-    { id: 'oculos_quebrado', name: 'Óculos Quebrado', image: '/img/sucata/oculos.png', coinPenalty: 0, matReward: 'energia_condensada', matQty: 1 },
-    { id: 'lixo_toxico', name: 'Barril Tóxico', image: '/img/sucata/lixo_toxico.png', coinPenalty: 0, matReward: 'po_magico', matQty: 1 },
-    { id: 'celular_quebrado', name: 'Celular Molhado', image: '/img/sucata/celular.png', coinPenalty: 0, matReward: 'escama_dragao', matQty: 1 },
-    { id: 'placa_mae', name: 'Placa Mãe Frita', image: '/img/sucata/placa.png', coinPenalty: 0, matReward: 'essencia_sombria', matQty: 1 },
-    { id: 'reator_pifado', name: 'Mini Reator', image: '/img/sucata/reator.png', coinPenalty: 0, matReward: 'lagrima_sereia', matQty: 1 },
-    { id: 'uranio_vazado', name: 'Urânio Empobrecido', image: '/img/sucata/uranio.png', coinPenalty: 0, matReward: 'fogo_fatuo', matQty: 1 }
+    { id: 'garrafa_pet', name: 'Garrafa PET', image: '/img/sucata/garrafa.webp', coinPenalty: 0, matReward: 'geleia_estranha', matQty: 1 },
+    { id: 'pneu_careca', name: 'Pneu Careca', image: '/img/sucata/pneu.webp', coinPenalty: 1, matReward: 'biomassa_brilhante', matQty: 1 },
+    { id: 'oculos_quebrado', name: 'Óculos Quebrado', image: '/img/sucata/oculos.png', coinPenalty: 2, matReward: 'energia_condensada', matQty: 1 },
+    { id: 'lixo_toxico', name: 'Barril Tóxico', image: '/img/sucata/lixo_toxico.png', coinPenalty: 3, matReward: 'po_magico', matQty: 1 },
+    { id: 'celular_quebrado', name: 'Celular Molhado', image: '/img/sucata/celular.png', coinPenalty: 5, matReward: 'escama_dragao', matQty: 1 },
+    { id: 'placa_mae', name: 'Placa Mãe Frita', image: '/img/sucata/placa.png', coinPenalty: 10, matReward: 'essencia_sombria', matQty: 1 },
+    { id: 'reator_pifado', name: 'Mini Reator', image: '/img/sucata/reator.png', coinPenalty: 100, matReward: 'lagrima_sereia', matQty: 1 },
+    { id: 'uranio_vazado', name: 'Urânio Empobrecido', image: '/img/sucata/uranio.png', coinPenalty: 1000, matReward: 'fogo_fatuo', matQty: 1 }
 ];
 
 window.KNIVES = [
