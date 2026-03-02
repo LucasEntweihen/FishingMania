@@ -2,7 +2,7 @@
    SISTEMA DE EVENTOS E BIOMAS V2 (LEVE E OTIMIZADO)
    ========================================================================== */
 
-const EVENT_CONFIG = {
+   const EVENT_CONFIG = {
     checkInterval: 60000, // Tenta puxar um evento a cada 1 minuto
     chance: 0.35,         // 35% de chance de rolar um evento
     duration: 75000       // Duração do evento: 1 minuto e 15 segundos
@@ -35,6 +35,23 @@ function showEventMessage(title, subtitle, bgColor) {
         eventAlert.style.transform = 'translateX(-50%) translateY(-20px)';
     }, 6000);
 }
+
+// 2.5. Plaquinha Dinâmica ao lado da Hora
+function injectEventBadge() {
+    const leftGroup = document.querySelector('.left-group');
+    if (leftGroup && !document.getElementById('event-active-badge')) {
+        const eventBadge = document.createElement('div');
+        eventBadge.id = "event-active-badge";
+        eventBadge.className = "time-badge badge";
+        eventBadge.style.display = "none";
+        eventBadge.style.textShadow = "0 1px 2px rgba(0,0,0,0.5)"; 
+        leftGroup.appendChild(eventBadge);
+    }
+}
+// Garante a injeção assim que a tela carrega
+document.addEventListener('DOMContentLoaded', injectEventBadge);
+setTimeout(injectEventBadge, 500);
+
 
 // 3. Catálogo de Eventos
 const EVENTS = {
@@ -93,9 +110,9 @@ function clearEvent() {
     // Desvanece a película visual
     overlay.style.opacity = '0';
     
-    // Volta a plaquinha de tempo para Dia/Noite
-    const ti = document.getElementById('time-indicator');
-    if (ti) ti.innerText = window.GAME_STATE && window.GAME_STATE.isDay ? "☀️ Dia" : "🌙 Noite";
+    // Oculta a plaquinha de evento SEM mexer no relógio de Dia/Noite
+    const eventBadge = document.getElementById('event-active-badge');
+    if (eventBadge) eventBadge.style.display = "none";
     
     currentEvent = null;
 }
@@ -113,14 +130,21 @@ function processEvents() {
         
         event.start();
 
-        // Altera a plaquinha de tempo superior
-        const ti = document.getElementById('time-indicator');
-        if (ti) {
+        // Acende a Plaquinha de Evento ao lado da hora
+        const eventBadge = document.getElementById('event-active-badge');
+        if (eventBadge) {
             let emoji = "✨";
-            if(eventKey==='frenesi') emoji="🐟";
-            if(eventKey==='tempestade') emoji="⛈️";
-            if(eventKey==='misticismo') emoji="🌌";
-            ti.innerText = `${emoji} Evento Ativo`;
+            let title = "Evento";
+            let bg = "rgba(0,0,0,0.5)";
+            
+            if(eventKey==='frenesi') { emoji="🐟"; title="Frenesi"; bg="linear-gradient(135deg, #2980b9, #6dd5ed)"; }
+            if(eventKey==='tempestade') { emoji="⛈️"; title="Tempestade"; bg="linear-gradient(135deg, #34495e, #2c3e50)"; }
+            if(eventKey==='misticismo') { emoji="🌌"; title="Mística"; bg="linear-gradient(135deg, #8e44ad, #9b59b6)"; }
+            if(eventKey==='ouro') { emoji="✨"; title="Maré Dourada"; bg="linear-gradient(135deg, #f39c12, #f1c40f)"; }
+            
+            eventBadge.innerText = `${emoji} ${title}`;
+            eventBadge.style.background = bg;
+            eventBadge.style.display = "inline-block";
         }
 
         // Agenda o fim do evento

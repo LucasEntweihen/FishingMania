@@ -30,8 +30,11 @@
         }
         .dropdown-content button:last-child { border-bottom: none; }
         .dropdown-content button:hover { background-color: #f1f8ff; color: #0277BD; padding-left: 24px; }
-        .dropdown:hover .dropdown-content { display: flex; }
-        .dropdown:hover .dropbtn { filter: brightness(1.1); transform: scale(1.05); }
+        
+        /* MUDANÇA CRÍTICA: O MENU AGORA ABRE COM CLIQUE (CLASSE ACTIVE) EM VEZ DE HOVER */
+        .dropdown.active .dropdown-content { display: flex; }
+        .dropdown.active .dropbtn { filter: brightness(1.1); transform: scale(1.05); }
+        
         @keyframes dropFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -263,6 +266,35 @@
 
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropdowns = document.querySelectorAll('.dropdown');
+            
+            // Abre o menu ao clicar
+            dropdowns.forEach(d => {
+                const btn = d.querySelector('.dropbtn');
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Impede o clique de fechar imediatamente
+                    const isActive = d.classList.contains('active');
+                    dropdowns.forEach(other => other.classList.remove('active')); // Fecha os outros
+                    if (!isActive) d.classList.add('active'); // Abre o clicado
+                });
+            });
+
+            // Fecha o menu se clicar em qualquer outro lugar da tela
+            document.addEventListener('click', () => {
+                dropdowns.forEach(d => d.classList.remove('active'));
+            });
+
+            // Fecha o menu ao clicar num botão dentro dele
+            document.querySelectorAll('.dropdown-content button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    dropdowns.forEach(d => d.classList.remove('active'));
+                });
+            });
+        });
+    </script>
 
     <script src="/script/database.js"></script>
     <script type="module" src="/script/script.js"></script>
