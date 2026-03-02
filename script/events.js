@@ -1,172 +1,104 @@
-/* ==========================================
-   SISTEMA DE EVENTOS E BIOMAS - GATO PESCADOR
-   ========================================== */
+/* ==========================================================================
+   SISTEMA DE EVENTOS E BIOMAS V2 (LEVE E OTIMIZADO)
+   ========================================================================== */
 
-   const EVENT_CONFIG = {
-    checkInterval: 60000, // Checa a cada 1 minuto
+const EVENT_CONFIG = {
+    checkInterval: 60000, // Tenta puxar um evento a cada 1 minuto
     chance: 0.35,         // 35% de chance de rolar um evento
-    duration: 60000       // Duração: 1 minuto
+    duration: 75000       // Duração do evento: 1 minuto e 15 segundos
 };
 
 let currentEvent = null;
+window.currentEventID = null; // Variável global para o script.js ler o evento atual
 
-// Elemento visual para avisar o jogador (Toast Grande)
+// 1. Criação da Película de Clima (Leve, sem filtros que travam o PC)
+const overlay = document.createElement('div');
+overlay.id = "event-overlay";
+overlay.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2; transition: background 2.5s ease, opacity 2.5s ease; opacity: 0;";
+document.getElementById('game-container').appendChild(overlay);
+
+// 2. Criação do Alerta de Tela (Toast Moderno)
 const eventAlert = document.createElement('div');
 eventAlert.id = "event-toast";
+eventAlert.style.cssText = "position:fixed; top:90px; left:50%; transform:translateX(-50%) translateY(-20px); padding:10px 25px; border-radius:20px; color:white; font-weight:800; z-index:1000; font-family:'Fredoka', sans-serif; pointer-events:none; transition:all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity:0; text-shadow:0 2px 4px rgba(0,0,0,0.5); font-size:1.1rem; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.2);";
 document.body.appendChild(eventAlert);
 
-// CSS dinâmico para os biomas e alertas
-const style = document.createElement('style');
-style.innerHTML = `
-    #event-toast {
-        position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-        padding: 12px 30px; border-radius: 30px; color: white; font-weight: 800;
-        z-index: 1000; font-family: 'Fredoka', sans-serif; pointer-events: none;
-        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 1.1rem; text-align: center;
-    }
-    #event-toast.active { opacity: 1; top: 100px; }
+function showEventMessage(title, subtitle, bgColor) {
+    eventAlert.style.background = bgColor;
+    eventAlert.innerHTML = `<div style="font-size:1.4rem; margin-bottom:2px;">${title}</div><div style="font-size:0.85rem; font-weight:500; opacity:0.95;">${subtitle}</div>`;
+    eventAlert.style.opacity = '1';
+    eventAlert.style.transform = 'translateX(-50%) translateY(0)';
     
-    /* Cores dos Toasts */
-    .toast-seca { background: #d35400; border: 2px solid #e67e22; box-shadow: 0 0 20px #d35400; }
-    .toast-abissal { background: #4a235a; border: 2px solid #8e44ad; box-shadow: 0 0 20px #8e44ad; }
-    .toast-inverno { background: #154360; border: 2px solid #2980b9; box-shadow: 0 0 20px #2980b9; }
-    .toast-ouro { background: #f39c12; border: 2px solid #f1c40f; box-shadow: 0 0 25px #f1c40f; color: #5c3a00 !important; }
-    .toast-tempestade { background: #2c3e50; border: 2px solid #7f8c8d; box-shadow: 0 0 20px #2c3e50; }
-
-    /* Filtros Visuais no Container do Jogo (Biomas) */
-    .biome-seca { filter: sepia(0.8) hue-rotate(-15deg) brightness(0.9); transition: filter 2s; }
-    .biome-abissal { filter: hue-rotate(250deg) saturate(1.5) brightness(0.7) contrast(1.2); transition: filter 3s; }
-    .biome-inverno { filter: hue-rotate(180deg) saturate(0.5) brightness(1.2); transition: filter 2s; }
-    .biome-ouro { filter: sepia(0.5) hue-rotate(10deg) brightness(1.1) saturate(1.5); transition: filter 2s; }
-    .biome-tempestade { filter: grayscale(0.6) brightness(0.6) contrast(1.3); transition: filter 1s; }
-`;
-document.head.appendChild(style);
-
-function showEventMessage(title, desc, className) {
-    eventAlert.innerHTML = `${title}<br><span style="font-size: 0.8rem; font-weight: 600; opacity: 0.9;">${desc}</span>`;
-    eventAlert.className = 'active ' + className;
-    setTimeout(() => { eventAlert.classList.remove('active'); }, 6000);
+    // Esconde o aviso depois de 6 segundos
+    setTimeout(() => {
+        eventAlert.style.opacity = '0';
+        eventAlert.style.transform = 'translateX(-50%) translateY(-20px)';
+    }, 6000);
 }
 
-// --- CRIANDO O NOVO INDICADOR DE CLIMA ---
-let weatherBadge = null;
-
-function setupWeatherBadge() {
-    const timeIndicator = document.getElementById('time-indicator');
-    // Só cria se o indicador de tempo já existir e a placa de clima ainda não
-    if (timeIndicator && !document.getElementById('weather-indicator')) {
-        weatherBadge = document.createElement('div');
-        weatherBadge.id = 'weather-indicator';
-        weatherBadge.className = 'time-badge badge'; // Herda o mesmo visual do botão de "Dia"
-        weatherBadge.style.transition = 'all 0.5s ease';
-        
-        // Insere a nova placa exatamante DEPOIS do botão de Dia/Noite
-        timeIndicator.parentNode.insertBefore(weatherBadge, timeIndicator.nextSibling);
-        
-        updateWeatherUI('🌊 Normal', 'rgba(0,0,0,0.3)', 'rgba(255,255,255,0.3)');
-    }
-}
-
-// Garante que a placa seja gerada assim que o HTML carregar
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupWeatherBadge);
-} else {
-    setupWeatherBadge();
-}
-
-function updateWeatherUI(text, bgColor, borderColor) {
-    if (!weatherBadge) return;
-    weatherBadge.innerText = text;
-    weatherBadge.style.background = bgColor;
-    weatherBadge.style.borderColor = borderColor;
-}
-
-// --- RESET E CONTROLE DE STATUS ---
-function resetEventStats() {
-    window.eventLuckMult = 1;      
-    window.eventCastTimeMult = 1;  
-    window.eventValueMult = 1;     
-    window.eventBgSpeedMult = 1;   
-    
-    // Devolve o visual do jogo para Dia ou Noite puramente
-    const gc = document.getElementById('game-container');
-    const timeIndicator = document.getElementById('time-indicator');
-    if (gc && timeIndicator) {
-        // Verifica se no texto do indicador tem a palavra "Dia"
-        const isDay = timeIndicator.innerText.includes('Dia');
-        gc.className = isDay ? 'day-mode' : 'night-mode';
-    }
-    
-    // Atualiza a placa de clima para Normal
-    updateWeatherUI('🌊 Normal', 'rgba(0,0,0,0.3)', 'rgba(255,255,255,0.3)');
-}
-
-// INICIALIZAÇÃO SEGURA
-setTimeout(resetEventStats, 500);
-
-// --- OS EVENTOS ---
+// 3. Catálogo de Eventos
 const EVENTS = {
-    seca: {
-        id: "seca",
+    frenesi: {
+        id: "frenesi",
         start: () => {
-            document.getElementById('game-container').classList.add('biome-seca');
-            window.eventLuckMult = 0.5;      
-            window.eventCastTimeMult = 0.5;  
-            window.eventValueMult = 0.7;     
-            showEventMessage("🏜️ Seca Escaldante!", "Água rasa. Pesca rápida, mas lucros e sorte caem.", "toast-seca");
-            updateWeatherUI('🏜️ Seca', 'rgba(211, 84, 0, 0.8)', '#e67e22');
-        }
-    },
-    abissal: {
-        id: "abissal",
-        start: () => {
-            document.getElementById('game-container').classList.add('biome-abissal');
-            window.eventLuckMult = 3.0;      
-            window.eventCastTimeMult = 2.0;  
-            window.eventValueMult = 2.0;     
-            window.eventBgSpeedMult = 0.3;   
-            showEventMessage("🌑 Despertar Abissal!", "Monstros à solta. Pesca lenta, mas sorte e lucro extremos!", "toast-abissal");
-            updateWeatherUI('🌑 Abissal', 'rgba(61, 35, 90, 0.8)', '#8e44ad');
-        }
-    },
-    inverno: {
-        id: "inverno",
-        start: () => {
-            document.getElementById('game-container').classList.add('biome-inverno');
-            window.eventLuckMult = 1.0;      
-            window.eventCastTimeMult = 1.5;  
-            window.eventValueMult = 1.5;     
-            window.eventBgSpeedMult = 2.0;   
-            showEventMessage("❄️ Inverno Rigoroso!", "Água congelando. A linha desce devagar, mas os peixes são mais gordos!", "toast-inverno");
-            updateWeatherUI('❄️ Inverno', 'rgba(21, 67, 96, 0.8)', '#2980b9');
+            window.eventCastTimeMult = 0.4;  // Linha desce absurdamente rápido
+            window.eventBgSpeedMult = 2.0;   // Peixes de fundo mais rápidos
+            overlay.style.background = "radial-gradient(circle, rgba(255,255,255,0) 40%, rgba(41, 128, 185, 0.3) 100%)"; // Azul bebê suave
+            overlay.style.opacity = '1';
+            showEventMessage("🐟 Frenesi Alimentar!", "Os peixes estão agitados. A linha desce super rápido!", "linear-gradient(135deg, #2980b9, #6dd5ed)");
         }
     },
     ouro: {
         id: "ouro",
         start: () => {
-            document.getElementById('game-container').classList.add('biome-ouro');
-            window.eventLuckMult = 1.2;      
-            window.eventCastTimeMult = 0.8;  
-            window.eventValueMult = 4.0;     
-            window.eventBgSpeedMult = 1.5;   
-            showEventMessage("✨ Maré Dourada!", "Cardume rico detectado! Lucros multiplicados por 4!", "toast-ouro");
-            updateWeatherUI('✨ Ouro', 'rgba(243, 156, 18, 0.8)', '#f1c40f');
+            window.eventValueMult = 3.0;     // Lucro x3
+            window.eventLuckMult = 10;       // Equivalente a +1000 de Sorte Extra
+            overlay.style.background = "radial-gradient(circle, rgba(255,255,255,0) 30%, rgba(241, 196, 15, 0.25) 100%)"; // Dourado suave nas bordas
+            overlay.style.opacity = '1';
+            showEventMessage("✨ Maré Dourada!", "As águas brilham. O lucro de venda de qualquer peixe foi triplicado!", "linear-gradient(135deg, #f39c12, #f1c40f)");
         }
     },
     tempestade: {
         id: "tempestade",
         start: () => {
-            document.getElementById('game-container').classList.add('biome-tempestade');
-            window.eventLuckMult = 1.5;      
-            window.eventCastTimeMult = 0.6;  
-            window.eventValueMult = 1.2;     
-            window.eventBgSpeedMult = 3.0;   
-            showEventMessage("⛈️ Tempestade em Alto Mar!", "Correnteza forte! Os peixes fisgam mais rápido.", "toast-tempestade");
-            updateWeatherUI('⛈️ Tempestade', 'rgba(44, 62, 80, 0.8)', '#7f8c8d');
+            window.eventLuckMult = 50;       // Equivalente a +5000 de Sorte
+            window.eventCastTimeMult = 1.3;  // Água pesada, linha demora um pouco mais
+            overlay.style.background = "linear-gradient(to bottom, rgba(44, 62, 80, 0.4) 0%, rgba(0,0,0,0.3) 100%)"; // Escurecimento suave do céu ao fundo
+            overlay.style.opacity = '1';
+            showEventMessage("⛈️ Tempestade Sombria!", "O clima fechou. O mar revolto atrai aberrações e lendas das profundezas.", "linear-gradient(135deg, #34495e, #2c3e50)");
+        }
+    },
+    misticismo: {
+        id: "misticismo",
+        start: () => {
+            window.eventLuckMult = 150;      // Equivalente a +15000 de Sorte
+            window.eventBgSpeedMult = 0.5;   // Peixes nadam bem devagarzinho
+            overlay.style.background = "radial-gradient(circle, rgba(255,255,255,0) 20%, rgba(155, 89, 182, 0.25) 100%)"; // Roxo místico
+            overlay.style.opacity = '1';
+            showEventMessage("🌌 Brisa Mística!", "Uma aura mágica paira no ar. As lendas despertaram...", "linear-gradient(135deg, #8e44ad, #9b59b6)");
         }
     }
 };
+
+function clearEvent() {
+    if (!currentEvent) return;
+    
+    // Reseta todos os modificadores
+    window.eventLuckMult = null;
+    window.eventCastTimeMult = null;
+    window.eventValueMult = null;
+    window.eventBgSpeedMult = null;
+    window.currentEventID = null;
+    
+    // Desvanece a película visual
+    overlay.style.opacity = '0';
+    
+    // Volta a plaquinha de tempo para Dia/Noite
+    const ti = document.getElementById('time-indicator');
+    if (ti) ti.innerText = window.GAME_STATE && window.GAME_STATE.isDay ? "☀️ Dia" : "🌙 Noite";
+    
+    currentEvent = null;
+}
 
 function processEvents() {
     if (currentEvent) return; 
@@ -177,16 +109,25 @@ function processEvents() {
         
         const event = EVENTS[eventKey];
         currentEvent = eventKey;
+        window.currentEventID = event.id; // Marca globalmente o evento ativo
         
         event.start();
 
-        setTimeout(() => {
-            resetEventStats(); // Remove buffs, placa volta ao normal e visuais resetam
-            currentEvent = null;
-            console.log("Bioma normalizado.");
-        }, EVENT_CONFIG.duration);
+        // Altera a plaquinha de tempo superior
+        const ti = document.getElementById('time-indicator');
+        if (ti) {
+            let emoji = "✨";
+            if(eventKey==='frenesi') emoji="🐟";
+            if(eventKey==='tempestade') emoji="⛈️";
+            if(eventKey==='misticismo') emoji="🌌";
+            ti.innerText = `${emoji} Evento Ativo`;
+        }
+
+        // Agenda o fim do evento
+        setTimeout(clearEvent, EVENT_CONFIG.duration);
     }
 }
 
-// Roda o monitor de biomas
+// Inicia os loops
 setInterval(processEvents, EVENT_CONFIG.checkInterval);
+setTimeout(processEvents, 15000); // Força uma tentativa de evento 15 segundos após abrir o jogo

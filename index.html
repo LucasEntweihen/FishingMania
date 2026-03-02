@@ -69,14 +69,6 @@
         .about-text p { font-size: 1.15rem; margin-bottom: 1.5rem; color: #555; }
         .about-image { background: #e1f5fe; border-radius: 20px; padding: 2rem; text-align: center; box-shadow: 0 10px 30px rgba(2, 119, 189, 0.1); border: 4px dashed #b3e5fc; font-size: 5rem; transform: rotate(3deg); }
 
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
-        .feature-card { background: white; padding: 2.5rem 1.5rem; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s, box-shadow 0.3s; border: 1px solid #eee; opacity: 0; transform: translateY(30px); }
-        .feature-card.visible { opacity: 1; transform: translateY(0); }
-        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(2, 119, 189, 0.15); border-color: #b3e5fc; }
-        .feature-icon { font-size: 3.5rem; margin-bottom: 1rem; display: inline-block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        .feature-card h3 { font-size: 1.4rem; color: var(--primary); margin-bottom: 1rem; }
-        .feature-card p { color: var(--text-light); font-size: 1rem; }
-
         footer { background-color: var(--text-dark); color: white; text-align: center; padding: 2rem; margin-top: 4rem; }
         footer p { opacity: 0.7; font-size: 0.9rem; }
 
@@ -179,6 +171,7 @@
     </div>
 
     <script type="module">
+        // Bolhas no fundo
         const bubbleContainer = document.getElementById('bubbles-container');
         for (let i = 0; i < 15; i++) {
             let bubble = document.createElement('div');
@@ -210,7 +203,7 @@
         const googleProvider = new GoogleAuthProvider();
 
         const mainCtaBtn = document.getElementById('main-cta-btn');
-        const mainGuestBtn = document.getElementById('main-guest-btn'); // Novo Botão
+        const mainGuestBtn = document.getElementById('main-guest-btn');
         const loginModal = document.getElementById('login-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const errorMsg = document.getElementById('error-message');
@@ -220,34 +213,34 @@
         
         let isUserLoggedIn = false;
 
+        // Ouve mudanças no login
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 isUserLoggedIn = true;
                 mainCtaBtn.innerText = "🎣 CONTINUAR JOGO";
                 userInfoBox.style.display = 'flex';
                 userEmailText.innerText = `👤 ${user.displayName || user.email}`;
-                mainGuestBtn.style.display = 'flex'; // Exibe o botão de convidado para quem tá logado
+                mainGuestBtn.style.display = 'flex'; 
             } else {
                 isUserLoggedIn = false;
                 mainCtaBtn.innerText = "🔑 LOGIN PARA JOGAR";
                 userInfoBox.style.display = 'none';
-                mainGuestBtn.style.display = 'none'; // Esconde, pois a pessoa acessa pelo Modal
+                mainGuestBtn.style.display = 'none'; 
             }
         });
 
+        // CORREÇÃO 1: O link estava fixo para o local da sua máquina, mudei para caminho relativo correto.
         mainCtaBtn.addEventListener('click', () => {
-            if (isUserLoggedIn) { window.location.href = '/html/pesca.html'; } 
+            if (isUserLoggedIn) { window.location.href = 'html/pesca.html'; } 
             else { loginModal.classList.add('active'); errorMsg.innerText = ''; }
         });
 
-        // Adiciona ?guest=true na URL quando clica em convidado (Na tela principal)
         mainGuestBtn.addEventListener('click', () => {
-            window.location.href = '/html/pesca.html?guest=true';
+            window.location.href = 'html/pesca.html?guest=true';
         });
         
-        // Adiciona ?guest=true na URL quando clica em convidado (No Modal)
         document.getElementById('btn-guest').addEventListener('click', () => {
-            window.location.href = '/html/pesca.html?guest=true';
+            window.location.href = 'html/pesca.html?guest=true';
         });
 
         btnLogout.addEventListener('click', () => { signOut(auth).catch((error) => console.error(error)); });
@@ -260,9 +253,10 @@
             errorMsg.innerText = message;
         }
 
-        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = '/html/pesca.html'; }).catch((e) => { showError(e.code); }); });
-        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha."; signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
-        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha para criar conta."; createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = '/html/pesca.html'; }).catch((err) => { showError(err.code); }); });
+        // CORREÇÃO 2: Redirecionamento seguro pós-login
+        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = 'html/pesca.html'; }).catch((e) => { showError(e.code); }); });
+        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha."; signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
+        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha para criar conta."; createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
     </script>
 </body>
 </html>
