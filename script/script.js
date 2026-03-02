@@ -83,7 +83,7 @@ function iniciarMotorDoJogo() {
         loadedImages: {},
         collection: {},
         collection67: {},
-        scrapCollection: {}, // NOVA COLEÇÃO DO MUSEU DO LIXO
+        scrapCollection: {}, 
         isDay: true,
         materials: {},
         sushiUnlocked: false 
@@ -181,7 +181,7 @@ function iniciarMotorDoJogo() {
             currentBait: window.GAME_STATE.currentBait,
             collection: window.GAME_STATE.collection,
             collection67: window.GAME_STATE.collection67,
-            scrapCollection: window.GAME_STATE.scrapCollection, // Salvando Museu do Lixo
+            scrapCollection: window.GAME_STATE.scrapCollection, 
             materials: window.GAME_STATE.materials,
             sushiUnlocked: window.GAME_STATE.sushiUnlocked
         };
@@ -255,32 +255,30 @@ function iniciarMotorDoJogo() {
     setInterval(window.saveGame, 30000);
 
     // ==========================================================================
-    // 5. NOVA FÓRMULA DE PESCA (SORTE ADITIVA + SUCATAS + BOOSTS NAS ISCAS)
+    // 4. NOVA FÓRMULA DE PESCA (SORTE ADITIVA + SUCATAS + BOOSTS NAS ISCAS)
     // ==========================================================================
     window.calculateCatch = function(rod, sinker) {
         const bait = window.GAME_STATE.currentBait ? window.BAITS.find(b => b.id === window.GAME_STATE.currentBait) : null;
-        let luckFactor = rod ? rod.luck : 1;
+        let luckFactor = rod && rod.luck ? rod.luck : 1;
         let valueMult = 1;
         let chance67 = 0.0005;
 
-        // Adiciona os atributos dos Pesos
-        if (sinker.stats && sinker.stats.luck) luckFactor += sinker.stats.luck;
-        if (sinker.stats && sinker.stats.value) valueMult *= sinker.stats.value;
-        if (sinker.stats && sinker.stats.chance67) chance67 += sinker.stats.chance67;
+        if (sinker && sinker.stats && sinker.stats.luck) luckFactor += sinker.stats.luck;
+        if (sinker && sinker.stats && sinker.stats.value) valueMult *= sinker.stats.value;
+        if (sinker && sinker.stats && sinker.stats.chance67) chance67 += sinker.stats.chance67;
         
-        if (sinker.synergy && rod && sinker.synergy.type === rod.type) {
+        if (sinker && sinker.synergy && rod && sinker.synergy.type === rod.type) {
             if (sinker.synergy.luck) luckFactor += sinker.synergy.luck;
             if (sinker.synergy.value) valueMult *= sinker.synergy.value;
             if (sinker.synergy.chance67) chance67 += sinker.synergy.chance67;
         }
 
-        // Adiciona os atributos das Iscas + OS BOOSTS PERMANENTES DAQUELA ISCA ESPECÍFICA!
         if (bait) {
             let luckBoostLvl = window.GAME_STATE.baitBoosts && window.GAME_STATE.baitBoosts[bait.id] ? window.GAME_STATE.baitBoosts[bait.id].luck || 0 : 0;
             let valBoostLvl = window.GAME_STATE.baitBoosts && window.GAME_STATE.baitBoosts[bait.id] ? window.GAME_STATE.baitBoosts[bait.id].value || 0 : 0;
 
-            if (bait.stats.luck) luckFactor += bait.stats.luck + (luckBoostLvl * 50); // Cada Boost dá +50
-            if (bait.stats.value) valueMult *= bait.stats.value + (valBoostLvl * 0.2); // Cada Boost soma +0.2 ao multiplicador
+            if (bait.stats.luck) luckFactor += bait.stats.luck + (luckBoostLvl * 50); 
+            if (bait.stats.value) valueMult *= bait.stats.value + (valBoostLvl * 0.2); 
             if (bait.stats.chance67) chance67 += bait.stats.chance67;
         }
 
@@ -288,16 +286,14 @@ function iniciarMotorDoJogo() {
 
         const rand = Math.random();
 
-        // 1. Chance de pescar Sucata (Lixo)
         let sucataChance = 0.15 - (luckFactor / 100000);
-        if (sucataChance < 0.05) sucataChance = 0.05; // Mínimo de 5% de chance de vir sucata
+        if (sucataChance < 0.05) sucataChance = 0.05; 
 
-        if (rand < sucataChance && window.SUCATAS) {
+        if (rand < sucataChance && window.SUCATAS && window.SUCATAS.length > 0) {
             const randomSucata = window.SUCATAS[Math.floor(Math.random() * window.SUCATAS.length)];
             return { type: 'sucata', data: randomSucata };
         }
 
-        // 2. Rolagem de Peixes Raros (Sorte Aditiva)
         let fishRoll = Math.random() - (luckFactor / 50000); 
         
         let caughtRarity = window.RARITIES.COMUM;
@@ -359,12 +355,12 @@ function iniciarMotorDoJogo() {
         const fishImg = safeGet('hooked-fish-img');
         if(fishImg) fishImg.style.display = 'none';
 
-        let targetDepth = Math.max(150, Math.floor((window.innerHeight - 150) * (0.3 + ((rod.id + 1) / 20 * 0.7))));
-        let speedMult = rod.speed;
+        let targetDepth = Math.max(150, Math.floor((window.innerHeight - 150) * (0.3 + (((rod.id || 0) + 1) / 20 * 0.7))));
+        let speedMult = rod && rod.speed ? rod.speed : 1;
         if (sinker.stats && sinker.stats.speed) speedMult *= sinker.stats.speed;
         if (sinker.synergy && rod && sinker.synergy.type === rod.type && sinker.synergy.speed) speedMult *= sinker.synergy.speed;
 
-        const travelTime = (Math.max(400, 2000 - (rod.id * 80)) / (speedMult || 1)) * (window.eventCastTimeMult || 1);
+        const travelTime = (Math.max(400, 2000 - ((rod.id || 0) * 80)) / (speedMult || 1)) * (window.eventCastTimeMult || 1);
         const line = safeGet('line-container');
         if(line) { line.style.transition = `height ${travelTime}ms ease-in`; line.style.height = `${targetDepth}px`; }
 
@@ -382,75 +378,90 @@ function iniciarMotorDoJogo() {
             if(line) { line.style.transition = `height ${reelTime}ms ease-out`; line.style.height = `0px`; }
 
             setTimeout(() => {
-                const div = document.createElement('div');
-                div.className = `catch-popup`;
+                // BLINDA O POPUP CONTRA ERROS QUE DEIXAVAM A TELA TRAVADA E O PEIXE PRESO
+                try {
+                    const div = document.createElement('div');
+                    div.className = `catch-popup`;
+                    div.style.zIndex = "9999"; // Força ficar sempre visível
 
-                // SISTEMA DE SUCATA (Sem cobrar moedas, vai pro Museu)
-                if (catchResult.type === 'sucata') {
-                    const scrap = catchResult.data;
-                    
-                    // Adiciona na coleção
-                    window.GAME_STATE.scrapCollection[scrap.id] = (window.GAME_STATE.scrapCollection[scrap.id] || 0) + 1;
-                    
-                    // Ganha o material
-                    window.GAME_STATE.materials[scrap.matReward] = (window.GAME_STATE.materials[scrap.matReward] || 0) + scrap.matQty;
-                    
-                    div.classList.add('border-comum'); 
-                    div.innerHTML = `
-                        <div class="fish-visual-container">
-                            <img src="${scrap.image}" class="popup-fish-img" style="filter: grayscale(0.5) sepia(0.5) contrast(0.8);" onerror="this.src='https://placehold.co/80x80?text=🗑️'">
-                        </div>
-                        <div class="popup-name" style="color: #7f8c8d;">${scrap.name}</div>
-                        <div class="popup-rarity-text" style="color: #e74c3c;">LIXO FISGADO!</div>
-                        <div class="popup-info-line" style="color:#2ecc71; font-weight:bold; margin-top:5px;">♻️ Lixo Reciclado!</div>
-                        <div class="popup-value" style="color:#2ecc71; font-size:0.85rem;">📦 +${scrap.matQty} Material de Isca</div>
-                    `;
-                } 
-                else {
-                    const fish = catchResult;
-                    window.GAME_STATE.coins += fish.value;
-                    let sealImage = null;
+                    if (catchResult.type === 'sucata') {
+                        const scrap = catchResult.data;
+                        
+                        if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
+                        window.GAME_STATE.scrapCollection[scrap.id] = (window.GAME_STATE.scrapCollection[scrap.id] || 0) + 1;
+                        
+                        window.GAME_STATE.materials[scrap.matReward] = (window.GAME_STATE.materials[scrap.matReward] || 0) + scrap.matQty;
+                        
+                        div.classList.add('border-comum'); 
+                        div.innerHTML = `
+                            <div class="fish-visual-container">
+                                <img src="${scrap.image}" class="popup-fish-img" style="filter: grayscale(0.5) sepia(0.5) contrast(0.8);" onerror="this.src='https://placehold.co/80x80?text=🗑️'">
+                            </div>
+                            <div class="popup-name" style="color: #7f8c8d; font-family:'Fredoka', sans-serif;">${scrap.name}</div>
+                            <div class="popup-rarity-text" style="color: #e74c3c;">LIXO FISGADO!</div>
+                            <div class="popup-info-line" style="color:#2ecc71; font-weight:bold; margin-top:5px;">♻️ Lixo Reciclado!</div>
+                            <div class="popup-value" style="color:#2ecc71; font-size:0.85rem;">📦 +${scrap.matQty} Material</div>
+                        `;
+                    } 
+                    else {
+                        const fish = catchResult;
+                        window.GAME_STATE.coins += (fish.value || 0);
+                        let sealImage = null;
 
-                    if (fish.size === 67) {
-                        window.GAME_STATE.collection67[fish.variation.name] = (window.GAME_STATE.collection67[fish.variation.name] || 0) + 1;
-                        sealImage = (fish.rarity.id === 'comum' || fish.rarity.id === 'raro') ? '/img/asset/67comum.jpg' : (fish.rarity.id === 'epico' || fish.rarity.id === 'lendario') ? '/img/asset/67raro.jpg' : '/img/asset/67muitoraro.webp';
-                    } else {
-                        window.GAME_STATE.collection[fish.variation.name] = (window.GAME_STATE.collection[fish.variation.name] || 0) + 1;
+                        if (fish.size === 67) {
+                            if (!window.GAME_STATE.collection67) window.GAME_STATE.collection67 = {};
+                            window.GAME_STATE.collection67[fish.variation.name] = (window.GAME_STATE.collection67[fish.variation.name] || 0) + 1;
+                            sealImage = (fish.rarity.id === 'comum' || fish.rarity.id === 'raro') ? '/img/asset/67comum.jpg' : (fish.rarity.id === 'epico' || fish.rarity.id === 'lendario') ? '/img/asset/67raro.jpg' : '/img/asset/67muitoraro.webp';
+                        } else {
+                            if (!window.GAME_STATE.collection) window.GAME_STATE.collection = {};
+                            window.GAME_STATE.collection[fish.variation.name] = (window.GAME_STATE.collection[fish.variation.name] || 0) + 1;
+                        }
+
+                        if (fish.rarity && fish.rarity.border) div.classList.add(fish.rarity.border);
+                        let timeIcon = fish.variation.time === 'day' ? '☀️ Dia' : (fish.variation.time === 'night' ? '🌙 Noite' : '🌗 Ambos');
+
+                        div.innerHTML = `
+                            <div class="fish-visual-container">
+                                <img src="${fish.variation.image}" class="${sealImage ? 'popup-fish-img fish-flash' : 'popup-fish-img'}">
+                                ${sealImage ? `<img src="${sealImage}" class="popup-seal">` : ''}
+                            </div>
+                            <div class="popup-name" style="font-family:'Fredoka', sans-serif;">${fish.variation.name}</div>
+                            <div class="popup-rarity-text ${fish.rarity ? fish.rarity.style : ''}">${fish.rarity ? fish.rarity.name : 'Desconhecido'}</div>
+                            <div class="popup-info-line">📏 ${fish.size}cm</div>
+                            <div class="popup-info-line" style="font-size: 0.75rem;">🕒 ${timeIcon}</div>
+                            <div class="popup-value">+${fish.value} 🪙</div>
+                        `;
                     }
 
-                    div.classList.add(fish.rarity.border);
-                    let timeIcon = fish.variation.time === 'day' ? '☀️ Dia' : (fish.variation.time === 'night' ? '🌙 Noite' : '🌗 Ambos');
+                    document.body.appendChild(div);
+                    
+                    setTimeout(() => { 
+                        div.style.transition = "opacity 0.5s"; 
+                        div.style.opacity = "0"; 
+                        setTimeout(() => div.remove(), 500); 
+                    }, 2500);
 
-                    div.innerHTML = `
-                        <div class="fish-visual-container">
-                            <img src="${fish.variation.image}" class="${sealImage ? 'popup-fish-img fish-flash' : 'popup-fish-img'}">
-                            ${sealImage ? `<img src="${sealImage}" class="popup-seal">` : ''}
-                        </div>
-                        <div class="popup-name">${fish.variation.name}</div>
-                        <div class="popup-rarity-text ${fish.rarity.style}">${fish.rarity.name}</div>
-                        <div class="popup-info-line">📏 ${fish.size}cm</div>
-                        <div class="popup-info-line" style="font-size: 0.75rem;">🕒 ${timeIcon}</div>
-                        <div class="popup-value">+${fish.value} 🪙</div>
-                    `;
+                } catch(e) {
+                    console.error("Erro CRÍTICO no Popup do Peixe! O jogo evitou quebrar graças à trava de segurança.", e);
+                } finally {
+                    // Independente do que aconteça no try/catch (mesmo que haja um erro catastrófico), 
+                    // o peixe sai do anzol e o botão de pescar é ativado novamente!
+                    if(fishImg) fishImg.style.display = 'none';
+                    window.GAME_STATE.isFishing = false;
+                    
+                    if(btn) { btn.disabled = false; btn.innerText = "Pescar (Espaço)"; }
+                    if(catIdle) catIdle.classList.replace('cat-fishing', 'cat-idle');
+
+                    window.updateUI(); 
+                    window.saveGame();
                 }
-
-                window.updateUI(); 
-                window.saveGame();
-                document.body.appendChild(div);
-                
-                setTimeout(() => { div.style.transition = "opacity 0.5s"; div.style.opacity = "0"; setTimeout(() => div.remove(), 500); }, 2500);
-
-                if(fishImg) fishImg.style.display = 'none';
-                window.GAME_STATE.isFishing = false;
-                if(btn) { btn.disabled = false; btn.innerText = "Pescar (Espaço)"; }
-                if(catIdle) catIdle.classList.replace('cat-fishing', 'cat-idle');
 
             }, reelTime);
         }, travelTime + 1000);
     }
 
     // ==========================================================================
-    // 6. EVENTOS DE BOTÕES E ATALHOS GERAIS
+    // 5. EVENTOS DE BOTÕES E ATALHOS GERAIS
     // ==========================================================================
     document.addEventListener('keydown', (e) => { 
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -473,10 +484,16 @@ function iniciarMotorDoJogo() {
         }
     });
 
+    // Eventos do Menu de Coleções
     safeGet('open-collection-btn')?.addEventListener('click', () => { safeGet('collection-modal')?.classList.remove('hidden'); window.renderCollection(); });
     safeGet('close-collection-btn')?.addEventListener('click', () => safeGet('collection-modal')?.classList.add('hidden'));
+
     safeGet('open-67-btn')?.addEventListener('click', () => { safeGet('collection-67-modal')?.classList.remove('hidden'); window.renderCollection67(); });
     safeGet('close-67-btn')?.addEventListener('click', () => safeGet('collection-67-modal')?.classList.add('hidden'));
+
+    // EVENTOS DO NOVO MUSEU DO LIXO
+    safeGet('open-scrap-btn')?.addEventListener('click', () => { safeGet('collection-scrap-modal')?.classList.remove('hidden'); window.renderScrapCollection(); });
+    safeGet('close-scrap-btn')?.addEventListener('click', () => safeGet('collection-scrap-modal')?.classList.add('hidden'));
 
     safeGet('sushi-btn')?.addEventListener('click', () => {
         if (!window.GAME_STATE.sushiUnlocked) {
@@ -487,7 +504,7 @@ function iniciarMotorDoJogo() {
     });
 
     // ==========================================================================
-    // 7. SISTEMA DE APRECIAÇÃO DE PEIXES E ENCICLOPÉDIA
+    // 6. SISTEMA DE APRECIAÇÃO DE PEIXES E ENCICLOPÉDIA
     // ==========================================================================
     window.showFishDetail = function(fish, rarity, count, is67) {
         const existing = document.getElementById('fish-detail-overlay');
@@ -563,6 +580,34 @@ function iniciarMotorDoJogo() {
         if(safeGet('collection-67-progress')) safeGet('collection-67-progress').innerText = `(${u}/${t})`;
     };
 
+    // A MÁGICA QUE FALTAVA: FUNÇÃO DE RENDERIZAR O MUSEU DO LIXO
+    window.renderScrapCollection = function() {
+        if (!window.SUCATAS) return;
+        const grid = safeGet('collection-scrap-grid'); 
+        if(!grid) return; 
+        grid.innerHTML = ''; 
+        let t=0, u=0;
+        
+        window.SUCATAS.forEach(scrap => { 
+            t++; 
+            const count = window.GAME_STATE.scrapCollection[scrap.id] || 0; 
+            if(count > 0) u++; 
+            
+            const isUnlocked = count > 0; 
+            const div = document.createElement('div'); 
+            div.className = `collection-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+            
+            div.innerHTML = `
+                ${isUnlocked ? `<div class="count-badge">x${count}</div>` : ''}
+                <img src="${scrap.image}" class="collection-img" style="${!isUnlocked ? 'filter: grayscale(1) opacity(0.3);' : 'filter: grayscale(0.5) sepia(0.5);'}">
+                <div style="font-size: 0.75rem; font-weight: bold; color: ${isUnlocked ? '#333' : '#999'}">${scrap.name}</div>
+                <div style="font-size: 0.65rem; color: ${isUnlocked ? '#e74c3c' : '#ccc'}">Lixo</div>
+            `;
+            grid.appendChild(div);
+        });
+        if(safeGet('collection-scrap-progress')) safeGet('collection-scrap-progress').innerText = `(${u}/${t})`;
+    };
+
     function createCard(container, fish, rarity, count, is67) {
         const isUnlocked = count > 0; 
         const div = document.createElement('div'); div.className = `collection-card ${isUnlocked ? 'unlocked' : 'locked'} ${is67 ? 'special-67' : ''}`;
@@ -584,7 +629,7 @@ function iniciarMotorDoJogo() {
     }
 
     // ==========================================================================
-    // 8. ANIMAÇÃO DE FUNDO DO OCEANO
+    // 7. ANIMAÇÃO DE FUNDO DO OCEANO
     // ==========================================================================
     const canvas = safeGet('bg-canvas');
     const ctx = canvas ? canvas.getContext('2d') : null;
@@ -638,7 +683,7 @@ function iniciarMotorDoJogo() {
     setTimeout(() => { window.updateUI(); if(canvas) animateBg(); }, 500);
 
     // ==========================================================================
-    // 9. MODO SUSHI V2 (EFEITOS VISUAIS E PEIXE PODRE)
+    // 8. MODO SUSHI V2 (EFEITOS VISUAIS E PEIXE PODRE)
     // ==========================================================================
     window.SushiMode = {
         pendingSushi: null, 
