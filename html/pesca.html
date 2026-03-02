@@ -1,50 +1,115 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gato Pescador - Mestre dos 67</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;800&display=swap"
+        rel="stylesheet">
+
     <link rel="stylesheet" href="/style/style.css">
     <link rel="stylesheet" href="/style/style2.css">
 
     <style>
-        .dropdown { position: relative; display: inline-block; }
-        .dropdown-content {
-            display: none; position: absolute; right: 0; top: 110%;
-            background-color: #ffffff; min-width: 210px;
-            box-shadow: 0px 8px 25px rgba(0,0,0,0.4); z-index: 1000;
-            border-radius: 12px; overflow: hidden; flex-direction: column;
-            animation: dropFadeIn 0.2s ease-in-out; border: 2px solid #bdc3c7;
+        .dropdown {
+            position: relative;
+            display: inline-block;
         }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 110%;
+            background-color: #ffffff;
+            min-width: 210px;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-direction: column;
+            animation: dropFadeIn 0.2s ease-in-out;
+            border: 2px solid #bdc3c7;
+        }
+
         .dropdown-content button {
-            color: #333; padding: 12px 16px; text-decoration: none; display: block;
-            background: none; border: none; width: 100%; text-align: left;
-            font-family: 'Poppins', sans-serif; font-weight: bold; font-size: 0.95rem;
-            cursor: pointer; transition: background 0.2s, color 0.2s, padding-left 0.2s;
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'Poppins', sans-serif;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, padding-left 0.2s;
             border-bottom: 1px solid #f0f0f0;
         }
-        .dropdown-content button:last-child { border-bottom: none; }
-        .dropdown-content button:hover { background-color: #f1f8ff; color: #0277BD; padding-left: 24px; }
-        
+
+        .dropdown-content button:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #f1f8ff;
+            color: #0277BD;
+            padding-left: 24px;
+        }
+
         /* MUDANÇA CRÍTICA: O MENU AGORA ABRE COM CLIQUE (CLASSE ACTIVE) EM VEZ DE HOVER */
-        .dropdown.active .dropdown-content { display: flex; }
-        .dropdown.active .dropbtn { filter: brightness(1.1); transform: scale(1.05); }
-        
-        @keyframes dropFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .dropdown.active .dropdown-content {
+            display: flex;
+        }
+
+        .dropdown.active .dropbtn {
+            filter: brightness(1.1);
+            transform: scale(1.05);
+        }
+
+        @keyframes dropFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #trilha-pescaria {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
+    <audio src="nome-do-seu-arquivo.mp3" autoplay loop id="trilha-pescaria"></audio>
+
+    <script>
+        // O script continua igual, garantindo que o som toque após o primeiro clique
+        document.addEventListener('click', function () {
+            var audio = document.getElementById('trilha-pescaria');
+            audio.play().catch(function (error) {
+                console.log("O autoplay foi bloqueado, mas tocará ao interagir.");
+            });
+        }, { once: true });
+    </script>
 
     <div id="game-container" class="day-mode">
         <canvas id="bg-canvas"></canvas>
 
         <div id="ui-layer">
-            
+
             <div class="top-bar">
                 <div class="left-group">
                     <div class="currency badge tooltip" data-tip="Suas economias">
@@ -53,10 +118,11 @@
                     </div>
                     <div id="time-indicator" class="time-badge badge">☀️ Dia</div>
                 </div>
-                
+
                 <div class="menu-buttons">
                     <div class="dropdown">
-                        <button class="icon-btn dropbtn" style="background: #8e44ad; color: white; border: 2px solid white;">🛠️ Criação ▼</button>
+                        <button class="icon-btn dropbtn"
+                            style="background: #8e44ad; color: white; border: 2px solid white;">🛠️ Criação ▼</button>
                         <div class="dropdown-content">
                             <button id="open-shop-btn">🛒 Loja de Materiais</button>
                             <button id="open-craft-btn">🔨 Forja de Equipamentos</button>
@@ -65,7 +131,8 @@
                     </div>
 
                     <div class="dropdown">
-                        <button class="icon-btn dropbtn" style="background: #3498db; color: white; border: 2px solid white;">📚 Galeria ▼</button>
+                        <button class="icon-btn dropbtn"
+                            style="background: #3498db; color: white; border: 2px solid white;">📚 Galeria ▼</button>
                         <div class="dropdown-content">
                             <button id="open-collection-btn">📖 Aquário Principal</button>
                             <button id="open-67-btn">🏆 Aquário dos 67s</button>
@@ -81,12 +148,13 @@
 
             <div class="center-stage">
                 <div id="cat-fisherman" class="cat-idle">
-                    <img src="/img/asset/gato mergulhador.png" class="cat-visual" alt="Gato Pescador" onerror="this.style.display='none'">
+                    <img src="/img/asset/gato mergulhador.png" class="cat-visual" alt="Gato Pescador"
+                        onerror="this.style.display='none'">
                     <div class="rod-visual rod-tier-0" id="rod-sinker-zone">
                         <div id="equipped-sinker-visual"></div>
                     </div>
                 </div>
-                
+
                 <div id="line-container">
                     <div id="fishing-line"></div>
                     <div id="hook-group">
@@ -123,67 +191,108 @@
                     <div class="modal-header" style="background: #8e44ad;">
                         <h2>🔨 Forja de Equipamentos</h2>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <button id="open-workbench-btn" class="icon-btn" style="background: #f1c40f; color: #333; font-size: 0.9rem; border: none; padding: 5px 15px;">⚙️ Ir para Montagem</button>
+                            <button id="open-workbench-btn" class="icon-btn"
+                                style="background: #f1c40f; color: #333; font-size: 0.9rem; border: none; padding: 5px 15px;">⚙️
+                                Ir para Montagem</button>
                             <button id="close-craft-btn" class="close-btn">&times;</button>
                         </div>
                     </div>
                     <div style="display: flex; height: 550px;">
-                        <div style="width: 75%; border-right: 2px solid #eee; overflow-y: auto; background: #f9f9f9; padding: 15px;" id="recipe-list"></div>
-                        <div style="width: 25%; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; background: #fff;" id="crafting-area">
+                        <div style="width: 75%; border-right: 2px solid #eee; overflow-y: auto; background: #f9f9f9; padding: 15px;"
+                            id="recipe-list"></div>
+                        <div style="width: 25%; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; background: #fff;"
+                            id="crafting-area">
                             <div style="font-size: 4rem; color: #ccc; margin-bottom: 20px;">🔥</div>
                             <h3 style="color: #333; margin-bottom: 10px; text-align:center;">Selecione uma planta</h3>
-                            <p style="color: #777; font-size: 0.9rem; text-align: center;">Escolha na lista ao lado para ver os materiais e forjar.</p>
+                            <p style="color: #777; font-size: 0.9rem; text-align: center;">Escolha na lista ao lado para
+                                ver os materiais e forjar.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="bait-forge-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 1050px; max-height: 90vh; border: 2px solid #27ae60; box-shadow: 0 10px 40px rgba(39, 174, 96, 0.3);">
-                    <div class="modal-header" style="background: linear-gradient(135deg, #1e8449, #2ecc71); border-bottom: 3px solid #145a32;">
-                        <h2 style="font-family: 'Fredoka', sans-serif; margin: 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">🧪 Laboratório de Síntese</h2>
+                <div class="modal-content"
+                    style="max-width: 1050px; max-height: 90vh; border: 2px solid #27ae60; box-shadow: 0 10px 40px rgba(39, 174, 96, 0.3);">
+                    <div class="modal-header"
+                        style="background: linear-gradient(135deg, #1e8449, #2ecc71); border-bottom: 3px solid #145a32;">
+                        <h2
+                            style="font-family: 'Fredoka', sans-serif; margin: 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">
+                            🧪 Laboratório de Síntese</h2>
                         <button id="close-bait-forge-btn" class="close-btn">&times;</button>
                     </div>
                     <div style="display: flex; height: 65vh; min-height: 600px;">
-                        
-                        <div style="width: 30%; border-right: 2px solid #e0e0e0; overflow-y: auto; background: #f8fbf8; padding: 15px;" id="bait-recipe-list"></div>
-                        
-                        <div style="width: 70%; display: flex; flex-direction: column; background: #ecf0f1; position: relative;">
-                            
-                            <div style="background: radial-gradient(circle at top, #2c3e50, #1a252f); padding: 25px 20px; box-shadow: inset 0 -5px 15px rgba(0,0,0,0.4); border-bottom: 4px solid #34495e;">
-                                <h3 style="color: #2ecc71; margin: 0 0 5px 0; font-family:'Fredoka', sans-serif; text-align: center; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(46,204,113,0.5);">Reator de Mistura</h3>
-                                <p style="font-size: 0.8rem; color: #bdc3c7; text-align: center; margin-top: 0; margin-bottom: 25px;">Selecione a fórmula à esquerda. Injete até 2 Catalisadores (Boosts) para mutação.</p>
-                                
-                                <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 25px;">
-                                    
-                                    <div class="equip-slot" id="bait-slot-1" style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #2ecc71; background: rgba(0,0,0,0.4); box-shadow: 0 0 15px rgba(46,204,113,0.2), inset 0 0 20px rgba(46,204,113,0.1);">
-                                        <div class="slot-title" style="color: #2ecc71; font-size:0.6rem; text-transform:uppercase;">Extrato A</div>
-                                        <div class="slot-content" id="bait-content-1" style="font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(46,204,113,0.8));">🧪</div>
+
+                        <div style="width: 30%; border-right: 2px solid #e0e0e0; overflow-y: auto; background: #f8fbf8; padding: 15px;"
+                            id="bait-recipe-list"></div>
+
+                        <div
+                            style="width: 70%; display: flex; flex-direction: column; background: #ecf0f1; position: relative;">
+
+                            <div
+                                style="background: radial-gradient(circle at top, #2c3e50, #1a252f); padding: 25px 20px; box-shadow: inset 0 -5px 15px rgba(0,0,0,0.4); border-bottom: 4px solid #34495e;">
+                                <h3
+                                    style="color: #2ecc71; margin: 0 0 5px 0; font-family:'Fredoka', sans-serif; text-align: center; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(46,204,113,0.5);">
+                                    Reator de Mistura</h3>
+                                <p
+                                    style="font-size: 0.8rem; color: #bdc3c7; text-align: center; margin-top: 0; margin-bottom: 25px;">
+                                    Selecione a fórmula à esquerda. Injete até 2 Catalisadores (Boosts) para mutação.
+                                </p>
+
+                                <div
+                                    style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 25px;">
+
+                                    <div class="equip-slot" id="bait-slot-1"
+                                        style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #2ecc71; background: rgba(0,0,0,0.4); box-shadow: 0 0 15px rgba(46,204,113,0.2), inset 0 0 20px rgba(46,204,113,0.1);">
+                                        <div class="slot-title"
+                                            style="color: #2ecc71; font-size:0.6rem; text-transform:uppercase;">Extrato
+                                            A</div>
+                                        <div class="slot-content" id="bait-content-1"
+                                            style="font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(46,204,113,0.8));">
+                                            🧪</div>
                                     </div>
                                     <div style="font-size: 1.5rem; color: #7f8c8d; font-weight:bold;">+</div>
-                                    <div class="equip-slot" id="bait-slot-2" style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #2ecc71; background: rgba(0,0,0,0.4); box-shadow: 0 0 15px rgba(46,204,113,0.2), inset 0 0 20px rgba(46,204,113,0.1);">
-                                        <div class="slot-title" style="color: #2ecc71; font-size:0.6rem; text-transform:uppercase;">Extrato B</div>
-                                        <div class="slot-content" id="bait-content-2" style="font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(46,204,113,0.8));">🧪</div>
+                                    <div class="equip-slot" id="bait-slot-2"
+                                        style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #2ecc71; background: rgba(0,0,0,0.4); box-shadow: 0 0 15px rgba(46,204,113,0.2), inset 0 0 20px rgba(46,204,113,0.1);">
+                                        <div class="slot-title"
+                                            style="color: #2ecc71; font-size:0.6rem; text-transform:uppercase;">Extrato
+                                            B</div>
+                                        <div class="slot-content" id="bait-content-2"
+                                            style="font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(46,204,113,0.8));">
+                                            🧪</div>
                                     </div>
-                                    
-                                    <div style="font-size: 1.5rem; color: #f39c12; font-weight:bold; margin-left: 15px; margin-right: 5px; text-shadow: 0 0 10px rgba(243,156,18,0.5);">⚡</div>
-                                    
-                                    <div class="equip-slot hover-boost" id="bait-slot-3" onclick="window.removeBoost(0)" style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #f39c12; background: rgba(243,156,18,0.1); cursor:pointer; box-shadow: 0 0 15px rgba(243,156,18,0.3), inset 0 0 20px rgba(243,156,18,0.1); transition: 0.2s;">
-                                        <div class="slot-title" style="color: #f39c12; font-size:0.6rem; text-transform:uppercase;">Catalisador 1</div>
-                                        <div class="slot-content" id="bait-content-3" style="font-size: 1.5rem;">Vazio</div>
+
+                                    <div
+                                        style="font-size: 1.5rem; color: #f39c12; font-weight:bold; margin-left: 15px; margin-right: 5px; text-shadow: 0 0 10px rgba(243,156,18,0.5);">
+                                        ⚡</div>
+
+                                    <div class="equip-slot hover-boost" id="bait-slot-3" onclick="window.removeBoost(0)"
+                                        style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #f39c12; background: rgba(243,156,18,0.1); cursor:pointer; box-shadow: 0 0 15px rgba(243,156,18,0.3), inset 0 0 20px rgba(243,156,18,0.1); transition: 0.2s;">
+                                        <div class="slot-title"
+                                            style="color: #f39c12; font-size:0.6rem; text-transform:uppercase;">
+                                            Catalisador 1</div>
+                                        <div class="slot-content" id="bait-content-3" style="font-size: 1.5rem;">Vazio
+                                        </div>
                                     </div>
-                                    <div class="equip-slot hover-boost" id="bait-slot-4" onclick="window.removeBoost(1)" style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #f39c12; background: rgba(243,156,18,0.1); cursor:pointer; box-shadow: 0 0 15px rgba(243,156,18,0.3), inset 0 0 20px rgba(243,156,18,0.1); transition: 0.2s;">
-                                        <div class="slot-title" style="color: #f39c12; font-size:0.6rem; text-transform:uppercase;">Catalisador 2</div>
-                                        <div class="slot-content" id="bait-content-4" style="font-size: 1.5rem;">Vazio</div>
+                                    <div class="equip-slot hover-boost" id="bait-slot-4" onclick="window.removeBoost(1)"
+                                        style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #f39c12; background: rgba(243,156,18,0.1); cursor:pointer; box-shadow: 0 0 15px rgba(243,156,18,0.3), inset 0 0 20px rgba(243,156,18,0.1); transition: 0.2s;">
+                                        <div class="slot-title"
+                                            style="color: #f39c12; font-size:0.6rem; text-transform:uppercase;">
+                                            Catalisador 2</div>
+                                        <div class="slot-content" id="bait-content-4" style="font-size: 1.5rem;">Vazio
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div id="bait-craft-result" style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                    <div style="color:#7f8c8d; font-family:'Poppins', sans-serif;">Aguardando inserção de fórmula química...</div>
+
+                                <div id="bait-craft-result"
+                                    style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <div style="color:#7f8c8d; font-family:'Poppins', sans-serif;">Aguardando inserção
+                                        de fórmula química...</div>
                                 </div>
                             </div>
-                            
-                            <div style="flex: 1; padding: 20px; overflow-y: auto; background: #f4f6f7;" id="bait-mat-inventory"></div>
+
+                            <div style="flex: 1; padding: 20px; overflow-y: auto; background: #f4f6f7;"
+                                id="bait-mat-inventory"></div>
                         </div>
                     </div>
                 </div>
@@ -195,8 +304,10 @@
                         <h2>🗑️ Museu do Lixo <span id="collection-scrap-progress" class="header-stat">(0/0)</span></h2>
                         <button id="close-scrap-btn" class="close-btn">&times;</button>
                     </div>
-                    <div style="background: #fdfdfd; padding: 10px; text-align: center; font-size: 0.85rem; color: #555; border-bottom: 2px dashed #ccc;">
-                        Oceano poluído! Pescar sucata te recompensa com <b style="color:#2ecc71;">Extratos Químicos</b> para criar Iscas no Laboratório!
+                    <div
+                        style="background: #fdfdfd; padding: 10px; text-align: center; font-size: 0.85rem; color: #555; border-bottom: 2px dashed #ccc;">
+                        Oceano poluído! Pescar sucata te recompensa com <b style="color:#2ecc71;">Extratos Químicos</b>
+                        para criar Iscas no Laboratório!
                     </div>
                     <div id="collection-scrap-grid" class="shop-grid"></div>
                 </div>
@@ -209,10 +320,14 @@
                         <button id="close-workbench-btn" class="close-btn">&times;</button>
                     </div>
                     <div style="display: flex; height: 500px;">
-                        <div style="width: 40%; background: #ecf0f1; padding: 20px; display: flex; flex-direction: column; gap: 10px; border-right: 2px solid #ccc; overflow-y: auto;">
-                            <h3 style="text-align: center; color: #333; font-family: 'Fredoka', sans-serif; margin-bottom: 0;">Seu Equipamento</h3>
-                            <p style="font-size: 0.7rem; text-align: center; color: #666; margin-top: 0;">Arraste os itens para as caixas</p>
-                            
+                        <div
+                            style="width: 40%; background: #ecf0f1; padding: 20px; display: flex; flex-direction: column; gap: 10px; border-right: 2px solid #ccc; overflow-y: auto;">
+                            <h3
+                                style="text-align: center; color: #333; font-family: 'Fredoka', sans-serif; margin-bottom: 0;">
+                                Seu Equipamento</h3>
+                            <p style="font-size: 0.7rem; text-align: center; color: #666; margin-top: 0;">Arraste os
+                                itens para as caixas</p>
+
                             <div class="equip-slot dropzone" data-droptype="rod" id="wb-rod-slot">
                                 <div class="slot-title">🎣 Vara de Pesca</div>
                                 <div class="slot-content" id="wb-rod-content">Vazio</div>
@@ -230,7 +345,7 @@
                                 <div class="slot-content" id="wb-bait-content">Vazio</div>
                             </div>
                         </div>
-                        
+
                         <div style="width: 60%; display: flex; flex-direction: column;">
                             <div class="backpack-tabs">
                                 <button class="wb-tab-btn active" data-tab="rod">Varas</button>
@@ -238,7 +353,8 @@
                                 <button class="wb-tab-btn" data-tab="knife">Facas</button>
                                 <button class="wb-tab-btn" data-tab="bait">Iscas</button>
                             </div>
-                            <div id="workbench-grid" class="shop-grid" style="flex: 1; align-content: flex-start;"></div>
+                            <div id="workbench-grid" class="shop-grid" style="flex: 1; align-content: flex-start;">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -270,7 +386,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const dropdowns = document.querySelectorAll('.dropdown');
-            
+
             // Abre o menu ao clicar
             dropdowns.forEach(d => {
                 const btn = d.querySelector('.dropbtn');
@@ -302,4 +418,5 @@
     <script src="/script/ragefish.js" defer></script>
     <script src="/script/crafting.js" defer></script>
 </body>
+
 </html>
