@@ -32,44 +32,68 @@
         .dropdown-content button:hover { background-color: #f1f8ff; color: #0277BD; padding-left: 24px; }
         .dropdown.active .dropdown-content { display: flex; }
         .dropdown.active .dropbtn { filter: brightness(1.1); transform: scale(1.05); }
+
+        /* RESET ABSOLUTO: Garante que o Sushi-btn e o Rituais ficam idênticos e não puxam lixo do style.css */
+        .dropdown-content #sushi-btn,
+        .dropdown-content #open-rituals-btn {
+            position: static !important;
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            border: none !important;
+            border-bottom: 1px solid #7822ae !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            padding: 12px 16px !important;
+            text-align: left !important;
+            transform: none !important;
+        }
+        .dropdown-content button:last-child { border-bottom: none !important; }
+        
+        /* O estado bloqueado do Sushi dentro do Dropdown */
+        .dropdown-content #sushi-btn.locked {
+            background-color: #f3f4f6 !important;
+            color: #9ca3af !important;
+            text-decoration: line-through !important;
+            cursor: not-allowed !important;
+        }
+        .dropdown-content #sushi-btn.locked:hover {
+            padding-left: 16px !important;
+        }
         
         @keyframes dropFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Scrollbars personalizadas para as áreas de coleção e forja */
         .custom-scrollbar::-webkit-scrollbar { width: 10px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 8px; border: 2px solid rgba(0,0,0,0.2); }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 
-        /* Badges de Clima e Dia Super Arredondadas */
         .badge { border-radius: 25px !important; padding: 6px 16px !important; font-family: 'Poppins', sans-serif; font-weight: bold; }
         #event-indicator { border-radius: 25px !important; padding: 6px 16px !important; font-family: 'Poppins', sans-serif; font-weight: bold; }
 
-        /* Estilo da Mesa de Montagem Tática */
-        .wb-slot-container {
-            background: rgba(15, 23, 42, 0.6);
-            border: 2px dashed #475569;
+        .uniform-btn {
+            width: 170px !important;
+            height: 45px !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            box-sizing: border-box;
             border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-            transition: all 0.2s ease;
-            text-align: center;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+            font-family: 'Poppins', sans-serif;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
         }
-        .wb-slot-container.drag-over {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6;
-            transform: scale(1.02);
+        .uniform-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+        .wb-slot-container {
+            background: rgba(15, 23, 42, 0.6); border: 2px dashed #475569; border-radius: 12px; padding: 12px; margin-bottom: 12px; transition: all 0.2s ease; text-align: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
         }
-        .wb-tab-btn {
-            flex: 1; background: transparent; color: #94a3b8; border: none; padding: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; text-transform: uppercase; font-size: 0.85rem;
-        }
-        .wb-tab-btn.active {
-            background: #3b82f6; color: #fff;
-        }
-        .wb-tab-btn:hover:not(.active) {
-            background: rgba(255,255,255,0.05); color: #e2e8f0;
-        }
+        .wb-slot-container.drag-over { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; transform: scale(1.02); }
+        .wb-tab-btn { flex: 1; background: transparent; color: #94a3b8; border: none; padding: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; text-transform: uppercase; font-size: 0.85rem; }
+        .wb-tab-btn.active { background: #3b82f6; color: #fff; }
+        .wb-tab-btn:hover:not(.active) { background: rgba(255,255,255,0.05); color: #e2e8f0; }
     </style>
 </head>
 <body>
@@ -90,16 +114,16 @@
                 
                 <div class="menu-buttons">
                     <div class="dropdown">
-                        <button class="icon-btn dropbtn" style="background: #8e44ad; color: white; border: 2px solid white;">🛠️ Criação ▼</button>
+                        <button class="icon-btn dropbtn uniform-btn" style="background: #8e44ad; color: white; border: 2px solid white;">🛠️ Criação ▼</button>
                         <div class="dropdown-content">
                             <button id="open-shop-btn">🛒 Loja de Materiais</button>
                             <button id="open-craft-btn">🔥 Grande Forja</button>
-                            <button id="open-bait-forge-btn">🧪 Laboratório de Iscas</button>
+                            <button id="open-bait-forge-btn">🧪 Laboratório Genético</button>
                         </div>
                     </div>
 
                     <div class="dropdown">
-                        <button class="icon-btn dropbtn" style="background: #3498db; color: white; border: 2px solid white;">📚 Galeria ▼</button>
+                        <button class="icon-btn dropbtn uniform-btn" style="background: #3498db; color: white; border: 2px solid white;">📚 Galeria ▼</button>
                         <div class="dropdown-content">
                             <button id="open-collection-btn">📖 Aquário Principal</button>
                             <button id="open-67-btn">🏆 Aquário dos 67s</button>
@@ -107,11 +131,21 @@
                         </div>
                     </div>
 
-                    <button id="exit-game-btn" class="icon-btn exit-btn">🚪 Sair</button>
+                    <button id="exit-game-btn" class="icon-btn exit-btn uniform-btn" style="background: #e74c3c; color: white; border: 2px solid white;">🚪 Sair</button>
                 </div>
             </div>
 
-            <button id="sushi-btn" class="locked">🍣 FAZER SUSHI</button>
+            <div id="left-sidebar" style="position: absolute; left: 20px; top: 90px; z-index: 100;">
+                <div class="dropdown">
+                    <button class="icon-btn dropbtn uniform-btn" style="background: #dc2626; color: white; border: 2px solid white;">⚔️ Ações ▼</button>
+                    <div class="dropdown-content" style="left: 0; right: auto;">
+                        <button id="sushi-btn" class="locked">🍣 Fazer Sushi</button>
+                        <button id="open-rituals-btn">🔮 Rituais Ocultos</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="orbs-container" style="position: absolute; top: 160px; left: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 50;"></div>
 
             <div class="center-stage">
                 <div id="cat-fisherman" class="cat-idle">
@@ -158,7 +192,7 @@
                     <div class="modal-header" style="background: linear-gradient(90deg, #111, #4a1505, #111); border-bottom: 3px solid #e67e22; padding: 20px 25px;">
                         <h2 style="margin: 0; color: #fff; font-family: 'Fredoka', sans-serif; text-shadow: 0 2px 5px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 10px; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 2px;">🔥 Grande Forja</h2>
                         <div style="display: flex; gap: 15px; align-items: center;">
-                            <button id="open-workbench-btn" class="icon-btn" style="background: #2c3e50; color: #f1c40f; font-weight: bold; border: 2px solid #f1c40f; padding: 8px 20px; border-radius: 8px; box-shadow: 0 4px 0 #d35400; transition: 0.2s; font-family: 'Poppins', sans-serif; text-transform: uppercase; font-size: 0.9rem;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">⚙️ Montagem</button>
+                            <button id="open-workbench-btn" class="icon-btn uniform-btn" style="width: auto !important; padding: 0 20px !important; background: #2c3e50; color: #f1c40f; border: 2px solid #f1c40f;">⚙️ Montagem</button>
                             <button id="close-craft-btn" class="close-btn" style="color: #e74c3c; text-shadow: 0 2px 4px #000; font-size: 2rem;">&times;</button>
                         </div>
                     </div>
@@ -244,10 +278,8 @@
                         <button id="close-workbench-btn" class="close-btn" style="color: #60a5fa;">&times;</button>
                     </div>
                     <div style="display: flex; height: 60vh; min-height: 500px;">
-                        
                         <div style="width: 35%; background: #1e293b; padding: 20px; overflow-y: auto; border-right: 2px solid #334155;" class="custom-scrollbar">
                             <h3 style="color: #94a3b8; font-family: 'Poppins', sans-serif; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; text-align: center; margin-bottom: 20px;">Loadout Ativo</h3>
-                            
                             <div class="wb-slot-container dropzone" data-droptype="rod" id="wb-rod-slot">
                                 <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🎣 Vara</div>
                                 <div id="wb-rod-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
@@ -269,7 +301,6 @@
                                 <div id="wb-bait-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
                             </div>
                         </div>
-                        
                         <div style="width: 65%; display: flex; flex-direction: column; background: #0f172a;">
                             <div class="backpack-tabs" style="display: flex; background: #0f172a; border-bottom: 2px solid #334155;">
                                 <button class="wb-tab-btn active" data-tab="rod">Varas</button>
@@ -280,7 +311,55 @@
                             </div>
                             <div id="workbench-grid" class="custom-scrollbar" style="flex: 1; overflow-y: auto;"></div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
+            <div id="rituals-modal" class="modal hidden">
+                <div class="modal-content" style="max-width: 1200px; max-height: 90vh; background: #09090b; border: 2px solid #8b5cf6; border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #4c1d95, #2e1065); border-bottom: 2px solid #8b5cf6; padding: 20px 30px;">
+                        <h2 style="margin: 0; color: #f5f3ff; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; display: flex; align-items: center; gap: 10px;">🔮 Rituais Ocultos</h2>
+                        <button id="close-rituals-btn" class="close-btn" style="color: #c4b5fd;">&times;</button>
+                    </div>
+                    
+                    <div style="display: flex; height: 65vh; min-height: 600px;">
+                        
+                        <div style="width: 30%; background: #18181b; border-right: 2px solid #27272a; padding: 20px; overflow-y: auto;" class="custom-scrollbar" id="ritual-list-container">
+                            </div>
+
+                        <div style="width: 70%; position: relative; background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px;">
+                            
+                            <h2 id="ritual-title" style="color: #ddd6fe; font-family: 'Fredoka', sans-serif; font-size: 2rem; text-shadow: 0 0 15px #8b5cf6; margin-bottom: 30px; margin-top: 0; text-align: center;">Selecione um Ritual</h2>
+                            
+                            <div style="display: flex; gap: 40px; justify-content: center; align-items: stretch; width: 100%; margin-bottom: 40px;">
+                                
+                                <div style="flex: 1; max-width: 350px; background: rgba(255,255,255,0.02); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 20px; text-align: center; box-shadow: inset 0 0 30px rgba(139, 92, 246, 0.1); position: relative; overflow: hidden; backdrop-filter: blur(5px);">
+                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, transparent, #8b5cf6, transparent);"></div>
+                                    <h3 style="color: #a78bfa; font-family: 'Poppins', sans-serif; font-size: 1rem; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;">Caixa de Vidro</h3>
+                                    <p style="font-size: 0.75rem; color: #71717a; margin-bottom: 20px;">Exige almas raras (Secreto ao Aurudo)</p>
+                                    
+                                    <div id="ritual-fish-req" style="display: flex; flex-direction: column; gap: 10px;">
+                                        <div style="color: #52525b; font-style: italic;">Nenhum ritual ativo.</div>
+                                    </div>
+                                </div>
+
+                                <div style="flex: 1; max-width: 350px; background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(139, 92, 246, 0.1) 100%); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 20px; text-align: center; position: relative; border-bottom: 10px solid #4c1d95;">
+                                    <h3 style="color: #a78bfa; font-family: 'Poppins', sans-serif; font-size: 1rem; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;">Pedestal</h3>
+                                    <p style="font-size: 0.75rem; color: #71717a; margin-bottom: 20px;">Exige catalisadores absolutos</p>
+                                    
+                                    <div id="ritual-mat-req" style="display: flex; flex-direction: column; gap: 10px;">
+                                        <div style="color: #52525b; font-style: italic;">Aguardando oferenda...</div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <button id="btn-execute-ritual" disabled style="background: #27272a; color: #52525b; border: 1px solid #3f3f46; padding: 15px 50px; font-size: 1.2rem; font-family: 'Fredoka', sans-serif; font-weight: bold; border-radius: 30px; text-transform: uppercase; letter-spacing: 2px; cursor: not-allowed; transition: all 0.3s;">
+                                Realizar Ritual
+                            </button>
+                            <p style="color: #ef4444; font-size: 0.8rem; font-family: 'Poppins', sans-serif; margin-top: 15px; font-weight: bold;">⚠️ Atenção: Rituais têm uma chance de falhar e destruir todos os sacrifícios!</p>
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -316,5 +395,6 @@
     <script src="/script/events.js" defer></script>
     <script src="/script/ragefish.js" defer></script>
     <script src="/script/crafting.js" defer></script>
+    <script src="/script/rituals.js" defer></script>
 </body>
 </html>

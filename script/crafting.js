@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SISTEMA DE CRAFTING, LOJA E FORJA - UI/UX ULTRA MODERNA (CORRIGIDO)
+   SISTEMA DE CRAFTING, LOJA E FORJA - UI/UX ULTRA MODERNA (SEM LORE NA LOJA)
    ========================================================================== */
 
    function safeGet(id) { return document.getElementById(id); }
@@ -182,7 +182,7 @@
                    </div>
                </div>
    
-               <div class="custom-scrollbar" style="padding: 30px; background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4=') repeat; overflow-y: auto; max-height: 65vh; scroll-behavior: auto;" id="shop-scroll-area">
+               <div class="custom-scrollbar" style="padding: 30px; background: url('/img/asset/bg-dark-pattern.png') repeat, #0f172a; overflow-y: auto; max-height: 65vh; scroll-behavior: auto;" id="shop-scroll-area">
        `;
    
        const buildCard = (item, isBoost) => {
@@ -194,18 +194,18 @@
            const canBuy100 = state.coins >= (item.price * 100);
    
            const btnStyle = (canBuy) => `flex:1; padding: 10px 0; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: ${canBuy ? `linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.05))` : 'rgba(0,0,0,0.3)'}; color: ${canBuy ? '#fff' : '#64748b'}; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: ${canBuy ? 'pointer' : 'not-allowed'}; transition: 0.2s; font-size: 0.8rem;`;
-           const loreHtml = item.lore ? `<div style="font-size:0.7rem; color:#94a3b8; margin: 10px 0; padding: 10px; line-height: 1.4; background: rgba(0,0,0,0.4); border-radius: 8px; border-left: 3px solid ${color}; text-align: left; word-wrap: break-word;">${item.lore}</div>` : '';
+   
+           // REMOVIDO A INJEÇÃO DE TEXTO (LORE) DOS MATERIAIS NA LOJA
    
            return `
-               <div class="modern-shop-card" style="box-shadow: 0 10px 30px -10px ${color}33;">
+               <div class="modern-shop-card" style="box-shadow: 0 10px 30px -10px ${color}33; display: flex; flex-direction: column;">
                    <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); color: #f8fafc; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; font-family: 'Poppins', sans-serif; border: 1px solid ${color}66; backdrop-filter: blur(4px);">
                        📦 Estoque: ${count}
                    </div>
-                   <div style="padding: 30px 20px 20px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: start; align-items: center; background: radial-gradient(circle at top, ${color}11, transparent 70%);">
-                       <div style="font-size: 4rem; margin-bottom: 15px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); animation: floatItem 6s ease-in-out infinite;">${item.icon}</div>
-                       <div style="color: #f8fafc; font-family: 'Fredoka', sans-serif; font-size: 1.2rem; font-weight: 600; line-height: 1.2; margin-bottom: 5px;">${item.name}</div>
+                   <div style="padding: 30px 20px 20px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: start; align-items: center; background: radial-gradient(circle at top, ${color}15, transparent 70%);">
+                       <div style="font-size: 3.5rem; margin-bottom: 15px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); animation: floatItem 6s ease-in-out infinite;">${item.icon}</div>
+                       <div style="color: #f8fafc; font-family: 'Fredoka', sans-serif; font-size: 1.1rem; font-weight: 600; line-height: 1.2; margin-bottom: 5px;">${item.name}</div>
                        ${isBoost ? `<div style="color: ${color}; font-size: 0.8rem; font-family: 'Poppins', sans-serif; margin-bottom: 5px; font-weight: bold; background: ${color}22; padding: 2px 10px; border-radius: 10px;">${item.desc}</div>` : ''}
-                       ${loreHtml}
                        <div style="color: #fbbf24; font-weight: 800; font-size: 1.1rem; font-family: 'Poppins', sans-serif; margin-top: auto; padding-top: 15px;">
                            🪙 ${item.price.toLocaleString()}
                        </div>
@@ -226,7 +226,7 @@
                <h3 style="margin: 0; color: #e2e8f0; font-family: 'Fredoka', sans-serif; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">💎 Matérias-Primas</h3>
                <div style="height: 1px; flex: 1; background: linear-gradient(90deg, rgba(255,255,255,0.2), transparent);"></div>
            </div>
-           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; margin-bottom: 50px; align-items: start;">
+           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 50px; align-items: stretch;">
        `;
        if(window.MATERIALS) window.MATERIALS.forEach(mat => { if (mat.price > 0) html += buildCard(mat, false); });
        html += `</div>`; 
@@ -236,7 +236,7 @@
                <h3 style="margin: 0; color: #e2e8f0; font-family: 'Fredoka', sans-serif; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">⚡ Catalisadores de Laboratório</h3>
                <div style="height: 1px; flex: 1; background: linear-gradient(90deg, rgba(255,255,255,0.2), transparent);"></div>
            </div>
-           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; align-items: start;">
+           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch;">
        `;
        if(window.BOOSTS) window.BOOSTS.forEach(bst => { html += buildCard(bst, true); });
        html += `</div></div></div>`; 
@@ -638,7 +638,7 @@
            });
            
            btn.addEventListener('mousedown', function() { this.style.transform = 'translateY(2px)'; this.style.boxShadow = 'none'; });
-           btn.addEventListener('mouseup', function() { this.style.transform = 'translateY(0)'; this.style.boxShadow = '0 10px 20px -5px rgba(16, 185, 129, 0.5), inset 0 2px 4px rgba(255,255,255,0.3)'; });
+           btn.addEventListener('mouseup', function() { this.style.transform = 'translateY(0)'; this.style.boxShadow = '0 8px 15px -5px rgba(16, 185, 129, 0.5), inset 0 2px 4px rgba(255,255,255,0.3)'; });
        }
    }
    
@@ -646,7 +646,6 @@
        const inv = safeGet('bait-mat-inventory');
        if (!inv || !window.MATERIALS) return;
        
-       // FIX: Renderiza corretamente os extratos do lixo
        let html = `
            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 15px;">
                <h4 style="margin:0; color:#f8fafc; font-family:'Fredoka'; font-size:1.1rem;">📦 Armazém de Extratos</h4>
@@ -720,7 +719,6 @@
            
            const div = document.createElement('div'); 
            div.className = `draggable-item`; 
-           // A propriedade draggable permite agarrar o item no PC
            div.draggable = true; 
            div.dataset.type = type; 
            div.dataset.id = id; 
@@ -752,13 +750,8 @@
                </div>
            `; 
            
-           // EVENTOS DE DRAG NATIVOS
            div.addEventListener('dragstart', handleDragStart); 
-           
-           // NOVO: SUPORTE PARA CLIQUE DUPLO (Equipa instantaneamente sem precisar arrastar)
-           div.addEventListener('dblclick', () => {
-               if (!isEq) equipItem(type, id);
-           });
+           div.addEventListener('dblclick', () => { if (!isEq) equipItem(type, id); });
    
            grid.appendChild(div); 
        };
@@ -808,21 +801,8 @@
        } else {
            if(baitDisplay) baitDisplay.innerHTML = "<span style='color:#64748b;'>Vazio</span>";
        }
-   
-       document.querySelectorAll('.wb-tab-btn').forEach(btn => {
-           btn.style.background = btn.classList.contains('active') ? '#3b82f6' : '#1e293b';
-           btn.style.color = btn.classList.contains('active') ? '#fff' : '#94a3b8';
-           btn.style.border = 'none';
-           btn.style.padding = '10px 20px';
-           btn.style.borderRadius = '8px 8px 0 0';
-           btn.style.fontFamily = "'Poppins', sans-serif";
-           btn.style.fontWeight = '700';
-           btn.style.cursor = 'pointer';
-           btn.style.transition = '0.2s';
-       });
    }
    
-   // LÓGICA DE EQUIPAR O ITEM (Usada pelo Drag e pelo Duplo Clique)
    function equipItem(type, id) {
        if (type === 'rod') window.GAME_STATE.currentRodIndex = parseInt(id);
        if (type === 'sinker') window.GAME_STATE.currentSinker = id;
@@ -831,7 +811,7 @@
        if (type === 'bait') window.GAME_STATE.currentBait = id;
        
        updateWorkbenchSlots();
-       renderWorkbench(type); // O "tab" é igual ao tipo de item
+       renderWorkbench(type);
    
        if(typeof window.updateUI === "function") window.updateUI(); 
        if(typeof window.saveGame === "function") window.saveGame();
@@ -846,7 +826,6 @@
        e.currentTarget.style.opacity = '0.4'; 
    }
    
-   // FIX: A query agora pesquisa exatamente pela classe .dropzone (independente do nome do div no HTML)
    document.addEventListener('DOMContentLoaded', () => {
        const dropzones = document.querySelectorAll('.dropzone');
    

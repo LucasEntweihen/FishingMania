@@ -102,7 +102,6 @@
             'lamina_infinito': { name: "Lâmina do Infinito", req: { madeira: 2500, poeira_cosmica: 15 } },
             'faca_criador': { name: "A Faca do Criador", req: { madeira: 5000, poeira_cosmica: 30, essencia: 20 } }
         },
-        // O NOVO SISTEMA DE ANZÓIS COM PREÇOS ABSURDOS
         hooks: {
             'anzol_sucata': { name: "Anzol Magnético", req: { metal: 50, plastico: 100 } },
             'anzol_comum': { name: "Anzol Rústico", req: { madeira: 500, fio: 500 } },
@@ -119,7 +118,6 @@
 
 window.MATERIALS = window.CRAFTING_DB.materials;
 
-// OS ANZÓIS E SEUS PODERES
 window.HOOKS = [
     { id: 'anzol_padrao', name: 'Anzol Padrão', color: '#bdc3c7', target: 'padrao', power: 0, lore: "⚙️ Função: Pescar o que vier. ✨ Diferencial: Nenhum. 📖 Origem: Veio agarrado à sua primeira vara." },
     { id: 'anzol_sucata', name: 'Anzol Magnético', color: '#7f8c8d', target: 'sucata', power: 0.50, lore: "⚙️ Função: Focar no Lixo (+50%). ✨ Diferencial: Atrai detritos pesados do fundo. 📖 Origem: Feito de ímãs de neodímio arrancados de satélites." },
@@ -239,6 +237,7 @@ window.BAITS = [
 ];
 
 window.RARITIES = {
+    // A NOVA RARIDADE ABSURDA
     COMUM: { id: 'comum', prob: 0.35, mult: 1, style: 'text-comum', border: 'border-comum', name: 'Comum', variations: [
         { name: 'Peixe Genérico', image: '/img/peixe/Genericfish001.webp', time: 'all', events: ["all"] },
         { name: 'Bombardilo', image: '/img/peixe/bombardilo crocarilho.webp', time: 'day', events: ["all"] },
@@ -286,15 +285,20 @@ window.RARITIES = {
         { name: 'Alien Fish REF!!!', image: '/img/peixe/alien_ref_fish.png', time: 'night', events: ["ouro", "frenesi", "misticismo"] }
     ]},
     DIVINO: { id: 'divino', prob: 0.001, mult: 500, style: 'text-divino', border: 'border-divino', name: 'Divino', variations: [
-        { name: 'Quase Arco-íris', image: '/img/peixe/Semi-rainbowfish.png', time: 'day', events: ["mistiscismo"] },
+        { name: 'Quase Arco-íris', image: '/img/peixe/Semi-rainbowfish.png', time: 'day', events: ["misticismo"] },
         { name: 'Golfizza Pescado', image: '/img/peixe/golfizza.gif', time: 'night', events: ["all"] },
         { name: 'Só mais um pouco', image: '/img/peixe/meus porrinhas.png', time: 'night', events: ["all"] },
-        { name: 'Ex rei dos mares (fraco)', image: '/img/peixe/CARALHOFODAA.png', time: 'night', events: ["tempestade"] },
-        { name: 'Salmão de lama', image: '/img/peixe/salmao_argila.gif', time: 'night', events: ["ouro", "mistiscismo"] }
+        { name: 'Ex rei dos mares (fraco)', image: '/img/peixe/CARALHOFODAA.png', time: 'night', events: ["tempestade", "mar_bestas"] },
+        { name: 'Salmão de lama', image: '/img/peixe/salmao_argila.gif', time: 'night', events: ["ouro", "misticismo"] }
     ]},
-    AURUDO: { id: 'aurudo', prob: 0.00005, mult: 5000, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
+    AURUDO: { id: 'aurudo', prob: 0.00005, mult: 100000, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
         { name: 'Triolho Diliça', image: '/img/peixe/triolho.webp', time: 'all', events: ["all"] },
         { name: 'Abueno Pasaber', image: '/img/peixe/abuenopasaber.png', time: 'all', events: ["all"] }
+    ]},
+    BESTIAL: { id: 'bestial', prob: 0.00001, mult: 15000, style: 'text-bestial', border: 'border-bestial', name: 'Bestial', variations: [
+        { name: 'O Leviatã Maligno', image: '/img/peixe/LENDAS/esmGA BOLAS.png', time: 'night', events: ["mar_bestas"] },
+        { name: 'A Vaca Marítima', image: '/img/peixe/LENDAS/maedorenan.png', time: 'day', events: ["mar_bestas"] },
+        { name: 'Jörmungandr', image: '/img/peixe/LENDAS/melbil.aw.png', time: 'all', events: ["mar_bestas"] }
     ]}
 };
 

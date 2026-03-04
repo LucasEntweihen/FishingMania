@@ -29,9 +29,6 @@ try {
     console.error("Erro ao inicializar Firebase. Jogo rodando localmente.", error);
 }
 
-// ==========================================================================
-// 2. CARREGAMENTO INTELIGENTE E INÍCIO DO JOGO
-// ==========================================================================
 async function carregarBancoDeDadosEIniciar() {
     if (window.CRAFTING_DB && window.KNIVES && window.RARITIES && window.HOOKS) {
         iniciarMotorDoJogo();
@@ -60,125 +57,66 @@ async function carregarBancoDeDadosEIniciar() {
     }
 }
 
-// ==========================================================================
-// INJEÇÃO DE ESTILOS PARA OS AQUÁRIOS E SUSHI
-// ==========================================================================
 function injectScriptStyles() {
     if (document.getElementById('modern-script-styles')) return;
     const style = document.createElement('style');
     style.id = 'modern-script-styles';
     style.innerHTML = `
         .modern-collection-card {
-            background: rgba(15, 23, 42, 0.8) !important;
-            border: 1px solid rgba(255,255,255,0.05) !important;
-            border-radius: 16px !important;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 2px 10px rgba(0,0,0,0.5) !important;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 15px 10px;
-            text-align: center;
-            min-height: 140px;
+            background: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(255,255,255,0.05) !important;
+            border-radius: 16px !important; box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 2px 10px rgba(0,0,0,0.5) !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px;
+            text-align: center; min-height: 140px;
         }
         .modern-collection-card.unlocked:hover {
-            transform: translateY(-6px) scale(1.03) !important;
-            box-shadow: 0 15px 25px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.1) !important;
-            z-index: 10;
+            transform: translateY(-6px) scale(1.03) !important; box-shadow: 0 15px 25px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.1) !important; z-index: 10;
         }
-        .modern-collection-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-            background: var(--card-color, #444);
-        }
+        .modern-collection-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--card-color, #444); }
         
-        @keyframes lootDropEnter {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            70% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
+        @keyframes lootDropEnter { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 70% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        
         .modern-loot-popup {
-            position: fixed; top: 50%; left: 50%;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 2px solid var(--loot-color, #fff);
-            border-radius: 20px; padding: 30px; text-align: center;
+            position: fixed; top: 50%; left: 50%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--loot-color, #fff); border-radius: 20px; padding: 30px; text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px var(--loot-glow, rgba(255,255,255,0.1));
-            animation: lootDropEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            z-index: 999999; pointer-events: none;
-            min-width: 250px;
+            animation: lootDropEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; z-index: 999999; pointer-events: none; min-width: 250px;
         }
 
-        .rotten-fish {
-            filter: drop-shadow(0 15px 20px rgba(0,0,0,0.8)) hue-rotate(260deg) saturate(3) contrast(1.3) brightness(0.6) sepia(0.5) !important;
-        }
+        .rotten-fish { filter: drop-shadow(0 15px 20px rgba(0,0,0,0.8)) hue-rotate(260deg) saturate(3) contrast(1.3) brightness(0.6) sepia(0.5) !important; }
     `;
     document.head.appendChild(style);
 }
 
-// ==========================================================================
-// 3. MOTOR PRINCIPAL DO JOGO
-// ==========================================================================
 function iniciarMotorDoJogo() {
     injectScriptStyles();
 
     window.GAME_STATE = {
-        coins: 0,
-        currentRodIndex: 0,
-        isFishing: false,
-        rods: [],
-        ownedRods: [0],
-        ownedSinkers: ['chumbo'],
-        currentSinker: 'chumbo',
-        ownedHooks: ['anzol_padrao'],
-        currentHook: 'anzol_padrao',
-        ownedKnives: ['faca_cozinha'],
-        currentKnife: 'faca_cozinha',
-        baitInventory: {},
-        currentBait: null,
-        loadedImages: {},
-        collection: {},
-        collection67: {},
-        scrapCollection: {}, 
-        isDay: true,
-        materials: {},
-        sushiUnlocked: false 
+        coins: 0, currentRodIndex: 0, isFishing: false, rods: [], ownedRods: [0], ownedSinkers: ['chumbo'], currentSinker: 'chumbo',
+        ownedHooks: ['anzol_padrao'], currentHook: 'anzol_padrao', ownedKnives: ['faca_cozinha'], currentKnife: 'faca_cozinha',
+        baitInventory: {}, currentBait: null, loadedImages: {}, collection: {}, collection67: {}, scrapCollection: {}, 
+        isDay: true, materials: {}, sushiUnlocked: false 
     };
 
-    if (window.ROD_TEMPLATES) {
-        window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
-    }
+    if (window.ROD_TEMPLATES) { window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl })); }
 
     window.showToast = function(title, message, type = 'info') {
         let container = document.getElementById('toast-container');
         if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container';
+            container = document.createElement('div'); container.id = 'toast-container';
             container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
             document.body.appendChild(container);
         }
 
         const toast = document.createElement('div');
-        let bgColor = 'linear-gradient(135deg, #1e293b, #0f172a)';
-        let icon = 'ℹ️';
-        let borderColor = 'rgba(255,255,255,0.1)';
-        
+        let bgColor = 'linear-gradient(135deg, #1e293b, #0f172a)'; let icon = 'ℹ️'; let borderColor = 'rgba(255,255,255,0.1)';
         if (type === 'success') { bgColor = 'linear-gradient(135deg, #065f46, #022c22)'; icon = '✅'; borderColor = '#10b981'; }
         if (type === 'error') { bgColor = 'linear-gradient(135deg, #991b1b, #450a0a)'; icon = '❌'; borderColor = '#ef4444'; }
         if (type === 'warning') { bgColor = 'linear-gradient(135deg, #92400e, #451a03)'; icon = '⚠️'; borderColor = '#f59e0b'; }
 
         toast.style.cssText = `
-            background: ${bgColor}; color: #f8fafc; padding: 15px 20px; border-radius: 12px;
-            font-family: 'Poppins', sans-serif; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            display: flex; align-items: center; gap: 15px; transform: translateX(120%);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-width: 320px; border: 1px solid ${borderColor};
-            pointer-events: auto; position: relative; overflow: hidden; cursor: pointer;
-            will-change: transform;
+            background: ${bgColor}; color: #f8fafc; padding: 15px 20px; border-radius: 12px; font-family: 'Poppins', sans-serif; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 15px; transform: translateX(120%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-width: 320px; border: 1px solid ${borderColor}; pointer-events: auto; position: relative; overflow: hidden; cursor: pointer; will-change: transform;
         `;
-
         const formattedMsg = message.replace(/\n/g, '<br>');
         toast.innerHTML = `
             <div style="font-size: 2rem; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">${icon}</div>
@@ -190,26 +128,17 @@ function iniciarMotorDoJogo() {
         `;
 
         container.appendChild(toast);
-
         requestAnimationFrame(() => {
             toast.style.transform = 'translateX(0)';
             setTimeout(() => { const pb = toast.querySelector('.toast-progress'); if(pb) pb.style.width = '0%'; }, 50);
         });
 
-        const removeToast = () => {
-            toast.style.transform = 'translateX(120%)';
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 400);
-        };
-
-        toast.addEventListener('click', removeToast);
-        setTimeout(removeToast, 4500);
+        const removeToast = () => { toast.style.transform = 'translateX(120%)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); };
+        toast.addEventListener('click', removeToast); setTimeout(removeToast, 4500);
     };
 
     window.customAlert = function(msg, isSuccess) {
-        let parts = msg.split('\n\n');
-        let title = isSuccess ? "Sucesso!" : "Atenção!";
-        let body = msg;
+        let parts = msg.split('\n\n'); let title = isSuccess ? "Sucesso!" : "Atenção!"; let body = msg;
         if (parts.length > 1) { title = parts[0]; body = parts.slice(1).join('<br><br>'); }
         window.showToast(title, body, isSuccess ? 'success' : 'error');
     };
@@ -217,15 +146,9 @@ function iniciarMotorDoJogo() {
     function preloadImages() {
         if (!window.RARITIES) return;
         Object.values(window.RARITIES).forEach(rarity => {
-            rarity.variations.forEach(fish => {
-                const img = new Image();
-                img.src = fish.image;
-                window.GAME_STATE.loadedImages[fish.image] = img;
-            });
+            rarity.variations.forEach(fish => { const img = new Image(); img.src = fish.image; window.GAME_STATE.loadedImages[fish.image] = img; });
         });
-        ['/img/asset/67comum.jpg', '/img/asset/67raro.jpg', '/img/asset/67muitoraro.webp'].forEach(src => {
-            const img = new Image(); img.src = src;
-        });
+        ['/img/asset/67comum.jpg', '/img/asset/67raro.jpg', '/img/asset/67muitoraro.webp'].forEach(src => { const img = new Image(); img.src = src; });
     }
     preloadImages();
 
@@ -233,15 +156,11 @@ function iniciarMotorDoJogo() {
 
     window.updateUI = function() {
         if(safeGet('cat-coins')) safeGet('cat-coins').innerText = window.GAME_STATE.coins.toLocaleString();
-        
         const rod = window.GAME_STATE.rods.find(r => r.id === window.GAME_STATE.currentRodIndex) || window.GAME_STATE.rods[0];
         if(safeGet('current-rod-display')) safeGet('current-rod-display').innerText = `Vara: ${rod ? rod.name : 'Nenhuma'}`;
         
         const catVisual = safeGet('cat-fisherman');
-        if (catVisual) {
-            const rodVisual = catVisual.querySelector('.rod-visual');
-            if (rodVisual) rodVisual.className = `rod-visual dropzone rod-tier-${rod ? rod.id : 0}`;
-        }
+        if (catVisual) { const rodVisual = catVisual.querySelector('.rod-visual'); if (rodVisual) rodVisual.className = `rod-visual dropzone rod-tier-${rod ? rod.id : 0}`; }
 
         const sinker = (window.SINKERS || []).find(s => s.id === window.GAME_STATE.currentSinker) || (window.SINKERS ? window.SINKERS[0] : {name: 'Padrão'});
         if(safeGet('sinker-slot')) safeGet('sinker-slot').innerText = `🪨 ${sinker.name}`;
@@ -249,66 +168,28 @@ function iniciarMotorDoJogo() {
 
         const hookId = window.GAME_STATE.currentHook || 'anzol_padrao';
         const hookData = (window.HOOKS || []).find(h => h.id === hookId) || {name: 'Anzol Padrão', color: '#bdc3c7'};
-
         if(safeGet('hook-display-slot')) safeGet('hook-display-slot').innerHTML = `<span style="color:${hookData.color}; font-weight:bold;">🪝 ${hookData.name}</span>`;
-
         const hookVisual = safeGet('hook');
-        if (hookVisual) {
-            hookVisual.style.color = hookData.color;
-            hookVisual.style.textShadow = `0 0 15px ${hookData.color}, 0 2px 4px rgba(0,0,0,0.8)`;
-        }
+        if (hookVisual) { hookVisual.style.color = hookData.color; hookVisual.style.textShadow = `0 0 15px ${hookData.color}, 0 2px 4px rgba(0,0,0,0.8)`; }
 
-        const baitDisplay = safeGet('bait-slot');
-        const baitVis = safeGet('bait-visual');
+        const baitDisplay = safeGet('bait-slot'); const baitVis = safeGet('bait-visual');
         if (window.GAME_STATE.currentBait && window.BAITS) {
             const bait = window.BAITS.find(b => b.id === window.GAME_STATE.currentBait);
-            if (bait && baitDisplay && baitVis) {
-                baitDisplay.innerText = `${bait.icon} ${bait.name} (x${window.GAME_STATE.baitInventory[bait.id] || 0})`;
-                baitVis.innerText = bait.icon;
-            }
+            if (bait && baitDisplay && baitVis) { baitDisplay.innerText = `${bait.icon} ${bait.name} (x${window.GAME_STATE.baitInventory[bait.id] || 0})`; baitVis.innerText = bait.icon; }
         } else {
-            if(baitDisplay) baitDisplay.innerText = "🪝 Sem Isca";
-            if(baitVis) baitVis.innerText = "";
+            if(baitDisplay) baitDisplay.innerText = "🪝 Sem Isca"; if(baitVis) baitVis.innerText = "";
         }
 
         const sushiBtn = safeGet('sushi-btn');
-        if (sushiBtn) {
-            if (window.GAME_STATE.sushiUnlocked) {
-                sushiBtn.classList.remove('locked');
-            } else {
-                sushiBtn.classList.add('locked');
-            }
-        }
+        if (sushiBtn) { if (window.GAME_STATE.sushiUnlocked) { sushiBtn.classList.remove('locked'); } else { sushiBtn.classList.add('locked'); } }
     };
 
     window.saveGame = function() {
-        if (isGuestMode) {
-            if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Convidado";
-            return; 
-        }
-        const playerSave = {
-            coins: window.GAME_STATE.coins,
-            currentRodIndex: window.GAME_STATE.currentRodIndex,
-            ownedRods: window.GAME_STATE.ownedRods,
-            ownedSinkers: window.GAME_STATE.ownedSinkers,
-            currentSinker: window.GAME_STATE.currentSinker,
-            ownedHooks: window.GAME_STATE.ownedHooks,
-            currentHook: window.GAME_STATE.currentHook,
-            ownedKnives: window.GAME_STATE.ownedKnives,
-            currentKnife: window.GAME_STATE.currentKnife,
-            baitInventory: window.GAME_STATE.baitInventory,
-            currentBait: window.GAME_STATE.currentBait,
-            collection: window.GAME_STATE.collection,
-            collection67: window.GAME_STATE.collection67,
-            scrapCollection: window.GAME_STATE.scrapCollection, 
-            materials: window.GAME_STATE.materials,
-            sushiUnlocked: window.GAME_STATE.sushiUnlocked
-        };
+        if (isGuestMode) { if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Convidado"; return; }
+        const playerSave = { coins: window.GAME_STATE.coins, currentRodIndex: window.GAME_STATE.currentRodIndex, ownedRods: window.GAME_STATE.ownedRods, ownedSinkers: window.GAME_STATE.ownedSinkers, currentSinker: window.GAME_STATE.currentSinker, ownedHooks: window.GAME_STATE.ownedHooks, currentHook: window.GAME_STATE.currentHook, ownedKnives: window.GAME_STATE.ownedKnives, currentKnife: window.GAME_STATE.currentKnife, baitInventory: window.GAME_STATE.baitInventory, currentBait: window.GAME_STATE.currentBait, collection: window.GAME_STATE.collection, collection67: window.GAME_STATE.collection67, scrapCollection: window.GAME_STATE.scrapCollection, materials: window.GAME_STATE.materials, sushiUnlocked: window.GAME_STATE.sushiUnlocked };
         if (currentUser && db) {
             localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
-            set(ref(db, 'users/' + currentUser.uid), playerSave)
-                .then(() => { if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Salvo"; })
-                .catch((e) => console.error("Erro ao salvar:", e));
+            set(ref(db, 'users/' + currentUser.uid), playerSave).then(() => { if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Salvo"; }).catch((e) => console.error("Erro ao salvar:", e));
         } else {
             localStorage.setItem('gatoPescadorSave_visitante', JSON.stringify(playerSave));
             if(safeGet('save-status')) safeGet('save-status').innerText = "✅ Salvo Local";
@@ -316,11 +197,7 @@ function iniciarMotorDoJogo() {
     };
 
     function loadGame() {
-        if (isGuestMode) {
-            if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Modo Convidado";
-            window.updateUI();
-            return; 
-        }
+        if (isGuestMode) { if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Modo Convidado"; window.updateUI(); return; }
 
         if (!currentUser || !db) {
             let localData = localStorage.getItem('gatoPescadorSave_visitante') || localStorage.getItem('gatoPescadorSave');
@@ -336,8 +213,7 @@ function iniciarMotorDoJogo() {
                     if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Visitante";
                 } catch (e) { console.error("Save corrompido"); }
             }
-            window.updateUI();
-            return;
+            window.updateUI(); return;
         }
 
         if(safeGet('save-status')) safeGet('save-status').innerText = "🔄 Nuvem...";
@@ -427,7 +303,16 @@ function iniciarMotorDoJogo() {
 
         if (!bypassedByHook) {
             let fishRoll = Math.random() - (luckFactor / 25000); 
-            if (fishRoll < window.RARITIES.AURUDO.prob) caughtRarity = window.RARITIES.AURUDO;
+
+            // CÓDIGO INJETADO DO MAR DAS BESTAS!
+            // Diminui muito as chances de cair nas faixas das raridades fracas
+            if (window.currentEventID === 'mar_bestas') {
+                fishRoll -= 0.15; 
+            }
+
+            // O BESTIAL foi integrado no fluxo normal para que o Mar das Bestas ou a mega-sorte atinjam este nível!
+            if (window.currentEventID === 'mar_bestas' && fishRoll < window.RARITIES.BESTIAL.prob) caughtRarity = window.RARITIES.BESTIAL;
+            else if (fishRoll < window.RARITIES.AURUDO.prob) caughtRarity = window.RARITIES.AURUDO;
             else if (fishRoll < window.RARITIES.DIVINO.prob) caughtRarity = window.RARITIES.DIVINO;
             else if (fishRoll < window.RARITIES.SECRETO.prob) caughtRarity = window.RARITIES.SECRETO;
             else if (fishRoll < window.RARITIES.MITICO.prob) caughtRarity = window.RARITIES.MITICO;
@@ -459,6 +344,7 @@ function iniciarMotorDoJogo() {
 
         let validVariations = getValidFishes(caughtRarity);
 
+        // SALVAGUARDA DE EMERGÊNCIA (Impede crashes se o BESTIAL for sorteado mas ainda não tiver peixes no JSON)
         if (validVariations.length === 0) {
             caughtRarity = window.RARITIES.COMUM;
             validVariations = getValidFishes(caughtRarity);
@@ -549,7 +435,7 @@ function iniciarMotorDoJogo() {
 
             setTimeout(() => {
                 try {
-                    const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a' };
+                    const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'bestial': '#7f1d1d' };
 
                     const div = document.createElement('div');
                     div.className = `modern-loot-popup`;
@@ -660,9 +546,6 @@ function iniciarMotorDoJogo() {
         if (window.SushiMode) window.SushiMode.open();
     });
 
-    // ==========================================================================
-    // 7. SISTEMA DE APRECIAÇÃO DE PEIXES E AQUÁRIOS (CORREÇÃO DE SCROLL FIXO)
-    // ==========================================================================
     window.showFishDetail = function(fish, rarity, count, is67) {
         const existing = document.getElementById('fish-detail-overlay');
         if (existing) existing.remove();
@@ -677,7 +560,7 @@ function iniciarMotorDoJogo() {
             seal = `<img src="${s}" style="position:absolute; bottom:-20px; right:-20px; width:110px; height:110px; object-fit:contain; transform:rotate(15deg); filter:drop-shadow(2px 8px 10px rgba(0,0,0,0.8));">`;
         }
 
-        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a' };
+        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'bestial': '#7f1d1d' };
         const borderColor = colors[rarity.id] || '#ffffff';
 
         let eventsText = "Qualquer Clima";
@@ -715,26 +598,17 @@ function iniciarMotorDoJogo() {
         closeBtn.onmouseover = () => { closeBtn.style.color = '#fff'; closeBtn.style.transform = 'scale(1.2)'; };
         closeBtn.onmouseout = () => { closeBtn.style.color = 'rgba(255,255,255,0.4)'; closeBtn.style.transform = 'scale(1)'; };
 
-        requestAnimationFrame(() => { 
-            overlay.style.opacity = '1'; 
-            box.style.transform = 'scale(1) translateY(0)'; 
-        });
-
-        const closeDetail = () => { 
-            overlay.style.opacity = '0'; 
-            box.style.transform = 'scale(0.95) translateY(20px)'; 
-            setTimeout(() => overlay.remove(), 400); 
-        };
+        requestAnimationFrame(() => { overlay.style.opacity = '1'; box.style.transform = 'scale(1) translateY(0)'; });
+        const closeDetail = () => { overlay.style.opacity = '0'; box.style.transform = 'scale(0.95) translateY(20px)'; setTimeout(() => overlay.remove(), 400); };
         closeBtn.addEventListener('click', closeDetail);
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDetail(); });
     };
 
     function getCollectionColor(rarityId) {
-        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a' };
+        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'bestial': '#7f1d1d' };
         return colors[rarityId] || '#fff';
     }
 
-    // FIX: O `cssText` foi refeito para INCLUIR o `overflow-y` e o `max-height` para que a tela possa rolar
     window.renderCollection = function() {
         if (!window.RARITIES) return;
         const grid = safeGet('collection-grid'); if(!grid) return; 
@@ -828,9 +702,6 @@ function iniciarMotorDoJogo() {
         container.appendChild(div);
     }
 
-    // ==========================================================================
-    // 8. ANIMAÇÃO DE FUNDO DO OCEANO
-    // ==========================================================================
     const canvas = safeGet('bg-canvas');
     const ctx = canvas ? canvas.getContext('2d', { alpha: false }) : null; 
     const fishes = [];
@@ -845,7 +716,8 @@ function iniciarMotorDoJogo() {
             if (!r) return;
             if(rands < 0.005) r = window.RARITIES.AURUDO; else if(rands < 0.005) r = window.RARITIES.DIVINO; else if(rands < 0.01) r = window.RARITIES.SECRETO; else if(rands < 0.03) r = window.RARITIES.MITICO; else if(rands < 0.08) r = window.RARITIES.LENDARIO; else if(rands < 0.20) r = window.RARITIES.EPICO; else if(rands < 0.40) r = window.RARITIES.RARO;
             const valid = r.variations.filter(v => v.time === 'all' || (window.GAME_STATE.isDay && v.time === 'day') || (!window.GAME_STATE.isDay && v.time === 'night'));
-            this.specificImage = (valid.length > 0 ? valid[Math.floor(Math.random() * valid.length)] : r.variations[0]).image;
+            if (valid.length === 0) return; // Evita o erro se a variação for do Bestial e estiver vazia
+            this.specificImage = valid[Math.floor(Math.random() * valid.length)].image;
             this.depth = Math.random(); this.direction = Math.random() > 0.5 ? 1 : -1;
             this.y = canvas ? Math.random() * (canvas.height - 200) + 200 : 300;
             this.width = (40 + Math.min(60, r.mult * 0.8)) * (0.4 + (this.depth * 0.6));
@@ -857,7 +729,7 @@ function iniciarMotorDoJogo() {
             if (canvas && ((this.direction === 1 && this.x > canvas.width + 300) || (this.direction === -1 && this.x < -300))) this.reset(); 
         }
         draw() {
-            if(!ctx) return; 
+            if(!ctx || !this.specificImage) return; 
             const renderable = window.GAME_STATE.loadedImages[this.specificImage];
             if (!renderable) return;
             const w = renderable.naturalWidth || renderable.width; const h_orig = renderable.naturalHeight || renderable.height;
@@ -887,9 +759,6 @@ function iniciarMotorDoJogo() {
     }, 45000);
     setTimeout(() => { window.updateUI(); if(canvas) animateBg(); }, 500);
 
-    // ==========================================================================
-    // 9. MODO SUSHI V3 (SISTEMA DE PONTOS VITAIS E PEIXE PODRE)
-    // ==========================================================================
     window.SushiMode = {
         pendingSushi: null, 
         targets: [],
@@ -989,7 +858,8 @@ function iniciarMotorDoJogo() {
                 'mitico': { coins: 15000, mats: ['perola', 'carbono'], matQty: 3 },
                 'secreto': { coins: 60000, mats: ['meteorito', 'cristal'], matQty: 3 },
                 'divino': { coins: 300000, mats: ['materia_escura', 'essencia'], matQty: 4 },
-                'aurudo': { coins: 10000000, mats: ['poeira_cosmica'], matQty: 5 }
+                'aurudo': { coins: 10000000, mats: ['poeira_cosmica'], matQty: 5 },
+                'bestial': { coins: 50000000, mats: ['tecido_realidade'], matQty: 10 } 
             };
             return tables[rarityId] || tables['comum'];
         },
