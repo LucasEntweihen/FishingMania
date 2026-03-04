@@ -3,107 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gato Pescador - Um jogo de pesca relaxante e dinâmico. Colecione peixes raros, desbloqueie varas lendárias e ajude o gatinho a se tornar o mestre dos mares.">
-    <meta name="keywords" content="jogo de pesca, cat coins, jogo relaxante, gato pescador, html5 games, pesca rpg, idle game">
-    <meta name="author" content="Gato Pescador Studios">
-    <title>Gato Pescador - Aventura Oceânica</title>
+    <meta name="description" content="Gato Pescador - Um RPG de pesca estratégico, incremental e sombrio. Colecione peixes míticos, forje equipamentos divinos, realize rituais ocultos e enfrente o Mar das Bestas.">
+    <meta name="keywords" content="jogo de pesca, cat coins, rpg idle, gato pescador, html5 games, pesca rpg, rituais, mar das bestas">
+    <meta name="author" content="Lucas Guerriero">
+
+    <link rel="icon" type="image/svg+xml" href="/favicom.svg">
     
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Gato Pescador - Mestre do Abismo</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary: #0288D1;
-            --primary-dark: #01579B;
-            --secondary: #FF9800;
-            --secondary-hover: #F57C00;
-            --text-dark: #2c3e50;
-            --text-light: #7f8c8d;
-            --bg-light: #f8f9fa;
+            --surface-blue: #0288D1;
+            --twilight-blue: #1e3a8a;
+            --midnight-blue: #0f172a;
+            --abyss-purple: #4c1d95;
+            --bestial-red: #7f1d1d;
+            --accent-gold: #fbbf24;
+            --accent-green: #34d399;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; color: var(--text-dark); background-color: var(--bg-light); line-height: 1.6; overflow-x: hidden; }
-        h1, h2, h3 { font-family: 'Fredoka', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        body { font-family: 'Poppins', sans-serif; color: var(--text-light); background-color: var(--midnight-blue); line-height: 1.7; overflow-x: hidden; }
+        h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 
-        /* --- HERO SECTION --- */
-        .hero { position: relative; background: linear-gradient(135deg, #0288D1 0%, #01579B 100%); color: white; text-align: center; padding: 8rem 2rem 10rem 2rem; overflow: hidden; }
-        .hero-content { position: relative; z-index: 10; max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: center;}
-        .hero h1 { font-size: 4rem; text-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 1rem; animation: dropDown 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .hero p { font-size: 1.3rem; font-weight: 300; opacity: 0.9; margin-bottom: 2.5rem; animation: fadeIn 1.5s ease; }
+        /* --- ANIMAÇÕES --- */
+        @keyframes dropDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes rise { 0% { bottom: -50px; transform: translateX(0); opacity: 0; } 50% { opacity: 1; } 100% { bottom: 100%; transform: translateX(-50px); opacity: 0; } }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); } 50% { box-shadow: 0 0 30px rgba(251, 191, 36, 0.8); } 100% { box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); } }
+
+        /* --- HERO SECTION (A Superfície) --- */
+        .hero { 
+            position: relative; 
+            background: linear-gradient(180deg, var(--surface-blue) 0%, var(--twilight-blue) 100%); 
+            text-align: center; 
+            padding: 10rem 2rem 12rem 2rem; 
+            overflow: hidden; 
+        }
+        .hero-content { position: relative; z-index: 10; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+        .hero h1 { font-size: 5rem; text-shadow: 0 10px 20px rgba(0,0,0,0.5); margin-bottom: 1rem; animation: dropDown 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); letter-spacing: 2px; }
+        .hero p { font-size: 1.4rem; font-weight: 300; color: #bae6fd; margin-bottom: 3rem; animation: fadeIn 1.5s ease; max-width: 700px; }
 
         .cta-button {
-            display: inline-block; background: linear-gradient(to bottom, #FFB74D, #FF9800); color: #fff; padding: 1.2rem 3rem; text-decoration: none;
-            font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.5rem; border-radius: 50px; text-transform: uppercase; letter-spacing: 2px;
-            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4), 0 4px 0 #E65100; transition: all 0.2s ease; cursor: pointer; border: none;
-            animation: pulse 2s infinite, floatUp 1s ease 0.5s both;
+            display: inline-block; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 1.2rem 3.5rem; text-decoration: none;
+            font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.6rem; border-radius: 50px; text-transform: uppercase; letter-spacing: 2px;
+            border: 2px solid #fbbf24; cursor: pointer; transition: all 0.3s ease; animation: dropDown 1s ease 0.5s both, pulseGlow 3s infinite;
         }
-        .cta-button:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(255, 152, 0, 0.5), 0 4px 0 #E65100; background: linear-gradient(to bottom, #FFCC80, #FFA726); }
-        .cta-button:active { transform: translateY(2px); box-shadow: 0 2px 10px rgba(255, 152, 0, 0.4), 0 0 0 #E65100; }
+        .cta-button:hover { transform: translateY(-5px) scale(1.05); background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+        .cta-button:active { transform: translateY(2px); }
 
-        /* Área do Usuário Logado */
+        /* Usuário */
         .user-badge {
-            display: flex; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.25);
-            padding: 8px 20px; border-radius: 30px; margin-top: 20px; font-size: 1rem;
-            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2);
-            animation: fadeIn 0.5s ease;
+            display: flex; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.4); padding: 10px 25px; border-radius: 30px; 
+            margin-top: 25px; font-size: 1.1rem; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); animation: fadeIn 0.5s ease;
         }
-        .logout-btn {
-            background: #ff5252; color: white; border: none; padding: 6px 15px;
-            border-radius: 15px; cursor: pointer; font-weight: bold; font-family: 'Poppins', sans-serif;
-            font-size: 0.85rem; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .logout-btn:hover { background: #d32f2f; transform: scale(1.05); }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: bold; font-family: 'Poppins', sans-serif; transition: 0.2s; }
+        .logout-btn:hover { background: #dc2626; transform: scale(1.05); }
+        .btn-guest-top { background: transparent; color: #bae6fd; border: 1px solid rgba(186, 230, 253, 0.4); padding: 10px 25px; border-radius: 30px; margin-top: 15px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; transition: 0.3s; }
+        .btn-guest-top:hover { background: rgba(255,255,255,0.1); border-color: #fff; color: #fff; }
 
-        .wave-divider { position: absolute; bottom: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; transform: rotate(180deg); }
-        .wave-divider svg { position: relative; display: block; width: calc(100% + 1.3px); height: 100px; }
-        .wave-divider .shape-fill { fill: var(--bg-light); }
+        .wave-divider { position: absolute; bottom: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; transform: rotate(180deg); z-index: 5; }
+        .wave-divider svg { position: relative; display: block; width: calc(100% + 1.3px); height: 120px; }
+        .wave-divider .shape-fill { fill: var(--midnight-blue); }
+
         .bubbles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
         .bubble { position: absolute; background: rgba(255, 255, 255, 0.1); border-radius: 50%; bottom: -50px; animation: rise infinite ease-in; }
 
-        /* --- SESSÃO PRINCIPAL --- */
-        main { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
-        .section-title { text-align: center; font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 3rem; position: relative; }
-        .section-title::after { content: ''; display: block; width: 80px; height: 4px; background: var(--secondary); margin: 10px auto 0; border-radius: 2px; }
+        /* --- SESSÕES DE LORE E PROFUNDIDADE --- */
+        .content-section { padding: 6rem 2rem; position: relative; }
+        .bg-twilight { background: var(--midnight-blue); }
+        .bg-midnight { background: linear-gradient(180deg, var(--midnight-blue) 0%, #09090b 100%); }
+        .bg-abyss { background: radial-gradient(circle at center, var(--abyss-purple) 0%, #050505 100%); border-top: 2px solid #8b5cf6; }
 
-        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; margin-bottom: 5rem; }
-        .about-text p { font-size: 1.15rem; margin-bottom: 1.5rem; color: #555; }
-        .about-image { background: #e1f5fe; border-radius: 20px; padding: 2rem; text-align: center; box-shadow: 0 10px 30px rgba(2, 119, 189, 0.1); border: 4px dashed #b3e5fc; font-size: 5rem; transform: rotate(3deg); }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .section-title { text-align: center; font-size: 3rem; margin-bottom: 4rem; text-transform: uppercase; letter-spacing: 2px; }
+        .title-gold { color: var(--accent-gold); text-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+        .title-blue { color: #38bdf8; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
+        .title-red { color: #ef4444; text-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
 
-        footer { background-color: var(--text-dark); color: white; text-align: center; padding: 2rem; margin-top: 4rem; }
-        footer p { opacity: 0.7; font-size: 0.9rem; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; margin-bottom: 6rem; }
+        .feature-grid.reverse { direction: rtl; }
+        .feature-grid.reverse > * { direction: ltr; }
+
+        .feature-text h3 { font-size: 2.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 15px; }
+        .feature-text p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.8; }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px;
+            padding: 3rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 2px 20px rgba(255,255,255,0.02);
+            backdrop-filter: blur(10px); transition: transform 0.4s ease; animation: float 6s ease-in-out infinite;
+        }
+        .feature-card:hover { transform: translateY(-10px); border-color: rgba(255,255,255,0.15); }
+        
+        .mechanic-list { list-style: none; margin-top: 1.5rem; }
+        .mechanic-list li { margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 10px; font-size: 1.05rem; color: #cbd5e1; }
+        .mechanic-list li span { font-size: 1.4rem; line-height: 1; }
+
+        /* --- FOOTER EXCLUSIVO & DETALHADO --- */
+        .modern-footer { 
+            background-color: #030303; 
+            color: var(--text-muted); 
+            border-top: 2px solid rgba(139, 92, 246, 0.3); 
+            padding: 5rem 2rem 2rem; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .modern-footer::before { 
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); 
+            width: 80%; height: 2px; background: linear-gradient(90deg, transparent, #8b5cf6, transparent); 
+            box-shadow: 0 0 20px #8b5cf6;
+        }
+        
+        .footer-content { 
+            max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr; gap: 4rem; margin-bottom: 4rem; 
+        }
+        
+        .footer-brand h2 { color: #f8fafc; font-size: 2.5rem; margin-bottom: 1rem; text-shadow: 0 0 15px rgba(139, 92, 246, 0.4); letter-spacing: 1px; }
+        .footer-brand p { font-size: 1.1rem; line-height: 1.7; max-width: 500px; }
+        
+        .footer-dev { display: flex; flex-direction: column; align-items: flex-start; }
+        .footer-dev h3 { color: #bae6fd; font-size: 1.5rem; margin-bottom: 1rem; letter-spacing: 1px; text-transform: uppercase; }
+        .footer-dev p { margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.6; }
+        
+        .github-link { 
+            display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); 
+            padding: 15px 30px; border-radius: 16px; color: #f8fafc; text-decoration: none; 
+            font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        .github-link:hover { 
+            background: rgba(139, 92, 246, 0.1); border-color: #8b5cf6; 
+            transform: translateY(-5px); box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3); color: #ddd6fe; 
+        }
+        .github-link svg { transition: transform 0.3s; fill: currentColor; }
+        .github-link:hover svg { transform: scale(1.15) rotate(-5deg); }
+        
+        .footer-bottom { 
+            text-align: center; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05); 
+            font-size: 0.95rem; font-weight: 300; display: flex; flex-direction: column; gap: 5px;
+        }
 
         /* --- MODAL DE LOGIN --- */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal.active { opacity: 1; pointer-events: all; }
-        .modal-content { background: white; width: 90%; max-width: 400px; border-radius: 20px; padding: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; text-align: center; transform: translateY(30px); transition: transform 0.3s; }
+        .modal-content { background: #0f172a; width: 90%; max-width: 420px; border-radius: 24px; padding: 2.5rem; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 2px 10px rgba(255,255,255,0.1); position: relative; text-align: center; transform: translateY(40px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid #334155; }
         .modal.active .modal-content { transform: translateY(0); }
         
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; background: none; border: none; cursor: pointer; color: #999; line-height: 1; }
-        .close-modal:hover { color: #333; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; background: none; border: none; cursor: pointer; color: #64748b; line-height: 1; transition: 0.2s; }
+        .close-modal:hover { color: #f8fafc; transform: scale(1.1); }
         
-        .modal h2 { color: var(--primary-dark); margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .modal h2 { color: #f8fafc; margin-bottom: 2rem; font-size: 2rem; }
         
-        /* Botões de Auth */
-        .auth-btn { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; font-size: 1rem; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; border: none; }
-        .btn-google { background: white; color: #555; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .btn-google:hover { background: #f5f5f5; }
-        .btn-email { background: var(--primary); color: white; }
-        .btn-email:hover { background: var(--primary-dark); }
-        .btn-register { background: none; color: var(--primary); border: 2px solid var(--primary); }
-        .btn-register:hover { background: #e1f5fe; }
-        .btn-guest { background: #eee; color: #555; margin-top: 15px; }
-        .btn-guest:hover { background: #ddd; }
+        .auth-btn { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 12px; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; border: none; }
+        .btn-google { background: #f8fafc; color: #1e293b; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-google:hover { background: #e2e8f0; transform: translateY(-2px); }
+        .btn-email { background: linear-gradient(135deg, #0288D1, #01579B); color: white; box-shadow: 0 4px 15px rgba(2, 136, 209, 0.3); }
+        .btn-email:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(2, 136, 209, 0.5); }
+        .btn-register { background: rgba(2, 136, 209, 0.1); color: #38bdf8; border: 2px solid #0288D1; }
+        .btn-register:hover { background: rgba(2, 136, 209, 0.2); transform: translateY(-2px); }
         
-        .auth-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-        .auth-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; font-family: 'Poppins', sans-serif; }
-        .auth-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2, 136, 209, 0.2); }
+        .auth-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
+        .auth-input { width: 100%; padding: 14px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; font-size: 1rem; font-family: 'Poppins', sans-serif; color: #f8fafc; transition: 0.3s; }
+        .auth-input::placeholder { color: #64748b; }
+        .auth-input:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); background: #0f172a; }
         
-        .divider { display: flex; align-items: center; color: #aaa; margin: 15px 0; font-size: 0.9rem; }
-        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #eee; margin: 0 10px; }
+        .divider { display: flex; align-items: center; color: #64748b; margin: 20px 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #334155; margin: 0 15px; }
 
-        .error-msg { color: #d32f2f; font-size: 0.85rem; margin-bottom: 10px; min-height: 20px; font-weight: 600;}
+        .error-msg { color: #ef4444; font-size: 0.9rem; margin-bottom: 15px; min-height: 20px; font-weight: 600; background: rgba(239, 68, 68, 0.1); border-radius: 8px; padding: 5px; display: none; }
 
-        @media (max-width: 768px) { .hero h1 { font-size: 2.8rem; } .about-grid { grid-template-columns: 1fr; text-align: center; } .about-image { display: none; } }
+        @media (max-width: 900px) { 
+            .feature-grid, .feature-grid.reverse { grid-template-columns: 1fr; gap: 2rem; text-align: center; } 
+            .feature-text h3 { justify-content: center; }
+            .hero h1 { font-size: 3.5rem; } 
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .footer-dev { align-items: center; }
+            .footer-brand p { margin: 0 auto; }
+        }
     </style>
 </head>
 <body>
@@ -112,17 +194,17 @@
         <div class="bubbles" id="bubbles-container"></div>
         <div class="hero-content">
             <h1>Gato Pescador</h1>
-            <p>Relaxe, jogue a isca e conquiste os mistérios do oceano com o felino mais habilidoso dos 7 mares.</p>
+            <p>Não é apenas um jogo de pescar. É uma jornada incremental de engenharia genética, magia negra, comércio no mercado negro e dominação oceânica absoluta.</p>
             
-            <button id="main-cta-btn" class="cta-button">⏳ Carregando...</button>
+            <button id="main-cta-btn" class="cta-button" style="margin-top: 30px;">⏳ Conectando aos Servidores...</button>
             
-            <button id="main-guest-btn" class="auth-btn btn-guest" style="display: none; max-width: 350px; margin-top: 15px; border-radius: 50px;">
-                Jogar como Convidado (Sem Salvar)
+            <button id="main-guest-btn" class="btn-guest-top" style="display: none;">
+                Jogar Offline (Visitante)
             </button>
             
             <div id="user-info" class="user-badge" style="display: none;">
                 <span id="user-email"></span>
-                <button id="btn-logout" class="logout-btn">Sair da Conta</button>
+                <button id="btn-logout" class="logout-btn">Desconectar</button>
             </div>
         </div>
         
@@ -134,52 +216,147 @@
     </header>
 
     <main>
-        <section class="about-grid">
-            <div class="about-text">
-                <h2 class="section-title" style="text-align: left;">Sua Jornada Começa Aqui</h2>
-                <p>Bem-vindo ao mundo encantador de <strong>Gato Pescador</strong>. Neste jogo incremental, você assume o controle de um gato aventureiro focado em capturar os peixes mais absurdos e raros do fundo do mar.</p>
-                <p>Venda suas capturas para ganhar <strong>Cat Coins 🪙</strong>. Use seu lucro para investir em iscas mágicas, chumbadas pesadas e varas de pesca tecnológicas que permitem alcançar as profundezas abissais!</p>
+        <section class="content-section bg-twilight">
+            <div class="container">
+                <h2 class="section-title title-gold">O Ecossistema Dinâmico</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-text">
+                        <h3 style="color: #f8fafc;"><span>🌊</span> O Clima Dita as Regras</h3>
+                        <p>O tempo não para no Cais. O ciclo imersivo de <strong>Dia e Noite</strong> altera completamente a fauna marinha disponível. Mas fique atento ao horizonte...</p>
+                        <p>Eventos climáticos massivos ocorrem espontaneamente. Uma <strong>Tempestade Noturna</strong> traz monstros das profundezas que dificultam a puxada da linha, enquanto a <strong>Maré Dourada</strong> faz os lucros de cada fisgada multiplicarem absurdamente!</p>
+                    </div>
+                    <div class="feature-card" style="border-color: #38bdf8; box-shadow: 0 10px 40px rgba(56, 189, 248, 0.1);">
+                        <div style="font-size: 5rem; margin-bottom: 20px;">⛈️✨</div>
+                        <h4 style="font-size: 1.4rem; color: #bae6fd; margin-bottom: 10px;">Mundo Vivo</h4>
+                        <p style="color: #94a3b8; font-size: 0.95rem;">Adapte o seu equipamento às condições adversas se quiser sobreviver às marés intensas e maximizar a sua economia de Cat Coins.</p>
+                    </div>
+                </div>
+
+                <div class="feature-grid reverse">
+                    <div class="feature-text">
+                        <h3 style="color: #fbbf24;"><span>⚙️</span> O Hub da Grande Forja</h3>
+                        <p>Pescar com galhos não o levará longe. Aceda ao <strong>Mercado Negro</strong> e gaste a sua fortuna em Titânio, Matéria Escura ou Núcleos Estelares.</p>
+                        <p>Leve esses materiais à <strong>Fornalha</strong> para forjar Varas de Fibra de Carbono, Chumbadas de Buraco Negro e Anzóis Divinos. Depois, arraste-os taticamente na <strong>Mesa de Montagem</strong> para criar o loadout perfeito e inquebrável.</p>
+                    </div>
+                    <div class="feature-card" style="border-color: #f59e0b; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.1);">
+                        <ul class="mechanic-list" style="text-align: left;">
+                            <li><span>🎣</span> <strong>Varas:</strong> Determinam a profundidade e velocidade da descida.</li>
+                            <li><span>🪨</span> <strong>Pesos:</strong> Quebram a tensão da água e fornecem sinergias críticas.</li>
+                            <li><span>🪝</span> <strong>Anzóis:</strong> Focam a sua pesca em raridades de Elite (Lendários, Míticos).</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="about-image">🐱🎣<br><span style="font-size: 1.5rem; font-family: 'Fredoka', sans-serif; color: #0277bd;">Mestre dos Mares</span></div>
+        </section>
+
+        <section class="content-section bg-midnight">
+            <div class="container">
+                <h2 class="section-title title-blue">Engenharia e Precisão</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-text">
+                        <h3 style="color: #4ade80;"><span>🧪</span> Laboratório Genético</h3>
+                        <p>Pescar Lixo não é inútil. Leve garrafas, urânio vazado e placas-mãe oxidadas ao <strong>Museu do Lixo</strong> para extrair biomassas.</p>
+                        <p>No Laboratório, cruze esses extratos para sintetizar iscas biológicas impossíveis (como o Néctar Divino ou o Pó de Cometa). Injete <strong>Catalisadores Puros</strong> (Sorte +1000, 67cm Garantido) nos tubos de ensaio para mutar o lote inteiro e garantir troféus!</p>
+                    </div>
+                    <div class="feature-card" style="border-color: #10b981; box-shadow: 0 10px 40px rgba(16, 185, 129, 0.1);">
+                        <div style="font-size: 5rem; margin-bottom: 20px;">🧬</div>
+                        <h4 style="font-size: 1.4rem; color: #a7f3d0; margin-bottom: 10px;">Ciência Imoral</h4>
+                        <p style="color: #94a3b8; font-size: 0.95rem;">Controle o RNG (Sorte) do jogo manipulando a genética das suas iscas. Peixes maiores rendem lucros astronômicos no mercado.</p>
+                    </div>
+                </div>
+
+                <div class="feature-grid reverse">
+                    <div class="feature-text">
+                        <h3 style="color: #ef4444;"><span>🔪</span> A Cozinha do Mestre</h3>
+                        <p>Peixes repetidos ocupam espaço vital no <strong>Aquário Principal</strong>. Equipe uma faca de caça letal (como a Lâmina do Infinito) e abra o tenso minijogo de <strong>Fazer Sushi</strong>.</p>
+                        <p>O peixe irá revelar 3 Pontos Vitais vermelhos na tábua de corte. Terá exatos 4 golpes precisos com o rato/dedo para os cruzar. Se a carne for cortada com perfeição, o saque é multiplicado! Mas cuidado com a cor: se o peixe estiver esverdeado, a carne está podre!</p>
+                    </div>
+                    <div class="feature-card" style="border-color: #ef4444; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.1);">
+                        <ul class="mechanic-list" style="text-align: left;">
+                            <li><span>🎯</span> <strong>Tática Mortal:</strong> Falhe os pontos vitais e a carne vira lixo puro.</li>
+                            <li><span>🦠</span> <strong>Podridão Oculta:</strong> Peixes doentes rendem valiosa "Geleia Estranha".</li>
+                            <li><span>⚔️</span> <strong>A Lâmina Certa:</strong> Facas de Rank Divino multiplicam as moedas em até x1000.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section bg-abyss">
+            <div class="container">
+                <h2 class="section-title title-red">O Fim das Linhas</h2>
+                
+                <div class="feature-grid" style="grid-template-columns: 1fr; text-align: center;">
+                    <div class="feature-text" style="max-width: 900px; margin: 0 auto;">
+                        <h3 style="color: #c4b5fd; justify-content: center; font-size: 2.8rem;"><span>🔮</span> Rituais Ocultos e as Bestas</h3>
+                        <p style="font-size: 1.2rem; color: #a78bfa; margin-bottom: 20px;">O verdadeiro desafio final reserva-se apenas para os jogadores obcecados. Aceda ao Pedestal de Sacrifício.</p>
+                        <p style="color: #ddd6fe; margin-bottom: 20px;">Ofereça <strong>Peixes Divinos, Secretos e Aurudos</strong> trancafiados numa Caixa de Vidro, juntamente com milhares de Matérias-Primas raras que demorou horas a farmar. Com uma chance implacável de <strong>Falhar e vaporizar tudo</strong>, um ritual bem sucedido concede-lhe um <strong>Orbe de Poder</strong> absoluto.</p>
+                        <p style="color: #fca5a5; font-weight: bold; font-size: 1.15rem; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid #7f1d1d;">
+                            Consuma o "Orbe do Fim" na tela principal para forçar a chegada do cataclísmico MAR DAS BESTAS, silenciando os peixes comuns e permitindo a invocação dos terríveis Leviatãs de raridade "BESTIAL" (Probabilidade de base: 0.000001%).
+                        </p>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
 
-    <footer>
-        <h2 style="margin-bottom: 10px;">Gato Pescador</h2>
-        <p>&copy; 2026 Gato Pescador Studios. Todos os direitos reservados.</p>
+    <footer class="modern-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h2>Gato Pescador</h2>
+                <p>A aventura que redefine o estilo de jogos Idle na web. Desvende mistérios profundos, crie equipamentos complexos na forja e controle as probabilidades do oceano até reinar sobre os colossos da Fossa das Marianas.</p>
+            </div>
+            
+            <div class="footer-dev">
+                <h3>O Desenvolvedor</h3>
+                <p>Projetado, programado e idealizado com paixão ao longo de inumeráveis horas de código por <strong>Lucas Guerriero</strong>.</p>
+                
+                <a href="https://github.com/LucasEntweihen" target="_blank" rel="noopener noreferrer" class="github-link">
+                    <svg height="28" width="28" viewBox="0 0 16 16">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                    </svg>
+                    <span>/LucasEntweihen</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <span>&copy; 2026 Gato Pescador Studios.</span>
+            <span>Todos os direitos reservados. Não jogue lixo no mar real.</span>
+        </div>
     </footer>
 
     <div id="login-modal" class="modal">
         <div class="modal-content">
             <button class="close-modal" id="close-modal-btn">&times;</button>
-            <h2>Entrar no Jogo</h2>
+            <h2>Identificação</h2>
             <button id="btn-google" class="auth-btn btn-google">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="20">
-                Entrar com o Google
+                Acessar via Google
             </button>
-            <div class="divider">ou e-mail</div>
+            <div class="divider">ou servidor local</div>
             <div class="auth-form">
-                <input type="email" id="email-input" class="auth-input" placeholder="Seu E-mail">
-                <input type="password" id="password-input" class="auth-input" placeholder="Sua Senha">
+                <input type="email" id="email-input" class="auth-input" placeholder="E-mail de Pescador">
+                <input type="password" id="password-input" class="auth-input" placeholder="Senha Segura">
             </div>
             <div id="error-message" class="error-msg"></div>
-            <button id="btn-login-email" class="auth-btn btn-email">Entrar</button>
-            <button id="btn-register-email" class="auth-btn btn-register">Criar Nova Conta</button>
-            <div class="divider"></div>
-            <button id="btn-guest" class="auth-btn btn-guest">Jogar como Convidado (Sem Nuvem)</button>
+            <button id="btn-login-email" class="auth-btn btn-email">Conectar ao Cais</button>
+            <button id="btn-register-email" class="auth-btn btn-register">Registrar Novo Perfil</button>
         </div>
     </div>
 
     <script type="module">
-        // Bolhas no fundo
+        // Bolhas no fundo animadas pelo JS
         const bubbleContainer = document.getElementById('bubbles-container');
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 20; i++) {
             let bubble = document.createElement('div');
             bubble.classList.add('bubble');
-            let size = Math.random() * 40 + 10; 
+            let size = Math.random() * 50 + 15; 
             bubble.style.width = `${size}px`; bubble.style.height = `${size}px`;
             bubble.style.left = `${Math.random() * 100}%`;
-            bubble.style.animationDuration = `${Math.random() * 5 + 3}s`;
+            bubble.style.animationDuration = `${Math.random() * 6 + 4}s`;
             bubble.style.animationDelay = `${Math.random() * 5}s`;
             bubbleContainer.appendChild(bubble);
         }
@@ -213,33 +390,27 @@
         
         let isUserLoggedIn = false;
 
-        // Ouve mudanças no login
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 isUserLoggedIn = true;
-                mainCtaBtn.innerText = "🎣 CONTINUAR JOGO";
+                mainCtaBtn.innerText = "⚓ EMBARCAR AGORA";
                 userInfoBox.style.display = 'flex';
                 userEmailText.innerText = `👤 ${user.displayName || user.email}`;
-                mainGuestBtn.style.display = 'flex'; 
+                mainGuestBtn.style.display = 'block'; 
             } else {
                 isUserLoggedIn = false;
-                mainCtaBtn.innerText = "🔑 LOGIN PARA JOGAR";
+                mainCtaBtn.innerText = "🔑 ACESSAR OS SERVIDORES";
                 userInfoBox.style.display = 'none';
-                mainGuestBtn.style.display = 'none'; 
+                mainGuestBtn.style.display = 'block'; 
             }
         });
 
-        // CORREÇÃO 1: O link estava fixo para o local da sua máquina, mudei para caminho relativo correto.
         mainCtaBtn.addEventListener('click', () => {
             if (isUserLoggedIn) { window.location.href = 'html/pesca.html'; } 
-            else { loginModal.classList.add('active'); errorMsg.innerText = ''; }
+            else { loginModal.classList.add('active'); errorMsg.style.display = 'none'; }
         });
 
         mainGuestBtn.addEventListener('click', () => {
-            window.location.href = 'html/pesca.html?guest=true';
-        });
-        
-        document.getElementById('btn-guest').addEventListener('click', () => {
             window.location.href = 'html/pesca.html?guest=true';
         });
 
@@ -247,16 +418,16 @@
         closeModalBtn.addEventListener('click', () => { loginModal.classList.remove('active'); });
 
         function showError(code) {
-            let message = "Ocorreu um erro. Tente novamente.";
-            if (code.includes('invalid-credential') || code.includes('wrong-password')) message = "E-mail ou senha incorretos.";
-            if (code.includes('email-already-in-use')) message = "Este e-mail já está cadastrado.";
+            errorMsg.style.display = 'block';
+            let message = "Ocorreu um erro. O sinal foi perdido.";
+            if (code.includes('invalid-credential') || code.includes('wrong-password')) message = "Credenciais inválidas ou corrompidas.";
+            if (code.includes('email-already-in-use')) message = "As docas já registraram este e-mail.";
             errorMsg.innerText = message;
         }
 
-        // CORREÇÃO 2: Redirecionamento seguro pós-login
         document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = 'html/pesca.html'; }).catch((e) => { showError(e.code); }); });
-        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha."; signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
-        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) return errorMsg.innerText = "Preencha e-mail e senha para criar conta."; createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
+        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) { errorMsg.style.display = 'block'; return errorMsg.innerText = "Forneça e-mail e senha."; } signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
+        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) { errorMsg.style.display = 'block'; return errorMsg.innerText = "Forneça e-mail e senha para o registro."; } createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
     </script>
 </body>
 </html>
