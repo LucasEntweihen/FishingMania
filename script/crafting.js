@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SISTEMA DE CRAFTING, LOJA E FORJA - UI/UX ULTRA MODERNA (PARTE 2)
+   SISTEMA DE CRAFTING, LOJA E FORJA - UI/UX ULTRA MODERNA (CORRIGIDO)
    ========================================================================== */
 
    function safeGet(id) { return document.getElementById(id); }
@@ -182,7 +182,7 @@
                    </div>
                </div>
    
-               <div class="custom-scrollbar" style="padding: 30px; background: url('/img/asset/bg-dark-pattern.png') repeat, #0f172a; overflow-y: auto; max-height: 65vh; scroll-behavior: auto;" id="shop-scroll-area">
+               <div class="custom-scrollbar" style="padding: 30px; background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4=') repeat; overflow-y: auto; max-height: 65vh; scroll-behavior: auto;" id="shop-scroll-area">
        `;
    
        const buildCard = (item, isBoost) => {
@@ -201,9 +201,9 @@
                    <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); color: #f8fafc; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; font-family: 'Poppins', sans-serif; border: 1px solid ${color}66; backdrop-filter: blur(4px);">
                        📦 Estoque: ${count}
                    </div>
-                   <div style="padding: 30px 20px 20px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: start; align-items: center; background: radial-gradient(circle at top, ${color}15, transparent 70%);">
-                       <div style="font-size: 3.5rem; margin-bottom: 15px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); animation: floatItem 6s ease-in-out infinite;">${item.icon}</div>
-                       <div style="color: #f8fafc; font-family: 'Fredoka', sans-serif; font-size: 1.1rem; font-weight: 600; line-height: 1.2; margin-bottom: 5px;">${item.name}</div>
+                   <div style="padding: 30px 20px 20px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: start; align-items: center; background: radial-gradient(circle at top, ${color}11, transparent 70%);">
+                       <div style="font-size: 4rem; margin-bottom: 15px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); animation: floatItem 6s ease-in-out infinite;">${item.icon}</div>
+                       <div style="color: #f8fafc; font-family: 'Fredoka', sans-serif; font-size: 1.2rem; font-weight: 600; line-height: 1.2; margin-bottom: 5px;">${item.name}</div>
                        ${isBoost ? `<div style="color: ${color}; font-size: 0.8rem; font-family: 'Poppins', sans-serif; margin-bottom: 5px; font-weight: bold; background: ${color}22; padding: 2px 10px; border-radius: 10px;">${item.desc}</div>` : ''}
                        ${loreHtml}
                        <div style="color: #fbbf24; font-weight: 800; font-size: 1.1rem; font-family: 'Poppins', sans-serif; margin-top: auto; padding-top: 15px;">
@@ -226,7 +226,7 @@
                <h3 style="margin: 0; color: #e2e8f0; font-family: 'Fredoka', sans-serif; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">💎 Matérias-Primas</h3>
                <div style="height: 1px; flex: 1; background: linear-gradient(90deg, rgba(255,255,255,0.2), transparent);"></div>
            </div>
-           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; margin-bottom: 50px; align-items: start;">
+           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; margin-bottom: 50px; align-items: start;">
        `;
        if(window.MATERIALS) window.MATERIALS.forEach(mat => { if (mat.price > 0) html += buildCard(mat, false); });
        html += `</div>`; 
@@ -236,7 +236,7 @@
                <h3 style="margin: 0; color: #e2e8f0; font-family: 'Fredoka', sans-serif; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">⚡ Catalisadores de Laboratório</h3>
                <div style="height: 1px; flex: 1; background: linear-gradient(90deg, rgba(255,255,255,0.2), transparent);"></div>
            </div>
-           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; align-items: start;">
+           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; align-items: start;">
        `;
        if(window.BOOSTS) window.BOOSTS.forEach(bst => { html += buildCard(bst, true); });
        html += `</div></div></div>`; 
@@ -246,7 +246,6 @@
        const newScrollArea = document.getElementById('shop-scroll-area');
        if (newScrollArea) newScrollArea.scrollTop = savedScrollTop;
    };
-   
    
    // ==========================================
    // 2. A GRANDE FORJA (MAGMA SINTÉTICO)
@@ -639,7 +638,7 @@
            });
            
            btn.addEventListener('mousedown', function() { this.style.transform = 'translateY(2px)'; this.style.boxShadow = 'none'; });
-           btn.addEventListener('mouseup', function() { this.style.transform = 'translateY(0)'; this.style.boxShadow = '0 8px 15px -5px rgba(16, 185, 129, 0.5), inset 0 2px 4px rgba(255,255,255,0.3)'; });
+           btn.addEventListener('mouseup', function() { this.style.transform = 'translateY(0)'; this.style.boxShadow = '0 10px 20px -5px rgba(16, 185, 129, 0.5), inset 0 2px 4px rgba(255,255,255,0.3)'; });
        }
    }
    
@@ -647,7 +646,7 @@
        const inv = safeGet('bait-mat-inventory');
        if (!inv || !window.MATERIALS) return;
        
-       // FIX: Renderiza corretamente os extratos do lixo para a criação de iscas
+       // FIX: Renderiza corretamente os extratos do lixo
        let html = `
            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 15px;">
                <h4 style="margin:0; color:#f8fafc; font-family:'Fredoka'; font-size:1.1rem;">📦 Armazém de Extratos</h4>
@@ -659,7 +658,6 @@
        let hasMats = false;
        const state = window.GAME_STATE || { materials: {} };
        window.MATERIALS.forEach(mat => {
-           // Os materiais com preço 0 são os que vêm do lixo (extratos)
            if (mat.price === 0) {
                const count = state.materials[mat.id] || 0;
                if (count > 0) {
@@ -709,13 +707,12 @@
    }
    
    // ==========================================
-   // 4. MESA DE MONTAGEM (DESIGN "CLEAN TACTICAL")
+   // 4. MESA DE MONTAGEM (NOVO DRAG & DROP + DBLCLICK)
    // ==========================================
    function renderWorkbench(tab) {
        const grid = safeGet('workbench-grid'); 
        if(!grid) return; grid.innerHTML = ''; let isEmpty = true;
    
-       // FIX: Layout limpo e sofisticado, com cores integradas ao navy blue
        const createEquipCard = (id, item, isEq, type) => {
            isEmpty = false;
            const color = isEq ? '#3b82f6' : '#475569';
@@ -723,36 +720,46 @@
            
            const div = document.createElement('div'); 
            div.className = `draggable-item`; 
-           div.draggable = true; div.dataset.type = type; div.dataset.id = id; 
-           div.style = `background: ${bg}; border: 1px solid ${color}; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: grab; transition: 0.2s; position: relative; overflow: hidden; min-height: 90px;`;
+           // A propriedade draggable permite agarrar o item no PC
+           div.draggable = true; 
+           div.dataset.type = type; 
+           div.dataset.id = id; 
+           div.style = `background: ${bg}; border: 1px solid ${color}; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: grab; transition: 0.2s; position: relative; overflow: hidden; min-height: 90px; user-select: none;`;
            
            div.onmouseover = () => { div.style.transform = 'translateY(-3px)'; div.style.boxShadow = '0 5px 15px rgba(0,0,0,0.5)'; if(!isEq) div.style.borderColor = '#94a3b8'; };
            div.onmouseout = () => { div.style.transform = 'translateY(0)'; div.style.boxShadow = 'none'; div.style.borderColor = color; };
    
            let iconHTML = '';
-           if (type === 'rod') iconHTML = `<div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">🎣</div>`;
-           else if (type === 'sinker') iconHTML = `<div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">🪨</div>`;
-           else if (type === 'hook') iconHTML = `<div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); color:${item.color || '#fff'};">🪝</div>`;
-           else if (type === 'knife') iconHTML = `<div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">🔪</div>`;
+           if (type === 'rod') iconHTML = `<div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); pointer-events: none;">🎣</div>`;
+           else if (type === 'sinker') iconHTML = `<div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); pointer-events: none;">🪨</div>`;
+           else if (type === 'hook') iconHTML = `<div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); color:${item.color || '#fff'}; pointer-events: none;">🪝</div>`;
+           else if (type === 'knife') iconHTML = `<div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); pointer-events: none;">🔪</div>`;
            else if (type === 'bait') {
                const count = window.GAME_STATE.baitInventory[id] || 0;
-               iconHTML = `<div style="position: absolute; top: 4px; right: 4px; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.6rem; font-weight: bold;">x${count}</div><div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">${item.icon}</div>`;
+               iconHTML = `<div style="position: absolute; top: 4px; right: 4px; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.6rem; font-weight: bold; pointer-events: none;">x${count}</div><div style="font-size:2.2rem; margin-bottom:8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); pointer-events: none;">${item.icon}</div>`;
            }
    
            let equippedBadge = '';
            if (isEq) {
-               equippedBadge = `<div style="position: absolute; top: 0; left: 0; width: 100%; background: #3b82f6; color: #fff; font-size: 0.55rem; font-weight: 800; padding: 2px 0; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Ativo</div>`;
+               equippedBadge = `<div style="position: absolute; top: 0; left: 0; width: 100%; background: #3b82f6; color: #fff; font-size: 0.55rem; font-weight: 800; padding: 2px 0; text-transform: uppercase; letter-spacing: 1px; text-align: center; pointer-events: none;">Ativo</div>`;
            }
    
            div.innerHTML = `
                ${equippedBadge}
-               <div style="margin-top: ${isEq ? '12px' : '0'}; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%;">
+               <div style="margin-top: ${isEq ? '12px' : '0'}; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%; pointer-events: none;">
                    ${iconHTML}
                    <div style="font-weight:700; font-size:0.75rem; color:${isEq ? '#f8fafc' : '#cbd5e1'}; font-family:'Poppins', sans-serif; line-height: 1.2; word-wrap: break-word;">${item.name || 'Desconhecido'}</div>
                </div>
            `; 
            
+           // EVENTOS DE DRAG NATIVOS
            div.addEventListener('dragstart', handleDragStart); 
+           
+           // NOVO: SUPORTE PARA CLIQUE DUPLO (Equipa instantaneamente sem precisar arrastar)
+           div.addEventListener('dblclick', () => {
+               if (!isEq) equipItem(type, id);
+           });
+   
            grid.appendChild(div); 
        };
    
@@ -801,6 +808,34 @@
        } else {
            if(baitDisplay) baitDisplay.innerHTML = "<span style='color:#64748b;'>Vazio</span>";
        }
+   
+       document.querySelectorAll('.wb-tab-btn').forEach(btn => {
+           btn.style.background = btn.classList.contains('active') ? '#3b82f6' : '#1e293b';
+           btn.style.color = btn.classList.contains('active') ? '#fff' : '#94a3b8';
+           btn.style.border = 'none';
+           btn.style.padding = '10px 20px';
+           btn.style.borderRadius = '8px 8px 0 0';
+           btn.style.fontFamily = "'Poppins', sans-serif";
+           btn.style.fontWeight = '700';
+           btn.style.cursor = 'pointer';
+           btn.style.transition = '0.2s';
+       });
+   }
+   
+   // LÓGICA DE EQUIPAR O ITEM (Usada pelo Drag e pelo Duplo Clique)
+   function equipItem(type, id) {
+       if (type === 'rod') window.GAME_STATE.currentRodIndex = parseInt(id);
+       if (type === 'sinker') window.GAME_STATE.currentSinker = id;
+       if (type === 'hook') window.GAME_STATE.currentHook = id;
+       if (type === 'knife') window.GAME_STATE.currentKnife = id;
+       if (type === 'bait') window.GAME_STATE.currentBait = id;
+       
+       updateWorkbenchSlots();
+       renderWorkbench(type); // O "tab" é igual ao tipo de item
+   
+       if(typeof window.updateUI === "function") window.updateUI(); 
+       if(typeof window.saveGame === "function") window.saveGame();
+       if(window.showToast) window.showToast("Equipamento Vinculado", "A sua configuração tática foi atualizada.", "success");
    }
    
    let draggedItem = null;
@@ -811,8 +846,9 @@
        e.currentTarget.style.opacity = '0.4'; 
    }
    
+   // FIX: A query agora pesquisa exatamente pela classe .dropzone (independente do nome do div no HTML)
    document.addEventListener('DOMContentLoaded', () => {
-       const dropzones = document.querySelectorAll('.equip-slot.dropzone');
+       const dropzones = document.querySelectorAll('.dropzone');
    
        dropzones.forEach(zone => {
            zone.addEventListener('dragover', (e) => { 
@@ -828,6 +864,7 @@
    
            document.addEventListener('dragend', (e) => {
                if(e.target && e.target.style) e.target.style.opacity = '1';
+               dropzones.forEach(z => z.classList.remove('drag-over'));
            });
    
            zone.addEventListener('drop', (e) => {
@@ -835,18 +872,7 @@
                zone.classList.remove('drag-over');
                
                if (draggedItem && draggedItem.type === zone.dataset.droptype) {
-                   if (draggedItem.type === 'rod') window.GAME_STATE.currentRodIndex = parseInt(draggedItem.id);
-                   if (draggedItem.type === 'sinker') window.GAME_STATE.currentSinker = draggedItem.id;
-                   if (draggedItem.type === 'hook') window.GAME_STATE.currentHook = draggedItem.id;
-                   if (draggedItem.type === 'knife') window.GAME_STATE.currentKnife = draggedItem.id;
-                   if (draggedItem.type === 'bait') window.GAME_STATE.currentBait = draggedItem.id;
-                   
-                   updateWorkbenchSlots();
-                   renderWorkbench(draggedItem.type);
-   
-                   if(typeof window.updateUI === "function") window.updateUI(); 
-                   if(typeof window.saveGame === "function") window.saveGame();
-                   if(window.showToast) window.showToast("Equipamento Vinculado", "A sua configuração tática foi atualizada.", "success");
+                   equipItem(draggedItem.type, draggedItem.id);
                }
                draggedItem = null;
            });
