@@ -33,7 +33,7 @@ try {
 // 2. CARREGAMENTO INTELIGENTE E INÍCIO DO JOGO
 // ==========================================================================
 async function carregarBancoDeDadosEIniciar() {
-    if (window.CRAFTING_DB && window.KNIVES && window.RARITIES) {
+    if (window.CRAFTING_DB && window.KNIVES && window.RARITIES && window.HOOKS) {
         iniciarMotorDoJogo();
         return;
     }
@@ -50,6 +50,7 @@ async function carregarBancoDeDadosEIniciar() {
         window.ROD_TEMPLATES = DB.ROD_TEMPLATES;
         window.SINKERS = DB.SINKERS;
         window.SUCATAS = DB.SUCATAS;
+        window.HOOKS = DB.HOOKS;
 
         window.CRAFTING_DB = { materials: DB.MATERIALS, recipes: DB.CRAFTING_RECIPES };
 
@@ -60,9 +61,68 @@ async function carregarBancoDeDadosEIniciar() {
 }
 
 // ==========================================================================
+// INJEÇÃO DE ESTILOS PARA OS AQUÁRIOS E SUSHI
+// ==========================================================================
+function injectScriptStyles() {
+    if (document.getElementById('modern-script-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'modern-script-styles';
+    style.innerHTML = `
+        .modern-collection-card {
+            background: rgba(15, 23, 42, 0.8) !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 2px 10px rgba(0,0,0,0.5) !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 10px;
+            text-align: center;
+            min-height: 140px;
+        }
+        .modern-collection-card.unlocked:hover {
+            transform: translateY(-6px) scale(1.03) !important;
+            box-shadow: 0 15px 25px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.1) !important;
+            z-index: 10;
+        }
+        .modern-collection-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: var(--card-color, #444);
+        }
+        
+        @keyframes lootDropEnter {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            70% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .modern-loot-popup {
+            position: fixed; top: 50%; left: 50%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--loot-color, #fff);
+            border-radius: 20px; padding: 30px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px var(--loot-glow, rgba(255,255,255,0.1));
+            animation: lootDropEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 999999; pointer-events: none;
+            min-width: 250px;
+        }
+
+        .rotten-fish {
+            filter: drop-shadow(0 15px 20px rgba(0,0,0,0.8)) hue-rotate(260deg) saturate(3) contrast(1.3) brightness(0.6) sepia(0.5) !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// ==========================================================================
 // 3. MOTOR PRINCIPAL DO JOGO
 // ==========================================================================
 function iniciarMotorDoJogo() {
+    injectScriptStyles();
 
     window.GAME_STATE = {
         coins: 0,
@@ -72,6 +132,8 @@ function iniciarMotorDoJogo() {
         ownedRods: [0],
         ownedSinkers: ['chumbo'],
         currentSinker: 'chumbo',
+        ownedHooks: ['anzol_padrao'],
+        currentHook: 'anzol_padrao',
         ownedKnives: ['faca_cozinha'],
         currentKnife: 'faca_cozinha',
         baitInventory: {},
@@ -89,28 +151,76 @@ function iniciarMotorDoJogo() {
         window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
     }
 
+    window.showToast = function(title, message, type = 'info') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        let bgColor = 'linear-gradient(135deg, #1e293b, #0f172a)';
+        let icon = 'ℹ️';
+        let borderColor = 'rgba(255,255,255,0.1)';
+        
+        if (type === 'success') { bgColor = 'linear-gradient(135deg, #065f46, #022c22)'; icon = '✅'; borderColor = '#10b981'; }
+        if (type === 'error') { bgColor = 'linear-gradient(135deg, #991b1b, #450a0a)'; icon = '❌'; borderColor = '#ef4444'; }
+        if (type === 'warning') { bgColor = 'linear-gradient(135deg, #92400e, #451a03)'; icon = '⚠️'; borderColor = '#f59e0b'; }
+
+        toast.style.cssText = `
+            background: ${bgColor}; color: #f8fafc; padding: 15px 20px; border-radius: 12px;
+            font-family: 'Poppins', sans-serif; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex; align-items: center; gap: 15px; transform: translateX(120%);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 320px; border: 1px solid ${borderColor};
+            pointer-events: auto; position: relative; overflow: hidden; cursor: pointer;
+            will-change: transform;
+        `;
+
+        const formattedMsg = message.replace(/\n/g, '<br>');
+        toast.innerHTML = `
+            <div style="font-size: 2rem; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">${icon}</div>
+            <div style="display: flex; flex-direction: column;">
+                ${title ? `<strong style="font-family:'Fredoka'; font-size:1.1rem; margin-bottom:2px; letter-spacing:0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">${title}</strong>` : ''}
+                <span style="font-size: 0.85rem; line-height: 1.3; color: #cbd5e1;">${formattedMsg}</span>
+            </div>
+            <div class="toast-progress" style="position:absolute; bottom:0; left:0; height:3px; background:${borderColor}; width:100%; transition: width 4.5s linear; box-shadow: 0 0 5px ${borderColor};"></div>
+        `;
+
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.style.transform = 'translateX(0)';
+            setTimeout(() => { const pb = toast.querySelector('.toast-progress'); if(pb) pb.style.width = '0%'; }, 50);
+        });
+
+        const removeToast = () => {
+            toast.style.transform = 'translateX(120%)';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 400);
+        };
+
+        toast.addEventListener('click', removeToast);
+        setTimeout(removeToast, 4500);
+    };
+
+    window.customAlert = function(msg, isSuccess) {
+        let parts = msg.split('\n\n');
+        let title = isSuccess ? "Sucesso!" : "Atenção!";
+        let body = msg;
+        if (parts.length > 1) { title = parts[0]; body = parts.slice(1).join('<br><br>'); }
+        window.showToast(title, body, isSuccess ? 'success' : 'error');
+    };
+
     function preloadImages() {
         if (!window.RARITIES) return;
         Object.values(window.RARITIES).forEach(rarity => {
             rarity.variations.forEach(fish => {
                 const img = new Image();
+                img.src = fish.image;
                 window.GAME_STATE.loadedImages[fish.image] = img;
-                img.onload = () => {
-                    if (fish.image.toLowerCase().endsWith('.gif')) {
-                        setTimeout(() => {
-                            try {
-                                if (!img.naturalWidth) return; 
-                                const offCanvas = document.createElement('canvas');
-                                offCanvas.width = img.naturalWidth;
-                                offCanvas.height = img.naturalHeight;
-                                const oCtx = offCanvas.getContext('2d');
-                                oCtx.drawImage(img, 0, 0);
-                                window.GAME_STATE.loadedImages[fish.image] = offCanvas;
-                            } catch (e) {}
-                        }, 300);
-                    }
-                };
-                img.src = fish.image; 
             });
         });
         ['/img/asset/67comum.jpg', '/img/asset/67raro.jpg', '/img/asset/67muitoraro.webp'].forEach(src => {
@@ -136,6 +246,17 @@ function iniciarMotorDoJogo() {
         const sinker = (window.SINKERS || []).find(s => s.id === window.GAME_STATE.currentSinker) || (window.SINKERS ? window.SINKERS[0] : {name: 'Padrão'});
         if(safeGet('sinker-slot')) safeGet('sinker-slot').innerText = `🪨 ${sinker.name}`;
         if(safeGet('equipped-sinker-visual')) safeGet('equipped-sinker-visual').style.display = (sinker.id && sinker.id !== 'chumbo') ? 'block' : 'none';
+
+        const hookId = window.GAME_STATE.currentHook || 'anzol_padrao';
+        const hookData = (window.HOOKS || []).find(h => h.id === hookId) || {name: 'Anzol Padrão', color: '#bdc3c7'};
+
+        if(safeGet('hook-display-slot')) safeGet('hook-display-slot').innerHTML = `<span style="color:${hookData.color}; font-weight:bold;">🪝 ${hookData.name}</span>`;
+
+        const hookVisual = safeGet('hook');
+        if (hookVisual) {
+            hookVisual.style.color = hookData.color;
+            hookVisual.style.textShadow = `0 0 15px ${hookData.color}, 0 2px 4px rgba(0,0,0,0.8)`;
+        }
 
         const baitDisplay = safeGet('bait-slot');
         const baitVis = safeGet('bait-visual');
@@ -171,6 +292,8 @@ function iniciarMotorDoJogo() {
             ownedRods: window.GAME_STATE.ownedRods,
             ownedSinkers: window.GAME_STATE.ownedSinkers,
             currentSinker: window.GAME_STATE.currentSinker,
+            ownedHooks: window.GAME_STATE.ownedHooks,
+            currentHook: window.GAME_STATE.currentHook,
             ownedKnives: window.GAME_STATE.ownedKnives,
             currentKnife: window.GAME_STATE.currentKnife,
             baitInventory: window.GAME_STATE.baitInventory,
@@ -208,9 +331,8 @@ function iniciarMotorDoJogo() {
                     if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
                     if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
                     if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
-                    if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) {
-                        window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha';
-                    }
+                    if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
+                    if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) { window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha'; }
                     if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Visitante";
                 } catch (e) { console.error("Save corrompido"); }
             }
@@ -228,9 +350,8 @@ function iniciarMotorDoJogo() {
                 if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
                 if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
                 if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
-                if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) {
-                    window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha';
-                }
+                if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
+                if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) { window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha'; }
                 localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(window.GAME_STATE));
                 if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Conectado";
             } else {
@@ -250,11 +371,10 @@ function iniciarMotorDoJogo() {
     if(auth) { onAuthStateChanged(auth, (user) => { currentUser = user; if(!isGuestMode) loadGame(); }); }
     setInterval(window.saveGame, 30000);
 
-    // ==========================================================================
-    // 4. FÓRMULA DE PESCA 
-    // ==========================================================================
-    window.calculateCatch = function(rod, sinker) {
-        const bait = window.GAME_STATE.currentBait ? window.BAITS.find(b => b.id === window.GAME_STATE.currentBait) : null;
+    window.calculateCatch = function(rod, sinker, activeBaitId) {
+        const bait = activeBaitId ? window.BAITS.find(b => b.id === activeBaitId) : null;
+        const hook = window.HOOKS ? window.HOOKS.find(h => h.id === window.GAME_STATE.currentHook) : null;
+
         let luckFactor = rod && rod.luck ? rod.luck : 1;
         let valueMult = 1;
         let chance67 = 0.0005;
@@ -280,42 +400,76 @@ function iniciarMotorDoJogo() {
 
         if (window.eventLuckMult) luckFactor += (window.eventLuckMult * 100); 
 
-        const rand = Math.random();
-
         let sucataChance = 0.15 - (luckFactor / 100000);
         if (sucataChance < 0.05) sucataChance = 0.05; 
 
+        if (hook && hook.target === 'sucata') sucataChance += hook.power;
+
+        const rand = Math.random();
         if (rand < sucataChance && window.SUCATAS && window.SUCATAS.length > 0) {
             const randomSucata = window.SUCATAS[Math.floor(Math.random() * window.SUCATAS.length)];
             return { type: 'sucata', data: randomSucata };
         }
 
-        let fishRoll = Math.random() - (luckFactor / 50000); 
-        
         let caughtRarity = window.RARITIES.COMUM;
-        if (fishRoll < window.RARITIES.AURUDO.prob) caughtRarity = window.RARITIES.AURUDO;
-        else if (fishRoll < window.RARITIES.DIVINO.prob) caughtRarity = window.RARITIES.DIVINO;
-        else if (fishRoll < window.RARITIES.SECRETO.prob) caughtRarity = window.RARITIES.SECRETO;
-        else if (fishRoll < window.RARITIES.MITICO.prob) caughtRarity = window.RARITIES.MITICO;
-        else if (fishRoll < window.RARITIES.LENDARIO.prob) caughtRarity = window.RARITIES.LENDARIO;
-        else if (fishRoll < window.RARITIES.EPICO.prob) caughtRarity = window.RARITIES.EPICO;
-        else if (fishRoll < window.RARITIES.RARO.prob) caughtRarity = window.RARITIES.RARO;
+        let bypassedByHook = false;
 
-        const validVariations = caughtRarity.variations.filter(v => {
-            const timeMatch = v.time === 'all' || (window.GAME_STATE.isDay && v.time === 'day') || (!window.GAME_STATE.isDay && v.time === 'night');
-            let eventMatch = true;
-            if (v.events && v.events.length > 0) {
-                if (v.events.includes('all')) {
-                    eventMatch = window.currentEventID !== null && window.currentEventID !== undefined;
-                } else {
-                    eventMatch = window.currentEventID && v.events.includes(window.currentEventID);
+        if (hook && hook.target !== 'sucata' && hook.target !== 'padrao') {
+            const hookRoll = Math.random();
+            if (hookRoll < hook.power) {
+                const targetKey = hook.target.toUpperCase();
+                if (window.RARITIES[targetKey]) {
+                    caughtRarity = window.RARITIES[targetKey];
+                    bypassedByHook = true;
                 }
             }
-            return timeMatch && eventMatch;
-        });
+        }
 
-        let specificFish = validVariations.length > 0 ? validVariations[Math.floor(Math.random() * validVariations.length)] : window.RARITIES.COMUM.variations[0];
-        if (validVariations.length === 0) caughtRarity = window.RARITIES.COMUM;
+        if (!bypassedByHook) {
+            let fishRoll = Math.random() - (luckFactor / 25000); 
+            if (fishRoll < window.RARITIES.AURUDO.prob) caughtRarity = window.RARITIES.AURUDO;
+            else if (fishRoll < window.RARITIES.DIVINO.prob) caughtRarity = window.RARITIES.DIVINO;
+            else if (fishRoll < window.RARITIES.SECRETO.prob) caughtRarity = window.RARITIES.SECRETO;
+            else if (fishRoll < window.RARITIES.MITICO.prob) caughtRarity = window.RARITIES.MITICO;
+            else if (fishRoll < window.RARITIES.LENDARIO.prob) caughtRarity = window.RARITIES.LENDARIO;
+            else if (fishRoll < window.RARITIES.EPICO.prob) caughtRarity = window.RARITIES.EPICO;
+            else if (fishRoll < window.RARITIES.RARO.prob) caughtRarity = window.RARITIES.RARO;
+        }
+
+        const getValidFishes = (rarityObj) => {
+            return rarityObj.variations.filter(v => {
+                const timeMatch = (!v.time || v.time === 'all') || 
+                                  (window.GAME_STATE.isDay && v.time === 'day') || 
+                                  (!window.GAME_STATE.isDay && v.time === 'night');
+                
+                let eventMatch = false;
+                const currentEvt = window.currentEventID;
+                
+                if (!v.events || v.events.length === 0 || v.events.includes('all')) {
+                    eventMatch = true; 
+                } else if (currentEvt && v.events.includes(currentEvt)) {
+                    eventMatch = true; 
+                } else if (!currentEvt && v.events.includes('none')) {
+                    eventMatch = true;
+                }
+                
+                return timeMatch && eventMatch;
+            });
+        };
+
+        let validVariations = getValidFishes(caughtRarity);
+
+        if (validVariations.length === 0) {
+            caughtRarity = window.RARITIES.COMUM;
+            validVariations = getValidFishes(caughtRarity);
+        }
+
+        for (let i = validVariations.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [validVariations[i], validVariations[j]] = [validVariations[j], validVariations[i]];
+        }
+
+        let specificFish = validVariations.length > 0 ? validVariations[0] : window.RARITIES.COMUM.variations[0];
 
         const sizeBase = 10 + (Object.keys(window.RARITIES).indexOf(caughtRarity.id.toUpperCase()) * 15);
         let finalSize = sizeBase + Math.floor(Math.random() * 60);
@@ -327,11 +481,10 @@ function iniciarMotorDoJogo() {
         return { type: 'fish', rarity: caughtRarity, variation: specificFish, size: finalSize, value: finalValue };
     }
 
-    // ==========================================================================
-    // 5. A PESCA BLINDADA (À PROVA DE FALHAS NO VERCEL)
-    // ==========================================================================
     window.castLine = function() {
         if (window.GAME_STATE.isFishing) return;
+
+        const activeBaitId = window.GAME_STATE.currentBait;
 
         if (window.GAME_STATE.currentBait) {
             if (window.GAME_STATE.baitInventory[window.GAME_STATE.currentBait] > 0) {
@@ -358,6 +511,10 @@ function iniciarMotorDoJogo() {
         let speedMult = rod && rod.speed ? rod.speed : 1;
         if (sinker.stats && sinker.stats.speed) speedMult *= sinker.stats.speed;
         if (sinker.synergy && rod && sinker.synergy.type === rod.type && sinker.synergy.speed) speedMult *= sinker.synergy.speed;
+        
+        if (activeBaitId && window.GAME_STATE.baitBoosts && window.GAME_STATE.baitBoosts[activeBaitId]) {
+            speedMult += window.GAME_STATE.baitBoosts[activeBaitId].speed || 0;
+        }
 
         const travelTime = (Math.max(400, 2000 - ((rod.id || 0) * 80)) / (speedMult || 1)) * (window.eventCastTimeMult || 1);
         const line = safeGet('line-container');
@@ -369,12 +526,10 @@ function iniciarMotorDoJogo() {
             let catchResult;
             let reelTime = travelTime * 0.8;
 
-            // BLOCO SUPER BLINDADO: Impede que qualquer erro no banco de dados trave o jogo
             try {
-                catchResult = window.calculateCatch(rod, sinker);
+                catchResult = window.calculateCatch(rod, sinker, activeBaitId);
                 
                 if(fishImg){ 
-                    // Se a imagem no Vercel estiver escrita errada (letras maiúsculas/minúsculas), isto impede o erro.
                     fishImg.onerror = () => { fishImg.src = 'https://placehold.co/80x80?text=🐟'; };
                     fishImg.src = catchResult.type === 'sucata' ? catchResult.data.image : catchResult.variation.image; 
                     fishImg.style.display = 'block'; 
@@ -383,38 +538,38 @@ function iniciarMotorDoJogo() {
                 if(line) { line.style.transition = `height ${reelTime}ms ease-out`; line.style.height = `0px`; }
 
             } catch (errCalc) {
-                console.error("ERRO CRÍTICO NA PESCA: Jogo reiniciando estado para evitar congelamento.", errCalc);
+                console.error("ERRO CRÍTICO NA PESCA", errCalc);
                 if(fishImg) fishImg.style.display = 'none';
                 if(line) { line.style.transition = 'none'; line.style.height = '0px'; }
                 window.GAME_STATE.isFishing = false;
                 if(btn) { btn.disabled = false; btn.innerText = "PESCAR (ESPAÇO)"; }
                 if(catIdle) catIdle.classList.replace('cat-fishing', 'cat-idle');
-                return; // Corta a função e impede o erro!
+                return; 
             }
 
             setTimeout(() => {
                 try {
+                    const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a' };
+
                     const div = document.createElement('div');
-                    div.className = `catch-popup`;
-                    div.style.zIndex = "999999"; 
+                    div.className = `modern-loot-popup`;
 
                     if (catchResult.type === 'sucata') {
                         const scrap = catchResult.data;
-                        
                         if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
                         window.GAME_STATE.scrapCollection[scrap.id] = (window.GAME_STATE.scrapCollection[scrap.id] || 0) + 1;
-                        
                         window.GAME_STATE.materials[scrap.matReward] = (window.GAME_STATE.materials[scrap.matReward] || 0) + scrap.matQty;
                         
-                        div.classList.add('border-comum'); 
+                        div.style.setProperty('--loot-color', '#64748b');
+                        div.style.setProperty('--loot-glow', 'rgba(100, 116, 139, 0.4)');
+                        
                         div.innerHTML = `
-                            <div class="fish-visual-container">
-                                <img src="${scrap.image}" class="popup-fish-img" style="filter: grayscale(0.5) sepia(0.5) contrast(0.8);" onerror="this.src='https://placehold.co/80x80?text=🗑️'">
+                            <div style="margin-bottom: 15px; animation: floatItem 3s ease-in-out infinite;">
+                                <img src="${scrap.image}" style="width: 120px; height: 120px; object-fit: contain; filter: grayscale(0.5) sepia(0.5) contrast(0.8) drop-shadow(0 10px 15px rgba(0,0,0,0.5)); will-change: transform; transform: translateZ(0);" onerror="this.src='https://placehold.co/80x80?text=🗑️'">
                             </div>
-                            <div class="popup-name" style="color: #7f8c8d; font-family:'Fredoka', sans-serif;">${scrap.name}</div>
-                            <div class="popup-rarity-text" style="color: #e74c3c;">LIXO FISGADO! (Museu)</div>
-                            <div class="popup-info-line" style="color:#2ecc71; font-weight:bold; margin-top:5px;">♻️ Lixo Reciclado!</div>
-                            <div class="popup-value" style="color:#2ecc71; font-size:0.85rem;">📦 +${scrap.matQty} Material Bruto</div>
+                            <div style="color: #cbd5e1; font-family:'Fredoka', sans-serif; font-size: 1.5rem; margin-bottom: 5px; font-weight: bold;">${scrap.name}</div>
+                            <div style="color: #ef4444; font-family:'Poppins', sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; margin-bottom: 15px;">Lixo Fisgado</div>
+                            <div style="background: rgba(0,0,0,0.5); padding: 8px 20px; border-radius: 20px; color:#34d399; font-weight:800; font-family: 'Poppins', sans-serif; display: inline-block; border: 1px solid rgba(52, 211, 153, 0.3);">♻️ +${scrap.matQty} Extrato Extraído</div>
                         `;
                     } 
                     else {
@@ -431,51 +586,43 @@ function iniciarMotorDoJogo() {
                             window.GAME_STATE.collection[fish.variation.name] = (window.GAME_STATE.collection[fish.variation.name] || 0) + 1;
                         }
 
-                        if (fish.rarity && fish.rarity.border) div.classList.add(fish.rarity.border);
+                        const color = colors[fish.rarity.id] || '#fff';
+                        div.style.setProperty('--loot-color', color);
+                        div.style.setProperty('--loot-glow', `${color}66`);
                         let timeIcon = fish.variation.time === 'day' ? '☀️ Dia' : (fish.variation.time === 'night' ? '🌙 Noite' : '🌗 Ambos');
 
                         div.innerHTML = `
-                            <div class="fish-visual-container">
-                                <img src="${fish.variation.image}" class="${sealImage ? 'popup-fish-img fish-flash' : 'popup-fish-img'}" onerror="this.src='https://placehold.co/80x80?text=🐟'">
-                                ${sealImage ? `<img src="${sealImage}" class="popup-seal">` : ''}
+                            <div style="position:relative; display:inline-block; margin-bottom:15px; animation: floatItem 3s ease-in-out infinite;">
+                                <img src="${fish.variation.image}" style="width: 140px; height: 140px; object-fit: contain; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.6)); will-change: transform; transform: translateZ(0);" onerror="this.src='https://placehold.co/80x80?text=🐟'">
+                                ${sealImage ? `<img src="${sealImage}" style="position: absolute; bottom:-10px; right:-10px; width:50px; height:50px; object-fit:contain; filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.6)); transform: rotate(15deg);">` : ''}
                             </div>
-                            <div class="popup-name" style="font-family:'Fredoka', sans-serif;">${fish.variation.name}</div>
-                            <div class="popup-rarity-text ${fish.rarity ? fish.rarity.style : ''}">${fish.rarity ? fish.rarity.name : 'Desconhecido'}</div>
-                            <div class="popup-info-line">📏 ${fish.size}cm</div>
-                            <div class="popup-info-line" style="font-size: 0.75rem;">🕒 ${timeIcon}</div>
-                            <div class="popup-value">+${fish.value} 🪙</div>
+                            <div style="color: #f8fafc; font-family:'Fredoka', sans-serif; font-size: 1.8rem; margin-bottom: 5px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${fish.variation.name}</div>
+                            <div style="color: ${color}; font-family:'Poppins', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; margin-bottom: 15px; text-shadow: 0 0 10px ${color}88;">${fish.rarity ? fish.rarity.name : 'Desconhecido'}</div>
+                            
+                            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;">
+                                <div style="background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 8px; color: #cbd5e1; font-size: 0.8rem; font-family: 'Poppins', sans-serif; border: 1px solid rgba(255,255,255,0.1);">📏 ${fish.size}cm</div>
+                                <div style="background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 8px; color: #cbd5e1; font-size: 0.8rem; font-family: 'Poppins', sans-serif; border: 1px solid rgba(255,255,255,0.1);">${timeIcon}</div>
+                            </div>
+
+                            <div style="background: rgba(241, 196, 15, 0.1); padding: 8px 20px; border-radius: 20px; color:#fcd34d; font-weight:900; font-size: 1.2rem; font-family: 'Poppins', sans-serif; display: inline-block; border: 1px solid rgba(241, 196, 15, 0.4); box-shadow: 0 0 15px rgba(241, 196, 15, 0.2);">🪙 +${fish.value.toLocaleString()}</div>
                         `;
                     }
 
                     document.body.appendChild(div);
-                    
-                    setTimeout(() => { 
-                        div.style.transition = "opacity 0.5s"; 
-                        div.style.opacity = "0"; 
-                        setTimeout(() => div.remove(), 500); 
-                    }, 2500);
-
+                    setTimeout(() => { div.style.transition = "all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)"; div.style.opacity = "0"; div.style.transform = "translate(-50%, -50%) scale(0.8)"; setTimeout(() => div.remove(), 400); }, 3000);
                 } catch(e) {
                     console.error("Erro CRÍTICO no Popup da Interface!", e);
                 } finally {
-                    // O FINALLY GARANTE QUE O PEIXE DESAPARECE E O BOTÃO ATIVA
                     if(fishImg) fishImg.style.display = 'none';
                     window.GAME_STATE.isFishing = false;
-                    
                     if(btn) { btn.disabled = false; btn.innerText = "PESCAR (ESPAÇO)"; }
                     if(catIdle) catIdle.classList.replace('cat-fishing', 'cat-idle');
-
-                    window.updateUI(); 
-                    window.saveGame();
+                    window.updateUI(); window.saveGame();
                 }
-
             }, reelTime);
         }, travelTime + 1000);
     }
 
-    // ==========================================================================
-    // 6. EVENTOS DE BOTÕES E ATALHOS GERAIS
-    // ==========================================================================
     document.addEventListener('keydown', (e) => { 
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.code === 'Space') { 
@@ -507,14 +654,14 @@ function iniciarMotorDoJogo() {
 
     safeGet('sushi-btn')?.addEventListener('click', () => {
         if (!window.GAME_STATE.sushiUnlocked) {
-            if(window.customAlert) window.customAlert("🔒 Restaurante Fechado!\n\nVocê precisa irritar o Peixe Tutor (clicando nele várias vezes) para ele te dar a chave da Bancada de Sushi!", false);
+            window.showToast("Restaurante Fechado!", "Você precisa irritar o Peixe Tutor clicando nele várias vezes para obter a chave!", "warning");
             return;
         }
         if (window.SushiMode) window.SushiMode.open();
     });
 
     // ==========================================================================
-    // 7. SISTEMA DE APRECIAÇÃO DE PEIXES E ENCICLOPÉDIAS
+    // 7. SISTEMA DE APRECIAÇÃO DE PEIXES E AQUÁRIOS (CORREÇÃO DE SCROLL FIXO)
     // ==========================================================================
     window.showFishDetail = function(fish, rarity, count, is67) {
         const existing = document.getElementById('fish-detail-overlay');
@@ -522,118 +669,162 @@ function iniciarMotorDoJogo() {
 
         const overlay = document.createElement('div');
         overlay.id = 'fish-detail-overlay';
-        overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 999999; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(5px);`;
+        overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(2, 6, 23, 0.85); display: flex; align-items: center; justify-content: center; z-index: 999999; opacity: 0; transition: opacity 0.4s ease; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);`;
 
         let seal = '';
         if (is67) {
             const s = (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
-            seal = `<img src="${s}" style="position:absolute; bottom:-10px; right:-10px; width:90px; height:90px; object-fit:contain; transform:rotate(15deg); filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.6));">`;
+            seal = `<img src="${s}" style="position:absolute; bottom:-20px; right:-20px; width:110px; height:110px; object-fit:contain; transform:rotate(15deg); filter:drop-shadow(2px 8px 10px rgba(0,0,0,0.8));">`;
         }
 
-        const colors = { 'comum': '#bdc3c7', 'raro': '#2ecc71', 'epico': '#9b59b6', 'lendario': '#f39c12', 'mitico': '#e74c3c', 'secreto': '#2c3e50', 'divino': '#f1c40f', 'aurudo': '#ffd700' };
+        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a' };
         const borderColor = colors[rarity.id] || '#ffffff';
 
         let eventsText = "Qualquer Clima";
         if (fish.events && fish.events.length > 0) {
-            if (fish.events.includes("all")) {
-                eventsText = "Durante Eventos";
-            } else {
-                eventsText = fish.events.map(e => e.toUpperCase()).join(", ");
-            }
+            if (fish.events.includes("all")) { eventsText = "Durante Eventos"; } 
+            else if (fish.events.includes("none")) { eventsText = "Clima Normal"; }
+            else { eventsText = fish.events.map(e => e.toUpperCase()).join(", "); }
         }
 
         const box = document.createElement('div');
-        box.style.cssText = `position: relative; background: radial-gradient(circle at center, #2c3e50 0%, #1a252f 100%); padding: 40px; border-radius: 20px; text-align: center; max-width: 600px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px ${borderColor}66; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid ${borderColor};`;
+        box.style.cssText = `position: relative; background: radial-gradient(circle at top right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); padding: 50px 40px; border-radius: 24px; text-align: center; max-width: 650px; width: 90%; box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.1), inset 0 0 40px ${borderColor}22; transform: scale(0.95) translateY(20px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-top: 2px solid ${borderColor};`;
+        
         box.innerHTML = `
-            <button id="close-detail-btn" style="position:absolute; top:15px; right:20px; background:none; border:none; color:white; font-size:2.5rem; cursor:pointer; opacity:0.7; transition:0.2s;">&times;</button>
-            <div style="position:relative; display:inline-block; margin-bottom:20px;">
-                <img src="${fish.image}" style="max-width:350px; max-height:350px; object-fit:contain; filter:drop-shadow(0 10px 15px rgba(0,0,0,0.6)); animation: floatBigFish 4s ease-in-out infinite;">
+            <button id="close-detail-btn" style="position:absolute; top:20px; right:25px; background:none; border:none; color: rgba(255,255,255,0.4); font-size:2.5rem; cursor:pointer; transition:0.2s; padding:0; line-height:1;">&times;</button>
+            
+            <div style="position:relative; display:inline-block; margin-bottom:30px; animation: floatItem 4s ease-in-out infinite; will-change: transform; transform: translateZ(0);">
+                <img src="${fish.image}" style="max-width:380px; max-height:380px; object-fit:contain; filter:drop-shadow(0 20px 30px rgba(0,0,0,0.8));">
                 ${seal}
             </div>
-            <h2 style="color:white; font-family:'Fredoka', sans-serif; font-size:2.5rem; margin:0; text-shadow:0 2px 4px rgba(0,0,0,0.8); line-height: 1.2;">${fish.name}</h2>
-            <div style="font-size:1.3rem; font-weight:bold; margin-bottom:20px; margin-top:5px; text-transform:uppercase; letter-spacing: 2px;" class="${rarity.style}">${rarity.name}</div>
             
-            <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:15px; color:#ccc; font-size:0.9rem; font-family:'Poppins', sans-serif;">
-                <div style="background:rgba(0,0,0,0.4); padding:10px 15px; border-radius:12px; border: 1px solid rgba(255,255,255,0.1);">📊 Pescados: <b style="color:white;">${count}</b></div>
-                <div style="background:rgba(0,0,0,0.4); padding:10px 15px; border-radius:12px; border: 1px solid rgba(255,255,255,0.1);">🕒 Hábito: <b style="color:white;">${fish.time === 'day' ? '☀️ Dia' : (fish.time === 'night' ? '🌙 Noite' : '🌗 Ambos')}</b></div>
-                <div style="background:rgba(0,0,0,0.4); padding:10px 15px; border-radius:12px; border: 1px solid rgba(255,255,255,0.1);">🌪️ Aparição: <b style="color:#e67e22;">${eventsText}</b></div>
+            <h2 style="color:#f8fafc; font-family:'Fredoka', sans-serif; font-size:3rem; margin:0; text-shadow:0 4px 10px rgba(0,0,0,0.8); line-height: 1.1;">${fish.name}</h2>
+            <div style="font-size:1.1rem; font-weight:800; margin-bottom:30px; margin-top:8px; text-transform:uppercase; letter-spacing: 4px; color: ${borderColor}; text-shadow: 0 0 15px ${borderColor}66;">${rarity.name}</div>
+            
+            <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:15px; color:#cbd5e1; font-size:0.9rem; font-family:'Poppins', sans-serif;">
+                <div style="background:rgba(0,0,0,0.6); padding:12px 20px; border-radius:12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">📊 Pescados: <b style="color:white; font-size: 1.1rem; margin-left: 5px;">${count}</b></div>
+                <div style="background:rgba(0,0,0,0.6); padding:12px 20px; border-radius:12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">🕒 Hábito: <b style="color:white; font-size: 1.1rem; margin-left: 5px;">${fish.time === 'day' ? '☀️ Dia' : (fish.time === 'night' ? '🌙 Noite' : '🌗 Ambos')}</b></div>
+                <div style="background:rgba(0,0,0,0.6); padding:12px 20px; border-radius:12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">🌪️ Clima: <b style="color:#38bdf8; font-size: 1.1rem; margin-left: 5px;">${eventsText}</b></div>
             </div>
         `;
 
         overlay.appendChild(box);
         document.body.appendChild(overlay);
 
-        if (!document.getElementById('float-big-fish-style')) {
-            const style = document.createElement('style');
-            style.id = 'float-big-fish-style';
-            style.innerHTML = `@keyframes floatBigFish { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }`;
-            document.head.appendChild(style);
-        }
-        requestAnimationFrame(() => { overlay.style.opacity = '1'; box.style.transform = 'scale(1)'; });
+        const closeBtn = document.getElementById('close-detail-btn');
+        closeBtn.onmouseover = () => { closeBtn.style.color = '#fff'; closeBtn.style.transform = 'scale(1.2)'; };
+        closeBtn.onmouseout = () => { closeBtn.style.color = 'rgba(255,255,255,0.4)'; closeBtn.style.transform = 'scale(1)'; };
 
-        const closeDetail = () => { overlay.style.opacity = '0'; box.style.transform = 'scale(0.8)'; setTimeout(() => overlay.remove(), 300); };
-        document.getElementById('close-detail-btn').addEventListener('click', closeDetail);
+        requestAnimationFrame(() => { 
+            overlay.style.opacity = '1'; 
+            box.style.transform = 'scale(1) translateY(0)'; 
+        });
+
+        const closeDetail = () => { 
+            overlay.style.opacity = '0'; 
+            box.style.transform = 'scale(0.95) translateY(20px)'; 
+            setTimeout(() => overlay.remove(), 400); 
+        };
+        closeBtn.addEventListener('click', closeDetail);
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDetail(); });
     };
 
+    function getCollectionColor(rarityId) {
+        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a' };
+        return colors[rarityId] || '#fff';
+    }
+
+    // FIX: O `cssText` foi refeito para INCLUIR o `overflow-y` e o `max-height` para que a tela possa rolar
     window.renderCollection = function() {
         if (!window.RARITIES) return;
-        const grid = safeGet('collection-grid'); if(!grid) return; grid.innerHTML = ''; let t=0, u=0;
-        Object.values(window.RARITIES).forEach(r => { r.variations.forEach(f => { t++; const c = window.GAME_STATE.collection[f.name] || 0; if(c>0) u++; createCard(grid, f, r, c, false); }); });
+        const grid = safeGet('collection-grid'); if(!grid) return; 
+        grid.innerHTML = ''; let t=0, u=0;
+        const fragment = document.createDocumentFragment();
+
+        Object.values(window.RARITIES).forEach(r => { 
+            r.variations.forEach(f => { t++; const c = window.GAME_STATE.collection[f.name] || 0; if(c>0) u++; createCard(fragment, f, r, c, false); }); 
+        });
+        
+        grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; padding: 20px; background: url("/img/asset/bg-dark-pattern.png") repeat, #020617; align-items: stretch; max-height: 65vh; overflow-y: auto;';
+        grid.appendChild(fragment);
         if(safeGet('collection-progress')) safeGet('collection-progress').innerText = `(${u}/${t})`;
     };
 
     window.renderCollection67 = function() {
         if (!window.RARITIES) return;
-        const grid = safeGet('collection-67-grid'); if(!grid) return; grid.innerHTML = ''; let t=0, u=0;
-        Object.values(window.RARITIES).forEach(r => { r.variations.forEach(f => { t++; const c = window.GAME_STATE.collection67[f.name] || 0; if(c>0) u++; createCard(grid, f, r, c, true); }); });
+        const grid = safeGet('collection-67-grid'); if(!grid) return; 
+        grid.innerHTML = ''; let t=0, u=0;
+        const fragment = document.createDocumentFragment();
+
+        Object.values(window.RARITIES).forEach(r => { 
+            r.variations.forEach(f => { t++; const c = window.GAME_STATE.collection67[f.name] || 0; if(c>0) u++; createCard(fragment, f, r, c, true); }); 
+        });
+
+        grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; padding: 20px; background: url("/img/asset/bg-dark-pattern.png") repeat, #020617; align-items: stretch; max-height: 65vh; overflow-y: auto;';
+        grid.appendChild(fragment);
         if(safeGet('collection-67-progress')) safeGet('collection-67-progress').innerText = `(${u}/${t})`;
     };
 
     window.renderScrapCollection = function() {
         if (!window.SUCATAS) return;
-        const grid = safeGet('collection-scrap-grid'); 
-        if(!grid) return; 
-        grid.innerHTML = ''; 
-        let t=0, u=0;
+        const grid = safeGet('collection-scrap-grid'); if(!grid) return; 
+        grid.innerHTML = ''; let t=0, u=0;
+        const fragment = document.createDocumentFragment();
         
         window.SUCATAS.forEach(scrap => { 
-            t++; 
-            const count = window.GAME_STATE.scrapCollection[scrap.id] || 0; 
-            if(count > 0) u++; 
-            
+            t++; const count = window.GAME_STATE.scrapCollection[scrap.id] || 0; if(count > 0) u++; 
             const isUnlocked = count > 0; 
             const div = document.createElement('div'); 
-            div.className = `collection-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+            div.className = `modern-collection-card ${isUnlocked ? 'unlocked' : ''}`;
+            div.style.setProperty('--card-color', '#64748b');
             
             div.innerHTML = `
-                ${isUnlocked ? `<div class="count-badge">x${count}</div>` : ''}
-                <img src="${scrap.image}" class="collection-img" style="${!isUnlocked ? 'filter: grayscale(1) opacity(0.3);' : 'filter: grayscale(0.5) sepia(0.5);'}">
-                <div style="font-size: 0.75rem; font-weight: bold; color: ${isUnlocked ? '#333' : '#999'}">${scrap.name}</div>
-                <div style="font-size: 0.65rem; color: ${isUnlocked ? '#e74c3c' : '#ccc'}">Lixo</div>
+                ${isUnlocked ? `<div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.8); color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);">x${count}</div>` : ''}
+                <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                    <img src="${scrap.image}" loading="lazy" style="width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px; opacity: ${isUnlocked ? '1' : '0.2'}; filter: grayscale(0.5) sepia(0.5);">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: ${isUnlocked ? '#f8fafc' : '#475569'}; font-family: 'Poppins', sans-serif; line-height: 1.2; margin-bottom: 5px; word-wrap: break-word; width: 100%;">${scrap.name}</div>
+                    <div style="font-size: 0.65rem; color: ${isUnlocked ? '#ef4444' : '#334155'}; font-weight: 800; text-transform: uppercase;">Lixo</div>
+                </div>
             `;
-            grid.appendChild(div);
+            fragment.appendChild(div);
         });
+
+        grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; padding: 20px; background: url("/img/asset/bg-dark-pattern.png") repeat, #020617; align-items: stretch; max-height: 65vh; overflow-y: auto;';
+        grid.appendChild(fragment);
         if(safeGet('collection-scrap-progress')) safeGet('collection-scrap-progress').innerText = `(${u}/${t})`;
     };
 
     function createCard(container, fish, rarity, count, is67) {
         const isUnlocked = count > 0; 
-        const div = document.createElement('div'); div.className = `collection-card ${isUnlocked ? 'unlocked' : 'locked'} ${is67 ? 'special-67' : ''}`;
+        const div = document.createElement('div'); 
+        div.className = `modern-collection-card ${isUnlocked ? 'unlocked' : ''} ${is67 ? 'special-67' : ''}`;
+        
+        const cardColor = getCollectionColor(rarity.id);
+        div.style.setProperty('--card-color', cardColor);
+
         let seal = ''; 
         if(is67 && isUnlocked) { 
             const s = (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
-            seal = `<img src="${s}" class="collection-seal">`; 
+            seal = `<img src="${s}" loading="lazy" style="position: absolute; bottom: 35px; right: 5px; width: 35px; height: 35px; transform: rotate(15deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">`; 
         }
+
+        let timeIcon = fish.time === 'day' ? '☀️' : (fish.time === 'night' ? '🌙' : '🌗');
+
         div.innerHTML = `
-            ${isUnlocked ? `<div class="count-badge">x${count}</div>` : ''}
-            <div style="position: absolute; top: 2px; left: 5px; font-size: 0.7rem;">${fish.time === 'day' ? '☀️' : (fish.time === 'night' ? '🌙' : '')}</div>
-            <img src="${fish.image}" class="collection-img">
-            ${seal}
-            <div style="font-size: 0.75rem; font-weight: bold; color: ${isUnlocked ? '#333' : '#999'}">${fish.name}</div>
-            <div style="font-size: 0.65rem; color: ${isUnlocked ? 'green' : '#ccc'}">${rarity.name}</div>
+            ${isUnlocked ? `<div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.8); color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; border: 1px solid ${cardColor}66;">x${count}</div>` : ''}
+            <div style="position: absolute; top: 5px; left: 5px; font-size: 1rem; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 50%;">${timeIcon}</div>
+            
+            <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; margin-top: 15px;">
+                <img src="${fish.image}" loading="lazy" style="width: 80px; height: 80px; object-fit: contain; margin: 0 auto 10px auto; opacity: ${isUnlocked ? '1' : '0.1'}; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.6));">
+                ${seal}
+                <div style="font-size: 0.8rem; font-weight: 700; color: ${isUnlocked ? '#f8fafc' : '#475569'}; font-family: 'Poppins', sans-serif; line-height: 1.2; margin-bottom: 5px; word-wrap: break-word; width: 100%;">${fish.name}</div>
+                <div style="font-size: 0.65rem; color: ${isUnlocked ? cardColor : '#334155'}; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${rarity.name}</div>
+            </div>
         `;
-        if (isUnlocked) { div.style.cursor = 'pointer'; div.addEventListener('click', () => window.showFishDetail(fish, rarity, count, is67)); div.onmouseover = () => { div.style.transform = 'scale(1.05)'; }; div.onmouseout = () => { div.style.transform = 'scale(1)'; }; }
+        if (isUnlocked) { 
+            div.style.cursor = 'pointer'; 
+            div.addEventListener('click', () => window.showFishDetail(fish, rarity, count, is67)); 
+        }
         container.appendChild(div);
     }
 
@@ -641,7 +832,7 @@ function iniciarMotorDoJogo() {
     // 8. ANIMAÇÃO DE FUNDO DO OCEANO
     // ==========================================================================
     const canvas = safeGet('bg-canvas');
-    const ctx = canvas ? canvas.getContext('2d') : null;
+    const ctx = canvas ? canvas.getContext('2d', { alpha: false }) : null; 
     const fishes = [];
 
     function resizeCanvas() { if(canvas){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } }
@@ -678,12 +869,17 @@ function iniciarMotorDoJogo() {
         }
     }
 
-    for (let i = 0; i < 25; i++) { fishes.push(new SwimmingFish()); }
+    for (let i = 0; i < 10; i++) { fishes.push(new SwimmingFish()); }
 
     function animateBg() { 
-        if(ctx && canvas) { ctx.clearRect(0, 0, canvas.width, canvas.height); fishes.forEach(f => { f.update(); f.draw(); }); } 
+        if(ctx && canvas && !document.hidden) { 
+            ctx.fillStyle = window.GAME_STATE.isDay ? '#0288D1' : '#0f172a'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height); 
+            fishes.forEach(f => { f.update(); f.draw(); }); 
+        } 
         requestAnimationFrame(animateBg); 
     }
+    
     setInterval(() => { 
         window.GAME_STATE.isDay = !window.GAME_STATE.isDay; 
         const gc = safeGet('game-container'); if(gc) gc.className = window.GAME_STATE.isDay ? 'day-mode' : 'night-mode'; 
@@ -692,26 +888,37 @@ function iniciarMotorDoJogo() {
     setTimeout(() => { window.updateUI(); if(canvas) animateBg(); }, 500);
 
     // ==========================================================================
-    // 9. MODO SUSHI V2
+    // 9. MODO SUSHI V3 (SISTEMA DE PONTOS VITAIS E PEIXE PODRE)
     // ==========================================================================
     window.SushiMode = {
         pendingSushi: null, 
+        targets: [],
+        cuts: [],
+        maxCuts: 4,
+        isRotten: false,
 
         init: function() {
             if (document.getElementById('sushi-modal')) return;
 
             const style = document.createElement('style');
             style.innerHTML = `
-                #sushi-btn.locked { background: #7f8c8d !important; color: #bdc3c7 !important; border-color: #95a5a6 !important; cursor: not-allowed !important; transform: none !important; box-shadow: none !important; filter: grayscale(100%); }
-                #sushi-modal .modal-content { background: #fffaf0; border: 4px solid #c0392b; background-image: radial-gradient(#fcdcd3 1px, transparent 1px); background-size: 20px 20px; }
-                #sushi-modal .modal-header { background: linear-gradient(to right, #c0392b, #e74c3c); border-bottom: 3px solid #922b21; }
-                .sushi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 15px; padding: 20px; max-height: 60vh; overflow-y: auto; }
-                .sushi-card { background: white; border: 2px solid #e0e0e0; border-radius: 12px; padding: 15px 10px; text-align: center; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; }
-                .sushi-card:hover { border-color: #c0392b; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(192,57,43,0.2); }
-                .sushi-btn-cut { background: #c0392b; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: 'Fredoka', sans-serif; transition: 0.2s; width: 100%; box-shadow: 0 4px 0 #922b21; text-transform: uppercase; letter-spacing: 1px;}
-                .sushi-btn-cut:hover { background: #e74c3c; transform: translateY(2px); box-shadow: 0 2px 0 #922b21; }
-                .sushi-btn-cut:active { transform: translateY(4px); box-shadow: none; }
-                .sushi-reward-preview { font-size: 0.75rem; color: #7f8c8d; margin-top: 8px; font-weight: bold; line-height: 1.3;}
+                #sushi-btn.locked { background: #334155 !important; color: #64748b !important; border-color: #1e293b !important; cursor: not-allowed !important; transform: none !important; box-shadow: none !important; filter: grayscale(100%); }
+                #sushi-modal .modal-content { background: #111827; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9); border-radius: 20px; overflow: hidden; padding: 0; }
+                
+                .sushi-board-bg {
+                    background: linear-gradient(90deg, #1f1107 0%, #3e2211 50%, #1f1107 100%);
+                    background-image: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,0,0,0.1) 20px, rgba(0,0,0,0.1) 21px);
+                    box-shadow: inset 0 20px 30px rgba(0,0,0,0.8);
+                }
+
+                .sushi-card-modern {
+                    background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px 10px; text-align: center; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); position: relative; display: flex; flex-direction: column; justify-content: space-between;
+                }
+                .sushi-card-modern:hover { border-color: #ef4444; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); }
+                .sushi-btn-cut { background: #dc2626; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; font-family: 'Poppins', sans-serif; transition: 0.2s; width: 100%; text-transform: uppercase; letter-spacing: 1px;}
+                .sushi-btn-cut:hover { background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+                .sushi-btn-cut:active { transform: translateY(2px); box-shadow: none; }
+                .sushi-reward-preview { font-size: 0.75rem; color: #94a3b8; margin-top: 10px; font-weight: 600; line-height: 1.4; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 6px;}
             `;
             document.head.appendChild(style);
 
@@ -720,16 +927,21 @@ function iniciarMotorDoJogo() {
             modal.className = 'modal hidden';
             modal.style.zIndex = '99999'; 
             modal.innerHTML = `
-                <div class="modal-content" style="max-width: 850px; width: 95%;">
-                    <div class="modal-header">
-                        <h2 style="margin: 0; color: white; font-family: 'Fredoka', sans-serif;">🍣 Restaurante de Sushi</h2>
-                        <button onclick="document.getElementById('sushi-modal').classList.add('hidden')" class="close-btn">&times;</button>
+                <div class="modal-content" style="max-width: 900px; width: 95%;">
+                    <div style="background: rgba(0,0,0,0.8); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dc2626;">
+                        <div>
+                            <h2 style="margin: 0; color: #f8fafc; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; display: flex; align-items: center; gap: 10px;">🍣 Cozinha do Mestre</h2>
+                            <p style="margin: 5px 0 0 0; color: #94a3b8; font-size: 0.85rem; font-family: 'Poppins', sans-serif;">Fatie os peixes. Cuidado com carne estragada e procure os pontos vitais!</p>
+                        </div>
+                        <button onclick="document.getElementById('sushi-modal').classList.add('hidden')" style="background: none; border: none; color: #64748b; font-size: 2rem; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#64748b'">&times;</button>
                     </div>
-                    <div style="padding: 15px; text-align: center; background: white; border-bottom: 2px dashed #ccc;">
-                        <h3 id="sushi-knife-title" style="margin:0; color:#c0392b; font-family:'Fredoka', sans-serif;">Faca Equipada: Nenhuma</h3>
-                        <p style="margin:5px 0 0 0; color:#555; font-size:0.9rem;">O Chef transforma peixes em moedas e materiais. Melhore sua faca na Forja para ganhar multiplicadores absurdos!</p>
+                    
+                    <div style="padding: 15px 30px; background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 id="sushi-knife-title" style="margin:0; color:#ef4444; font-family:'Fredoka', sans-serif; font-size: 1.2rem;">🔪 Faca: Nenhuma</h3>
+                        <span style="color: #64748b; font-size: 0.8rem; font-family: 'Poppins', sans-serif;">Melhore a faca na Forja para aumentar os saques.</span>
                     </div>
-                    <div id="sushi-grid" class="sushi-grid"></div>
+
+                    <div id="sushi-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 30px; max-height: 60vh; overflow-y: auto;" class="sushi-board-bg custom-scrollbar"></div>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -739,16 +951,21 @@ function iniciarMotorDoJogo() {
             miniModal.className = 'modal hidden';
             miniModal.style.zIndex = '999999'; 
             miniModal.innerHTML = `
-                <div class="modal-content" style="max-width: 500px; background: #2c3e50; border: 4px solid #e74c3c;">
-                    <button onclick="document.getElementById('sushi-minigame-modal').classList.add('hidden'); document.getElementById('sushi-modal').classList.remove('hidden'); window.SushiMode.pendingSushi = null;" class="close-btn" style="position:absolute; top:10px; right:15px;">&times;</button>
-                    <h2 style="color: white; font-family: 'Fredoka'; text-align: center; margin-bottom: 5px;">🔪 Filete o Peixe!</h2>
-                    <p style="color: #ccc; text-align: center; margin-bottom: 20px; font-size: 0.9rem;">Passe a faca 4 vezes sobre a imagem.</p>
-                    <div id="sushi-cut-area" style="position: relative; width: 300px; height: 300px; margin: 0 auto; border: 2px dashed #7f8c8d; border-radius: 10px; background: rgba(255,255,255,0.05); cursor: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22><text y=%2224%22 font-size=%2224%22>🔪</text></svg>') 0 24, crosshair;">
-                        <img id="sushi-cut-img" src="" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); transition: transform 0.1s;">
+                <div class="modal-content sushi-board-bg" style="max-width: 500px; border: 4px solid #78350f; box-shadow: 0 0 50px rgba(0,0,0,0.9); border-radius: 12px; padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 10px;">
+                        <h2 style="color: #f8fafc; font-family: 'Fredoka'; margin: 0; font-size: 1.5rem;">🔪 Filetagem Tática</h2>
+                        <button onclick="document.getElementById('sushi-minigame-modal').classList.add('hidden'); document.getElementById('sushi-modal').classList.remove('hidden'); window.SushiMode.pendingSushi = null;" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    
+                    <p style="color: #cbd5e1; text-align: center; margin-bottom: 20px; font-size: 0.9rem; font-family: 'Poppins', sans-serif;">Corte passando a faca pelos <strong style="color:#ef4444;">Pontos Vitais (Alvos)</strong>.</p>
+                    
+                    <div id="sushi-cut-area" style="position: relative; width: 300px; height: 300px; margin: 0 auto; border-radius: 8px; cursor: crosshair;">
+                        <img id="sushi-cut-img" src="" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 20px 20px rgba(0,0,0,0.8)); transition: transform 0.1s;">
                         <canvas id="sushi-cut-canvas" width="300" height="300" style="position: absolute; top:0; left:0; z-index: 10;"></canvas>
                     </div>
-                    <div style="text-align: center; margin-top: 20px;">
-                        <span id="sushi-cut-counter" style="color: #e74c3c; font-size: 1.5rem; font-weight: bold; font-family: 'Fredoka';">Cortes: 0 / 4</span>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <span id="sushi-cut-counter" style="background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 20px; color: #ef4444; font-size: 1.5rem; font-weight: 800; font-family: 'Poppins', sans-serif; border: 1px solid rgba(239, 68, 68, 0.3);">0 / 4 Cortes</span>
                     </div>
                 </div>
             `;
@@ -781,6 +998,8 @@ function iniciarMotorDoJogo() {
             const grid = document.getElementById('sushi-grid');
             if(!grid || !window.KNIVES) return;
             grid.innerHTML = '';
+            
+            const fragment = document.createDocumentFragment();
             let hasFish = false;
 
             const currentKnifeId = window.GAME_STATE.currentKnife || 'faca_cozinha';
@@ -795,9 +1014,7 @@ function iniciarMotorDoJogo() {
                     const count = collection[fishName];
                     if (count > 0) {
                         hasFish = true;
-                        
-                        let foundRarity = null;
-                        let foundFish = null;
+                        let foundRarity = null, foundFish = null;
                         Object.values(window.RARITIES).forEach(r => {
                             const f = r.variations.find(v => v.name === fishName);
                             if (f) { foundRarity = r; foundFish = f; }
@@ -807,29 +1024,80 @@ function iniciarMotorDoJogo() {
                         const lootPreview = this.getLootTable(foundRarity.id);
                         let expectedCoins = Math.floor(lootPreview.coins * multiplier);
                         let expectedMats = Math.floor(lootPreview.matQty * multiplier);
-                        
                         if (is67) { expectedCoins *= 3; expectedMats *= 2; }
                         
-                        let matPreviewText = dropsMats ? `<br>📦 +${expectedMats} Mat. Tier ${foundRarity.name}` : `<br><span style="color:#e74c3c; font-size:0.65rem;">(Faca não extrai materiais)</span>`;
+                        let matPreviewText = dropsMats ? `<div style="color:#34d399; margin-top:3px;">📦 +${expectedMats} Mat. Tier ${foundRarity.name}</div>` : `<div style="color:#ef4444; margin-top:3px;">❌ Faca cega (Sem Mats)</div>`;
                         const div = document.createElement('div');
-                        div.className = 'sushi-card';
+                        div.className = 'sushi-card-modern';
                         const safeFishName = fishName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
                         div.innerHTML = `
-                            <div style="position: absolute; top: -5px; right: -5px; background: #333; color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.8rem; font-weight: bold; border: 2px solid white; z-index: 5;">Estoque: ${count}</div>
-                            <img src="${foundFish.image}" style="width: 70px; height: 70px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));">
-                            <div style="font-size: 0.9rem; font-weight: bold; color: #333; line-height: 1.1; height: 32px; overflow: hidden; display: flex; align-items: center; justify-content: center;">${fishName} ${is67 ? '🏆' : ''}</div>
-                            <div class="${foundRarity.style}" style="font-size: 0.7rem; text-transform: uppercase; font-weight: 800; margin-bottom: 5px;">${foundRarity.name}</div>
-                            <div class="sushi-reward-preview"><span style="color:#e67e22;">💰 +${expectedCoins.toLocaleString()}</span>${matPreviewText}</div>
-                            <button class="sushi-btn-cut" onclick="window.SushiMode.startMinigame('${safeFishName}', ${is67}, '${foundRarity.id}', '${foundFish.image}')">🔪 FILETAR</button>
+                            <div style="position: absolute; top: -5px; right: -5px; background: #0f172a; color: #f8fafc; border-radius: 8px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 5px rgba(0,0,0,0.5);">Estoque: ${count}</div>
+                            <img src="${foundFish.image}" loading="lazy" style="width: 70px; height: 70px; object-fit: contain; margin: 10px auto; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.6));">
+                            
+                            <div style="font-size: 0.9rem; font-weight: 700; color: #f8fafc; line-height: 1.2; height: 35px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">${fishName} ${is67 ? '🏆' : ''}</div>
+                            
+                            <div class="sushi-reward-preview">
+                                <span style="color:#fbbf24;">🪙 +${expectedCoins.toLocaleString()}</span>
+                                ${matPreviewText}
+                            </div>
+                            
+                            <button class="sushi-btn-cut" onclick="window.SushiMode.startMinigame('${safeFishName}', ${is67}, '${foundRarity.id}', '${foundFish.image}')">Filetar</button>
                         `;
-                        grid.appendChild(div);
+                        fragment.appendChild(div);
                     }
                 });
             };
 
             if (window.GAME_STATE && window.RARITIES) { addFishCards(window.GAME_STATE.collection, false); addFishCards(window.GAME_STATE.collection67, true); }
-            if (!hasFish) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 50px; font-size: 1.3rem; font-family: Fredoka, sans-serif;">Você não tem nenhum peixe na sua coleção. Volte a pescar!</div>';
+            
+            if (hasFish) { grid.appendChild(fragment); } 
+            else { grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 50px; font-size: 1.2rem; font-family: Poppins, sans-serif; background: rgba(0,0,0,0.4); border-radius: 12px;">A despensa está vazia. Volte a pescar para abastecer o restaurante!</div>'; }
+        },
+
+        distPointToSegment: function(px, py, x1, y1, x2, y2) {
+            const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+            if (l2 === 0) return Math.hypot(px - x1, py - y1);
+            let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+        },
+
+        drawCanvas: function(ctx, canvas) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            this.targets.forEach(t => {
+                if (!t.hit) {
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, 20, 0, Math.PI*2);
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, 6, 0, Math.PI*2);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fill();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, 15, 0, Math.PI*2);
+                    ctx.fillStyle = 'rgba(34, 197, 94, 0.8)';
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(t.x - 5, t.y); ctx.lineTo(t.x + 5, t.y);
+                    ctx.moveTo(t.x, t.y - 5); ctx.lineTo(t.x, t.y + 5);
+                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+                }
+            });
+
+            this.cuts.forEach(cut => {
+                ctx.beginPath(); ctx.moveTo(cut.x1, cut.y1); ctx.lineTo(cut.x2, cut.y2);
+                ctx.strokeStyle = "rgba(239, 68, 68, 0.8)"; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cut.x1, cut.y1); ctx.lineTo(cut.x2, cut.y2);
+                ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.stroke();
+            });
         },
 
         setupCanvas: function() {
@@ -837,7 +1105,6 @@ function iniciarMotorDoJogo() {
             const ctx = canvas.getContext('2d');
             let isDragging = false;
             let startX = 0, startY = 0;
-            let cuts = 0;
 
             const startCut = (e) => {
                 isDragging = true;
@@ -854,24 +1121,26 @@ function iniciarMotorDoJogo() {
                 const endY = (e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0)) - rect.top;
 
                 const dist = Math.hypot(endX - startX, endY - startY);
-                if (dist > 40) {
-                    ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
-                    ctx.strokeStyle = "rgba(231, 76, 60, 0.9)"; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY);
-                    ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.stroke();
+                if (dist > 30) {
+                    
+                    this.targets.forEach(t => {
+                        if (!t.hit) {
+                            const hitDist = this.distPointToSegment(t.x, t.y, startX, startY, endX, endY);
+                            if (hitDist < 25) { 
+                                t.hit = true;
+                            }
+                        }
+                    });
 
-                    for(let i=0; i<3; i++){
-                        ctx.beginPath();
-                        ctx.arc(endX + (Math.random()*40-20), endY + (Math.random()*40-20), Math.random()*8+2, 0, Math.PI*2);
-                        ctx.fillStyle = "rgba(231, 76, 60, 0.6)";
-                        ctx.fill();
+                    this.cuts.push({x1: startX, y1: startY, x2: endX, y2: endY});
+                    this.drawCanvas(ctx, canvas);
+
+                    document.getElementById('sushi-cut-counter').innerText = `${this.cuts.length} / ${this.maxCuts} Cortes`;
+                    document.getElementById('sushi-cut-img').style.transform = `scale(${1 + (this.cuts.length * 0.05)})`;
+
+                    if (this.cuts.length >= this.maxCuts) { 
+                        setTimeout(() => { window.SushiMode.finishMinigame(); }, 400); 
                     }
-
-                    cuts++;
-                    document.getElementById('sushi-cut-counter').innerText = `Cortes: ${cuts} / 4`;
-                    document.getElementById('sushi-cut-img').style.transform = `scale(${1 + (cuts * 0.05)})`;
-
-                    if (cuts >= 4) { setTimeout(() => { window.SushiMode.finishMinigame(); }, 300); }
                 }
             };
 
@@ -882,9 +1151,10 @@ function iniciarMotorDoJogo() {
             canvas.addEventListener('touchend', endCut, {passive: true});
 
             this.resetCanvas = () => {
+                this.cuts = [];
+                this.targets = [];
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                cuts = 0;
-                document.getElementById('sushi-cut-counter').innerText = `Cortes: 0 / 4`;
+                document.getElementById('sushi-cut-counter').innerText = `0 / ${this.maxCuts} Cortes`;
                 document.getElementById('sushi-cut-img').style.transform = `scale(1)`;
             };
         },
@@ -893,7 +1163,30 @@ function iniciarMotorDoJogo() {
             this.pendingSushi = { fishName, is67, rarityId };
             document.getElementById('sushi-modal').classList.add('hidden'); 
             this.resetCanvas();
-            document.getElementById('sushi-cut-img').src = imageSrc;
+            
+            this.isRotten = Math.random() < 0.15;
+            
+            const imgEl = document.getElementById('sushi-cut-img');
+            imgEl.src = imageSrc;
+            
+            if (this.isRotten) {
+                imgEl.classList.add('rotten-fish');
+                window.showToast("Alerta Biológico", "Este peixe tem uma cor estranha. Cuidado, pode estar podre!", "warning");
+            } else {
+                imgEl.classList.remove('rotten-fish');
+            }
+
+            for(let i=0; i<3; i++) {
+                this.targets.push({
+                    x: 60 + Math.random() * 180,
+                    y: 60 + Math.random() * 180,
+                    hit: false
+                });
+            }
+
+            const canvas = document.getElementById('sushi-cut-canvas');
+            this.drawCanvas(canvas.getContext('2d'), canvas);
+
             document.getElementById('sushi-minigame-modal').classList.remove('hidden'); 
         },
 
@@ -907,15 +1200,26 @@ function iniciarMotorDoJogo() {
             if (!collectionTarget[fishName] || collectionTarget[fishName] <= 0) return;
             collectionTarget[fishName]--;
 
-            const isRotten = Math.random() < 0.15;
-            if (isRotten) {
+            const hits = this.targets.filter(t => t.hit).length;
+            const requiredHits = 2; 
+
+            if (hits < requiredHits) {
+                window.GAME_STATE.materials['restos_comida'] = (window.GAME_STATE.materials['restos_comida'] || 0) + 1;
+                if(window.updateUI) window.updateUI(); if(window.saveGame) window.saveGame();
+                if(window.showToast) window.showToast("Corte Arruinado!", `Você falhou os pontos vitais e destruiu a carne.\nExtraído: 📦 +1 Restos de Comida`, "error");
+            } 
+            else if (this.isRotten) {
                 window.GAME_STATE.materials['geleia_estranha'] = (window.GAME_STATE.materials['geleia_estranha'] || 0) + 1;
                 if(window.updateUI) window.updateUI(); if(window.saveGame) window.saveGame();
-                if(window.customAlert) window.customAlert(`🤢 ECA!\n\nO ${fishName} estava PODRE por dentro!\nVocê perdeu a refeição, mas extraiu:\n🦠 +1 Geleia Estranha`, false);
-            } else {
+                if(window.showToast) window.showToast("Peixe Podre!", `Você fez um bom corte, mas o peixe estava doente.\nIsolado: 🦠 +1 Geleia Estranha`, "warning");
+            } 
+            else {
                 const currentKnifeId = window.GAME_STATE.currentKnife || 'faca_cozinha';
                 const knifeData = window.KNIVES.find(k => k.id === currentKnifeId) || window.KNIVES[0];
-                const multiplier = knifeData.mult;
+                let multiplier = knifeData.mult;
+                
+                if (hits === 3) multiplier *= 1.5;
+
                 const dropsMats = knifeData.dropsMats;
                 const loot = this.getLootTable(rarityId);
                 
@@ -926,7 +1230,7 @@ function iniciarMotorDoJogo() {
                 const matRewardId = loot.mats[Math.floor(Math.random() * loot.mats.length)]; 
 
                 window.GAME_STATE.coins += coinReward;
-                let rewardMessage = `🪙 +${coinReward.toLocaleString()} Cat Coins`;
+                let rewardMessage = `🪙 +${coinReward.toLocaleString()} Moedas`;
 
                 if (dropsMats) {
                     window.GAME_STATE.materials[matRewardId] = (window.GAME_STATE.materials[matRewardId] || 0) + matRewardQty;
@@ -936,10 +1240,12 @@ function iniciarMotorDoJogo() {
                         if (matInfo) { matIcon = matInfo.icon; matName = matInfo.name; }
                     }
                     rewardMessage += `\n${matIcon} +${matRewardQty.toLocaleString()} ${matName}`;
-                } else { rewardMessage += `\n❌ Sem materiais (Faca muito fraca)`; }
+                } else { rewardMessage += `\n❌ Faca fraca (Sem materiais)`; }
+
+                if (hits === 3) rewardMessage = `⭐ CORTE PERFEITO! BÓNUS x1.5!\n` + rewardMessage;
 
                 if(window.updateUI) window.updateUI(); if(window.saveGame) window.saveGame();
-                if(window.customAlert) window.customAlert(`🔪 Perfeito!\n\nVocê filetou o ${fishName}!\n\nRecompensas (Faca x${multiplier}):\n${rewardMessage}`, true);
+                if(window.showToast) window.showToast("Prato Concluído!", `O ${fishName} rendeu:\n\n${rewardMessage}`, "success");
             }
 
             this.renderGrid();

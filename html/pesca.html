@@ -1,115 +1,84 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gato Pescador - Mestre dos 67</title>
-
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;800&display=swap"
-        rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="/style/style.css">
     <link rel="stylesheet" href="/style/style2.css">
 
     <style>
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
+        .dropdown { position: relative; display: inline-block; }
         .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 110%;
-            background-color: #ffffff;
-            min-width: 210px;
-            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.4);
-            z-index: 1000;
-            border-radius: 12px;
-            overflow: hidden;
-            flex-direction: column;
-            animation: dropFadeIn 0.2s ease-in-out;
-            border: 2px solid #bdc3c7;
+            display: none; position: absolute; right: 0; top: 110%;
+            background-color: #ffffff; min-width: 210px;
+            box-shadow: 0px 8px 25px rgba(0,0,0,0.4); z-index: 1000;
+            border-radius: 12px; overflow: hidden; flex-direction: column;
+            animation: dropFadeIn 0.2s ease-in-out; border: 2px solid #bdc3c7;
         }
-
         .dropdown-content button {
-            color: #333;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-            font-family: 'Poppins', sans-serif;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s, padding-left 0.2s;
+            color: #333; padding: 12px 16px; text-decoration: none; display: block;
+            background: none; border: none; width: 100%; text-align: left;
+            font-family: 'Poppins', sans-serif; font-weight: bold; font-size: 0.95rem;
+            cursor: pointer; transition: background 0.2s, color 0.2s, padding-left 0.2s;
             border-bottom: 1px solid #f0f0f0;
         }
+        .dropdown-content button:last-child { border-bottom: none; }
+        .dropdown-content button:hover { background-color: #f1f8ff; color: #0277BD; padding-left: 24px; }
+        .dropdown.active .dropdown-content { display: flex; }
+        .dropdown.active .dropbtn { filter: brightness(1.1); transform: scale(1.05); }
+        
+        @keyframes dropFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .dropdown-content button:last-child {
-            border-bottom: none;
+        /* Scrollbars personalizadas para as áreas de coleção e forja */
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 8px; border: 2px solid rgba(0,0,0,0.2); }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        /* Badges de Clima e Dia Super Arredondadas */
+        .badge { border-radius: 25px !important; padding: 6px 16px !important; font-family: 'Poppins', sans-serif; font-weight: bold; }
+        #event-indicator { border-radius: 25px !important; padding: 6px 16px !important; font-family: 'Poppins', sans-serif; font-weight: bold; }
+
+        /* Estilo da Mesa de Montagem Tática */
+        .wb-slot-container {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px dashed #475569;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            text-align: center;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
         }
-
-        .dropdown-content button:hover {
-            background-color: #f1f8ff;
-            color: #0277BD;
-            padding-left: 24px;
+        .wb-slot-container.drag-over {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            transform: scale(1.02);
         }
-
-        /* MUDANÇA CRÍTICA: O MENU AGORA ABRE COM CLIQUE (CLASSE ACTIVE) EM VEZ DE HOVER */
-        .dropdown.active .dropdown-content {
-            display: flex;
+        .wb-tab-btn {
+            flex: 1; background: transparent; color: #94a3b8; border: none; padding: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; text-transform: uppercase; font-size: 0.85rem;
         }
-
-        .dropdown.active .dropbtn {
-            filter: brightness(1.1);
-            transform: scale(1.05);
+        .wb-tab-btn.active {
+            background: #3b82f6; color: #fff;
         }
-
-        @keyframes dropFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        #trilha-pescaria {
-            display: none;
+        .wb-tab-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.05); color: #e2e8f0;
         }
     </style>
 </head>
-
 <body>
-    <audio src="nome-do-seu-arquivo.mp3" autoplay loop id="trilha-pescaria"></audio>
-
-    <script>
-        // O script continua igual, garantindo que o som toque após o primeiro clique
-        document.addEventListener('click', function () {
-            var audio = document.getElementById('trilha-pescaria');
-            audio.play().catch(function (error) {
-                console.log("O autoplay foi bloqueado, mas tocará ao interagir.");
-            });
-        }, { once: true });
-    </script>
 
     <div id="game-container" class="day-mode">
         <canvas id="bg-canvas"></canvas>
 
         <div id="ui-layer">
-
+            
             <div class="top-bar">
                 <div class="left-group">
                     <div class="currency badge tooltip" data-tip="Suas economias">
@@ -118,21 +87,19 @@
                     </div>
                     <div id="time-indicator" class="time-badge badge">☀️ Dia</div>
                 </div>
-
+                
                 <div class="menu-buttons">
                     <div class="dropdown">
-                        <button class="icon-btn dropbtn"
-                            style="background: #8e44ad; color: white; border: 2px solid white;">🛠️ Criação ▼</button>
+                        <button class="icon-btn dropbtn" style="background: #8e44ad; color: white; border: 2px solid white;">🛠️ Criação ▼</button>
                         <div class="dropdown-content">
                             <button id="open-shop-btn">🛒 Loja de Materiais</button>
-                            <button id="open-craft-btn">🔨 Forja de Equipamentos</button>
+                            <button id="open-craft-btn">🔥 Grande Forja</button>
                             <button id="open-bait-forge-btn">🧪 Laboratório de Iscas</button>
                         </div>
                     </div>
 
                     <div class="dropdown">
-                        <button class="icon-btn dropbtn"
-                            style="background: #3498db; color: white; border: 2px solid white;">📚 Galeria ▼</button>
+                        <button class="icon-btn dropbtn" style="background: #3498db; color: white; border: 2px solid white;">📚 Galeria ▼</button>
                         <div class="dropdown-content">
                             <button id="open-collection-btn">📖 Aquário Principal</button>
                             <button id="open-67-btn">🏆 Aquário dos 67s</button>
@@ -148,17 +115,16 @@
 
             <div class="center-stage">
                 <div id="cat-fisherman" class="cat-idle">
-                    <img src="/img/asset/gato mergulhador.png" class="cat-visual" alt="Gato Pescador"
-                        onerror="this.style.display='none'">
+                    <img src="/img/asset/gato mergulhador.png" class="cat-visual" alt="Gato Pescador" onerror="this.style.display='none'">
                     <div class="rod-visual rod-tier-0" id="rod-sinker-zone">
                         <div id="equipped-sinker-visual"></div>
                     </div>
                 </div>
-
+                
                 <div id="line-container">
                     <div id="fishing-line"></div>
                     <div id="hook-group">
-                        <div id="hook">J</div>
+                        <div id="hook" style="transition: color 0.3s; font-weight: bold;">J</div>
                         <div id="bait-visual"></div>
                         <img id="hooked-fish-img" src="" alt="Peixe Fisgado">
                     </div>
@@ -168,6 +134,7 @@
             <div class="controls-area">
                 <div class="gear-display">
                     <div class="gear-slot tooltip" id="sinker-slot" data-tip="Peso da linha">🪨 Padrão</div>
+                    <div class="gear-slot tooltip" id="hook-display-slot" data-tip="Anzol Especial Atual">🪝 Padrão</div>
                     <div class="gear-slot tooltip" id="bait-slot" data-tip="Isca atual">🪝 Sem Isca</div>
                 </div>
 
@@ -177,206 +144,144 @@
             </div>
 
             <div id="shop-modal" class="modal hidden">
-                <div class="modal-content">
+                <div class="modal-content" style="max-width: 850px;">
                     <div class="modal-header">
                         <h2>🏪 Loja de Materiais</h2>
                         <button id="close-shop-btn" class="close-btn">&times;</button>
                     </div>
-                    <div id="shop-container" class="shop-grid"></div>
+                    <div id="shop-container" style="padding: 20px; overflow-y: auto; max-height: 75vh;"></div>
                 </div>
             </div>
 
             <div id="craft-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 1200px; max-height: 85vh;">
-                    <div class="modal-header" style="background: #8e44ad;">
-                        <h2>🔨 Forja de Equipamentos</h2>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <button id="open-workbench-btn" class="icon-btn"
-                                style="background: #f1c40f; color: #333; font-size: 0.9rem; border: none; padding: 5px 15px;">⚙️
-                                Ir para Montagem</button>
-                            <button id="close-craft-btn" class="close-btn">&times;</button>
+                <div class="modal-content" style="max-width: 1400px; max-height: 90vh; background: #0d0d0d; border: 2px solid #d35400; border-radius: 15px; box-shadow: 0 0 50px rgba(211, 84, 0, 0.4); overflow: hidden; padding: 0;">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #111, #4a1505, #111); border-bottom: 3px solid #e67e22; padding: 20px 25px;">
+                        <h2 style="margin: 0; color: #fff; font-family: 'Fredoka', sans-serif; text-shadow: 0 2px 5px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 10px; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 2px;">🔥 Grande Forja</h2>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <button id="open-workbench-btn" class="icon-btn" style="background: #2c3e50; color: #f1c40f; font-weight: bold; border: 2px solid #f1c40f; padding: 8px 20px; border-radius: 8px; box-shadow: 0 4px 0 #d35400; transition: 0.2s; font-family: 'Poppins', sans-serif; text-transform: uppercase; font-size: 0.9rem;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">⚙️ Montagem</button>
+                            <button id="close-craft-btn" class="close-btn" style="color: #e74c3c; text-shadow: 0 2px 4px #000; font-size: 2rem;">&times;</button>
                         </div>
                     </div>
-                    <div style="display: flex; height: 550px;">
-                        <div style="width: 75%; border-right: 2px solid #eee; overflow-y: auto; background: #f9f9f9; padding: 15px;"
-                            id="recipe-list"></div>
-                        <div style="width: 25%; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; background: #fff;"
-                            id="crafting-area">
-                            <div style="font-size: 4rem; color: #ccc; margin-bottom: 20px;">🔥</div>
-                            <h3 style="color: #333; margin-bottom: 10px; text-align:center;">Selecione uma planta</h3>
-                            <p style="color: #777; font-size: 0.9rem; text-align: center;">Escolha na lista ao lado para
-                                ver os materiais e forjar.</p>
+                    <div style="display: flex; height: 65vh; min-height: 600px;">
+                        <div style="width: 75%; border-right: 3px solid #222; overflow-y: auto; overflow-x: hidden; background: url('/img/asset/bg-dark-pattern.png') repeat, #151515; padding: 25px 15px 25px 25px; scroll-behavior: smooth;" id="recipe-list" class="custom-scrollbar"></div>
+                        <div style="width: 25%; padding: 30px 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; background: radial-gradient(circle at bottom, #4a1505 0%, #0d0d0d 70%); position: relative;" id="crafting-area" class="custom-scrollbar">
+                            <div style="font-size: 5rem; margin-bottom: 20px; filter: drop-shadow(0 0 20px #e67e22); opacity: 0.5;">⚒️</div>
+                            <h3 style="color: #f39c12; margin-bottom: 10px; text-align:center; font-family: 'Fredoka', sans-serif; text-shadow: 0 2px 4px #000; font-size: 1.5rem;">Fornalha Inativa</h3>
+                            <p style="color: #7f8c8d; font-size: 0.9rem; text-align: center; line-height: 1.5;">Selecione um diagrama mestre à esquerda para analisar os custos, fundir materiais e aquecer a bigorna.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="bait-forge-modal" class="modal hidden">
-                <div class="modal-content"
-                    style="max-width: 1050px; max-height: 90vh; border: 2px solid #27ae60; box-shadow: 0 10px 40px rgba(39, 174, 96, 0.3);">
-                    <div class="modal-header"
-                        style="background: linear-gradient(135deg, #1e8449, #2ecc71); border-bottom: 3px solid #145a32;">
-                        <h2
-                            style="font-family: 'Fredoka', sans-serif; margin: 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">
-                            🧪 Laboratório de Síntese</h2>
-                        <button id="close-bait-forge-btn" class="close-btn">&times;</button>
+                <div class="modal-content" style="max-width: 1100px; max-height: 90vh; background: #020617; border: 2px solid #22c55e; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); overflow: hidden; padding: 0;">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #064e3b, #022c22); border-bottom: 2px solid #10b981; padding: 20px;">
+                        <h2 style="font-family: 'Fredoka', sans-serif; margin: 0; color: #4ade80; display: flex; align-items: center; gap: 10px; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px;">🧪 Laboratório Genético</h2>
+                        <button id="close-bait-forge-btn" class="close-btn" style="color: #10b981;">&times;</button>
                     </div>
                     <div style="display: flex; height: 65vh; min-height: 600px;">
-
-                        <div style="width: 30%; border-right: 2px solid #e0e0e0; overflow-y: auto; background: #f8fbf8; padding: 15px;"
-                            id="bait-recipe-list"></div>
-
-                        <div
-                            style="width: 70%; display: flex; flex-direction: column; background: #ecf0f1; position: relative;">
-
-                            <div
-                                style="background: radial-gradient(circle at top, #2c3e50, #1a252f); padding: 25px 20px; box-shadow: inset 0 -5px 15px rgba(0,0,0,0.4); border-bottom: 4px solid #34495e;">
-                                <h3
-                                    style="color: #2ecc71; margin: 0 0 5px 0; font-family:'Fredoka', sans-serif; text-align: center; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(46,204,113,0.5);">
-                                    Reator de Mistura</h3>
-                                <p
-                                    style="font-size: 0.8rem; color: #bdc3c7; text-align: center; margin-top: 0; margin-bottom: 25px;">
-                                    Selecione a fórmula à esquerda. Injete até 2 Catalisadores (Boosts) para mutação.
-                                </p>
-
-                                <div
-                                    style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 25px;">
-
-                                    <div class="equip-slot" id="bait-slot-1"
-                                        style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #2ecc71; background: rgba(0,0,0,0.4); box-shadow: 0 0 15px rgba(46,204,113,0.2), inset 0 0 20px rgba(46,204,113,0.1);">
-                                        <div class="slot-title"
-                                            style="color: #2ecc71; font-size:0.6rem; text-transform:uppercase;">Extrato
-                                            A</div>
-                                        <div class="slot-content" id="bait-content-1"
-                                            style="font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(46,204,113,0.8));">
-                                            🧪</div>
+                        <div style="width: 30%; border-right: 1px solid rgba(255,255,255,0.1); overflow-y: auto; background: rgba(15, 23, 42, 0.5); padding: 20px;" id="bait-recipe-list" class="custom-scrollbar"></div>
+                        <div style="width: 70%; display: flex; flex-direction: column; background: #0f172a; position: relative;">
+                            <div style="background: radial-gradient(circle at top, #1e293b, #0f172a); padding: 30px; box-shadow: inset 0 -5px 15px rgba(0,0,0,0.5); border-bottom: 2px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; width: 100%;">
+                                    <div class="equip-slot" id="bait-slot-1">
+                                        <div class="slot-content" id="bait-content-1">🧪</div>
                                     </div>
-                                    <div style="font-size: 1.5rem; color: #7f8c8d; font-weight:bold;">+</div>
-                                    <div class="equip-slot" id="bait-slot-2"
-                                        style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #2ecc71; background: rgba(0,0,0,0.4); box-shadow: 0 0 15px rgba(46,204,113,0.2), inset 0 0 20px rgba(46,204,113,0.1);">
-                                        <div class="slot-title"
-                                            style="color: #2ecc71; font-size:0.6rem; text-transform:uppercase;">Extrato
-                                            B</div>
-                                        <div class="slot-content" id="bait-content-2"
-                                            style="font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(46,204,113,0.8));">
-                                            🧪</div>
+                                    <div style="font-size: 1.5rem; color: #64748b; font-weight:bold;">+</div>
+                                    <div class="equip-slot" id="bait-slot-2">
+                                        <div class="slot-content" id="bait-content-2">🧪</div>
                                     </div>
-
-                                    <div
-                                        style="font-size: 1.5rem; color: #f39c12; font-weight:bold; margin-left: 15px; margin-right: 5px; text-shadow: 0 0 10px rgba(243,156,18,0.5);">
-                                        ⚡</div>
-
-                                    <div class="equip-slot hover-boost" id="bait-slot-3" onclick="window.removeBoost(0)"
-                                        style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #f39c12; background: rgba(243,156,18,0.1); cursor:pointer; box-shadow: 0 0 15px rgba(243,156,18,0.3), inset 0 0 20px rgba(243,156,18,0.1); transition: 0.2s;">
-                                        <div class="slot-title"
-                                            style="color: #f39c12; font-size:0.6rem; text-transform:uppercase;">
-                                            Catalisador 1</div>
-                                        <div class="slot-content" id="bait-content-3" style="font-size: 1.5rem;">Vazio
-                                        </div>
+                                    <div style="font-size: 1.5rem; color: #f59e0b; font-weight:bold; margin-left: 20px; text-shadow: 0 0 10px rgba(245,158,11,0.5);">⚡</div>
+                                    <div class="equip-slot hover-boost" id="bait-slot-3" onclick="window.removeBoost(0)">
+                                        <div class="slot-content" id="bait-content-3">Vazio</div>
                                     </div>
-                                    <div class="equip-slot hover-boost" id="bait-slot-4" onclick="window.removeBoost(1)"
-                                        style="min-width: 80px; min-height: 80px; padding: 5px; border-radius: 15px; border: 2px solid #f39c12; background: rgba(243,156,18,0.1); cursor:pointer; box-shadow: 0 0 15px rgba(243,156,18,0.3), inset 0 0 20px rgba(243,156,18,0.1); transition: 0.2s;">
-                                        <div class="slot-title"
-                                            style="color: #f39c12; font-size:0.6rem; text-transform:uppercase;">
-                                            Catalisador 2</div>
-                                        <div class="slot-content" id="bait-content-4" style="font-size: 1.5rem;">Vazio
-                                        </div>
+                                    <div class="equip-slot hover-boost" id="bait-slot-4" onclick="window.removeBoost(1)">
+                                        <div class="slot-content" id="bait-content-4">Vazio</div>
                                     </div>
                                 </div>
-
-                                <div id="bait-craft-result"
-                                    style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                    <div style="color:#7f8c8d; font-family:'Poppins', sans-serif;">Aguardando inserção
-                                        de fórmula química...</div>
-                                </div>
+                                <div id="bait-craft-result" style="width: 100%;"></div>
                             </div>
-
-                            <div style="flex: 1; padding: 20px; overflow-y: auto; background: #f4f6f7;"
-                                id="bait-mat-inventory"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="collection-scrap-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 800px; border: 4px solid #7f8c8d;">
-                    <div class="modal-header" style="background: #7f8c8d;">
-                        <h2>🗑️ Museu do Lixo <span id="collection-scrap-progress" class="header-stat">(0/0)</span></h2>
-                        <button id="close-scrap-btn" class="close-btn">&times;</button>
-                    </div>
-                    <div
-                        style="background: #fdfdfd; padding: 10px; text-align: center; font-size: 0.85rem; color: #555; border-bottom: 2px dashed #ccc;">
-                        Oceano poluído! Pescar sucata te recompensa com <b style="color:#2ecc71;">Extratos Químicos</b>
-                        para criar Iscas no Laboratório!
-                    </div>
-                    <div id="collection-scrap-grid" class="shop-grid"></div>
-                </div>
-            </div>
-
-            <div id="workbench-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 850px; max-height: 85vh;">
-                    <div class="modal-header" style="background: #2c3e50;">
-                        <h2>⚙️ Mesa de Montagem</h2>
-                        <button id="close-workbench-btn" class="close-btn">&times;</button>
-                    </div>
-                    <div style="display: flex; height: 500px;">
-                        <div
-                            style="width: 40%; background: #ecf0f1; padding: 20px; display: flex; flex-direction: column; gap: 10px; border-right: 2px solid #ccc; overflow-y: auto;">
-                            <h3
-                                style="text-align: center; color: #333; font-family: 'Fredoka', sans-serif; margin-bottom: 0;">
-                                Seu Equipamento</h3>
-                            <p style="font-size: 0.7rem; text-align: center; color: #666; margin-top: 0;">Arraste os
-                                itens para as caixas</p>
-
-                            <div class="equip-slot dropzone" data-droptype="rod" id="wb-rod-slot">
-                                <div class="slot-title">🎣 Vara de Pesca</div>
-                                <div class="slot-content" id="wb-rod-content">Vazio</div>
-                            </div>
-                            <div class="equip-slot dropzone" data-droptype="sinker" id="wb-sinker-slot">
-                                <div class="slot-title">🪨 Chumbada</div>
-                                <div class="slot-content" id="wb-sinker-content">Vazio</div>
-                            </div>
-                            <div class="equip-slot dropzone" data-droptype="knife" id="wb-knife-slot">
-                                <div class="slot-title">🔪 Faca de Sushi</div>
-                                <div class="slot-content" id="wb-knife-content">Vazio</div>
-                            </div>
-                            <div class="equip-slot dropzone" data-droptype="bait" id="wb-bait-slot">
-                                <div class="slot-title">🪝 Isca (Consumível)</div>
-                                <div class="slot-content" id="wb-bait-content">Vazio</div>
-                            </div>
-                        </div>
-
-                        <div style="width: 60%; display: flex; flex-direction: column;">
-                            <div class="backpack-tabs">
-                                <button class="wb-tab-btn active" data-tab="rod">Varas</button>
-                                <button class="wb-tab-btn" data-tab="sink">Pesos</button>
-                                <button class="wb-tab-btn" data-tab="knife">Facas</button>
-                                <button class="wb-tab-btn" data-tab="bait">Iscas</button>
-                            </div>
-                            <div id="workbench-grid" class="shop-grid" style="flex: 1; align-content: flex-start;">
-                            </div>
+                            <div style="flex: 1; padding: 25px; overflow-y: auto; background: #020617;" id="bait-mat-inventory" class="custom-scrollbar"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="collection-modal" class="modal hidden">
-                <div class="modal-content">
-                    <div class="modal-header header-teal">
-                        <h2>📖 Aquário Principal <span id="collection-progress" class="header-stat">(0/0)</span></h2>
-                        <button id="close-collection-btn" class="close-btn">&times;</button>
+                <div class="modal-content" style="max-width: 1000px; max-height: 85vh; background: #0f172a; border: 1px solid #38bdf8; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #0369a1, #1e3a8a); padding: 20px; border-bottom: 2px solid #38bdf8;">
+                        <h2 style="color: #f8fafc; font-family: 'Fredoka', sans-serif; margin: 0;">📖 Aquário Principal <span id="collection-progress" style="color: #7dd3fc; font-size: 1rem;">(0/0)</span></h2>
+                        <button id="close-collection-btn" class="close-btn" style="color: #bae6fd;">&times;</button>
                     </div>
-                    <div id="collection-grid" class="shop-grid"></div>
+                    <div id="collection-grid" class="custom-scrollbar" style="max-height: 65vh; overflow-y: auto; padding: 20px;"></div>
                 </div>
             </div>
 
             <div id="collection-67-modal" class="modal hidden">
-                <div class="modal-content gold-border">
-                    <div class="modal-header header-gold">
-                        <h2>🏆 Aquário dos 67cm <span id="collection-67-progress" class="header-stat">(0/0)</span></h2>
-                        <button id="close-67-btn" class="close-btn dark-text">&times;</button>
+                <div class="modal-content" style="max-width: 1000px; max-height: 85vh; background: #0f172a; border: 1px solid #fbbf24; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #b45309, #78350f); padding: 20px; border-bottom: 2px solid #fbbf24;">
+                        <h2 style="color: #f8fafc; font-family: 'Fredoka', sans-serif; margin: 0;">🏆 Aquário dos 67cm <span id="collection-67-progress" style="color: #fde68a; font-size: 1rem;">(0/0)</span></h2>
+                        <button id="close-67-btn" class="close-btn" style="color: #fef08a;">&times;</button>
                     </div>
-                    <div id="collection-67-grid" class="shop-grid"></div>
+                    <div id="collection-67-grid" class="custom-scrollbar" style="max-height: 65vh; overflow-y: auto; padding: 20px;"></div>
+                </div>
+            </div>
+
+            <div id="collection-scrap-modal" class="modal hidden">
+                <div class="modal-content" style="max-width: 1000px; max-height: 85vh; background: #0f172a; border: 1px solid #94a3b8; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #475569, #1e293b); padding: 20px; border-bottom: 2px solid #94a3b8;">
+                        <h2 style="color: #f8fafc; font-family: 'Fredoka', sans-serif; margin: 0;">🗑️ Museu do Lixo <span id="collection-scrap-progress" style="color: #cbd5e1; font-size: 1rem;">(0/0)</span></h2>
+                        <button id="close-scrap-btn" class="close-btn" style="color: #e2e8f0;">&times;</button>
+                    </div>
+                    <div id="collection-scrap-grid" class="custom-scrollbar" style="max-height: 65vh; overflow-y: auto; padding: 20px;"></div>
+                </div>
+            </div>
+
+            <div id="workbench-modal" class="modal hidden">
+                <div class="modal-content" style="max-width: 900px; background: #0f172a; border: 2px solid #3b82f6; border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #1e3a8a, #0f172a); border-bottom: 2px solid #3b82f6; padding: 20px 25px;">
+                        <h2 style="margin: 0; color: #fff; font-family: 'Fredoka', sans-serif; display: flex; align-items: center; gap: 10px;">⚙️ Mesa Tática</h2>
+                        <button id="close-workbench-btn" class="close-btn" style="color: #60a5fa;">&times;</button>
+                    </div>
+                    <div style="display: flex; height: 60vh; min-height: 500px;">
+                        
+                        <div style="width: 35%; background: #1e293b; padding: 20px; overflow-y: auto; border-right: 2px solid #334155;" class="custom-scrollbar">
+                            <h3 style="color: #94a3b8; font-family: 'Poppins', sans-serif; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; text-align: center; margin-bottom: 20px;">Loadout Ativo</h3>
+                            
+                            <div class="wb-slot-container dropzone" data-droptype="rod" id="wb-rod-slot">
+                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🎣 Vara</div>
+                                <div id="wb-rod-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
+                            </div>
+                            <div class="wb-slot-container dropzone" data-droptype="sinker" id="wb-sinker-slot">
+                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🪨 Peso</div>
+                                <div id="wb-sinker-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
+                            </div>
+                            <div class="wb-slot-container dropzone" data-droptype="hook" id="wb-hook-slot">
+                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🪝 Anzol</div>
+                                <div id="wb-hook-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
+                            </div>
+                            <div class="wb-slot-container dropzone" data-droptype="knife" id="wb-knife-slot">
+                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🔪 Faca</div>
+                                <div id="wb-knife-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
+                            </div>
+                            <div class="wb-slot-container dropzone" data-droptype="bait" id="wb-bait-slot">
+                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🪱 Isca</div>
+                                <div id="wb-bait-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
+                            </div>
+                        </div>
+                        
+                        <div style="width: 65%; display: flex; flex-direction: column; background: #0f172a;">
+                            <div class="backpack-tabs" style="display: flex; background: #0f172a; border-bottom: 2px solid #334155;">
+                                <button class="wb-tab-btn active" data-tab="rod">Varas</button>
+                                <button class="wb-tab-btn" data-tab="sink">Pesos</button>
+                                <button class="wb-tab-btn" data-tab="hook">Anzóis</button>
+                                <button class="wb-tab-btn" data-tab="knife">Facas</button>
+                                <button class="wb-tab-btn" data-tab="bait">Iscas</button>
+                            </div>
+                            <div id="workbench-grid" class="custom-scrollbar" style="flex: 1; overflow-y: auto;"></div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
@@ -386,24 +291,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const dropdowns = document.querySelectorAll('.dropdown');
-
-            // Abre o menu ao clicar
             dropdowns.forEach(d => {
                 const btn = d.querySelector('.dropbtn');
                 btn.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Impede o clique de fechar imediatamente
+                    e.stopPropagation(); 
                     const isActive = d.classList.contains('active');
-                    dropdowns.forEach(other => other.classList.remove('active')); // Fecha os outros
-                    if (!isActive) d.classList.add('active'); // Abre o clicado
+                    dropdowns.forEach(other => other.classList.remove('active')); 
+                    if (!isActive) d.classList.add('active'); 
                 });
             });
-
-            // Fecha o menu se clicar em qualquer outro lugar da tela
             document.addEventListener('click', () => {
                 dropdowns.forEach(d => d.classList.remove('active'));
             });
-
-            // Fecha o menu ao clicar num botão dentro dele
             document.querySelectorAll('.dropdown-content button').forEach(btn => {
                 btn.addEventListener('click', () => {
                     dropdowns.forEach(d => d.classList.remove('active'));
@@ -418,5 +317,4 @@
     <script src="/script/ragefish.js" defer></script>
     <script src="/script/crafting.js" defer></script>
 </body>
-
 </html>

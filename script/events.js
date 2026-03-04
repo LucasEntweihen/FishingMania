@@ -1,157 +1,193 @@
 /* ==========================================================================
-   SISTEMA DE EVENTOS E BIOMAS V2 (LEVE E OTIMIZADO)
+   SISTEMA DE CLIMA E EVENTOS MÍSTICOS (O MOTOR DO MUNDO)
    ========================================================================== */
 
-   const EVENT_CONFIG = {
-    checkInterval: 60000, // Tenta puxar um evento a cada 1 minuto
-    chance: 0.35,         // 35% de chance de rolar um evento
-    duration: 75000       // Duração do evento: 1 minuto e 15 segundos
+// Variáveis Globais que o script.js lê
+window.currentEventID = null;
+window.eventLuckMult = 0;
+window.eventValueMult = 1;
+window.eventCastTimeMult = 1;
+window.eventBgSpeedMult = 1;
+
+// O Catálogo de Eventos do Jogo
+const GAME_EVENTS = {
+    'tempestade': {
+        id: 'tempestade',
+        name: 'Tempestade Noturna',
+        icon: '⛈️',
+        color: '#2c3e50',
+        desc: 'Águas muito agitadas! Peixes das profundezas sobem à superfície. (Tempo de pesca mais lento, mas atrai Lendas)',
+        duration: 120000, // Duração: 2 minutos
+        luckMult: 1.5,    // +150% Sorte
+        valueMult: 1,
+        castTimeMult: 1.5, // Linha desce 50% mais devagar por causa da correnteza
+        bgSpeedMult: 3.0,  // Peixes do fundo nadam muito rápido
+        startMsg: "O céu escureceu e os ventos uivam! Uma Tempestade aproxima-se!",
+        effectCSS: 'background: rgba(44, 62, 80, 0.4); mix-blend-mode: multiply;'
+    },
+    'ouro': {
+        id: 'ouro',
+        name: 'Maré Dourada',
+        icon: '✨',
+        color: '#f1c40f',
+        desc: 'O plâncton dourado reflete a luz! Todos os peixes capturados valem o DOBRO.',
+        duration: 90000, // Duração: 1.5 minutos
+        luckMult: 0,
+        valueMult: 2.0,   // Tudo vale 2x mais moedas
+        castTimeMult: 1,
+        bgSpeedMult: 1.0,
+        startMsg: "As águas estão a brilhar intensamente! A Maré Dourada começou!",
+        effectCSS: 'background: rgba(241, 196, 15, 0.15); mix-blend-mode: overlay;'
+    },
+    'frenesi': {
+        id: 'frenesi',
+        name: 'Frenesi Alimentar',
+        icon: '🦈',
+        color: '#e74c3c',
+        desc: 'Os peixes estão desesperados por comida! A velocidade da sua linha é 3x mais rápida.',
+        duration: 60000, // Duração: 1 minuto
+        luckMult: -0.2,  // Pequena penalidade de sorte (vêm muitos comuns juntos)
+        valueMult: 1,
+        castTimeMult: 0.33, // Linha cai 3x mais rápido
+        bgSpeedMult: 4.0,
+        startMsg: "A água está a ferver com barbatanas! Frenesi Alimentar detetado!",
+        effectCSS: 'background: rgba(231, 76, 60, 0.1); mix-blend-mode: color-burn;'
+    },
+    'misticismo': {
+        id: 'misticismo',
+        name: 'Nevoeiro Místico',
+        icon: '🔮',
+        color: '#8e44ad',
+        desc: 'Entidades esquecidas acordam. Bônus ABSURDO de Raros, Divinos e Aurudos!',
+        duration: 100000, // Duração: 1m 40s
+        luckMult: 6.0,    // +600% Sorte (Ignora limites)
+        valueMult: 1.5,   // +50% Valor
+        castTimeMult: 0.8,
+        bgSpeedMult: 0.5, // Fundo fica assustadoramente devagar
+        startMsg: "Um nevoeiro roxo e espesso cobre o Cais... As lendas despertaram.",
+        effectCSS: 'background: rgba(142, 68, 173, 0.2); backdrop-filter: blur(3px);'
+    }
 };
 
-let currentEvent = null;
-window.currentEventID = null; // Variável global para o script.js ler o evento atual
-
-// 1. Criação da Película de Clima (Leve, sem filtros que travam o PC)
-const overlay = document.createElement('div');
-overlay.id = "event-overlay";
-overlay.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2; transition: background 2.5s ease, opacity 2.5s ease; opacity: 0;";
-document.getElementById('game-container').appendChild(overlay);
-
-// 2. Criação do Alerta de Tela (Toast Moderno)
-const eventAlert = document.createElement('div');
-eventAlert.id = "event-toast";
-eventAlert.style.cssText = "position:fixed; top:90px; left:50%; transform:translateX(-50%) translateY(-20px); padding:10px 25px; border-radius:20px; color:white; font-weight:800; z-index:1000; font-family:'Fredoka', sans-serif; pointer-events:none; transition:all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity:0; text-shadow:0 2px 4px rgba(0,0,0,0.5); font-size:1.1rem; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.2);";
-document.body.appendChild(eventAlert);
-
-function showEventMessage(title, subtitle, bgColor) {
-    eventAlert.style.background = bgColor;
-    eventAlert.innerHTML = `<div style="font-size:1.4rem; margin-bottom:2px;">${title}</div><div style="font-size:0.85rem; font-weight:500; opacity:0.95;">${subtitle}</div>`;
-    eventAlert.style.opacity = '1';
-    eventAlert.style.transform = 'translateX(-50%) translateY(0)';
+// Constrói a UI para o jogador ver que evento está a ocorrer
+function createEventUI() {
+    const topBar = document.querySelector('.left-group');
+    if (!topBar) return;
     
-    // Esconde o aviso depois de 6 segundos
+    // Crachá do Evento (Fica invisível até um evento começar)
+    const badge = document.createElement('div');
+    badge.id = 'event-indicator';
+    badge.className = 'badge hidden';
+    badge.style.cssText = 'transition: all 0.5s; cursor: pointer; text-shadow: 0 1px 2px rgba(0,0,0,0.5); border: 2px solid white; box-shadow: 0 0 10px rgba(255,255,255,0.4); margin-left: 10px;';
+    
+    // Se clicar no crachá, abre um Toast a explicar o evento
+    badge.addEventListener('click', () => {
+        if (window.currentEventID && GAME_EVENTS[window.currentEventID]) {
+            const ev = GAME_EVENTS[window.currentEventID];
+            if(window.showToast) window.showToast(ev.name, ev.desc, "info");
+        }
+    });
+
+    topBar.appendChild(badge);
+
+    // Filtro visual para a tela (Chuva, Nevoeiro, etc)
+    const overlay = document.createElement('div');
+    overlay.id = 'event-overlay-fx';
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; opacity: 0; transition: opacity 3s ease-in-out; pointer-events: none;';
+    
+    // Insere o overlay atrás dos modais, mas à frente do mar
+    const uiLayer = document.getElementById('ui-layer');
+    if (uiLayer) {
+        document.getElementById('game-container').insertBefore(overlay, uiLayer);
+    } else {
+        document.body.appendChild(overlay);
+    }
+}
+
+// Lança um evento aleatório
+function triggerRandomEvent() {
+    if (window.currentEventID) return; // Não sobrepõe eventos
+
+    const eventKeys = Object.keys(GAME_EVENTS);
+    const randomKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
+    startEvent(randomKey);
+}
+
+// Inicia um evento específico
+function startEvent(eventID) {
+    const ev = GAME_EVENTS[eventID];
+    if (!ev) return;
+
+    window.currentEventID = ev.id;
+    window.eventLuckMult = ev.luckMult;
+    window.eventValueMult = ev.valueMult;
+    window.eventCastTimeMult = ev.castTimeMult;
+    window.eventBgSpeedMult = ev.bgSpeedMult;
+
+    // Atualiza a Interface Superior
+    const badge = document.getElementById('event-indicator');
+    if (badge) {
+        badge.innerHTML = `${ev.icon} ${ev.name}`;
+        badge.style.background = ev.color;
+        badge.classList.remove('hidden');
+    }
+
+    // Aplica o Efeito Visual no Ecrã Inteiro
+    const overlay = document.getElementById('event-overlay-fx');
+    if (overlay) {
+        overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; opacity: 1; transition: opacity 3s ease-in-out; pointer-events: none; ${ev.effectCSS}`;
+    }
+
+    // Dispara a Notificação Épica!
+    if(window.showToast) window.showToast("⚠️ Alerta Climático", ev.startMsg, "warning");
+
+    // Agenda o fim do evento
     setTimeout(() => {
-        eventAlert.style.opacity = '0';
-        eventAlert.style.transform = 'translateX(-50%) translateY(-20px)';
-    }, 6000);
+        endEvent();
+    }, ev.duration);
 }
 
-// 2.5. Plaquinha Dinâmica ao lado da Hora
-function injectEventBadge() {
-    const leftGroup = document.querySelector('.left-group');
-    if (leftGroup && !document.getElementById('event-active-badge')) {
-        const eventBadge = document.createElement('div');
-        eventBadge.id = "event-active-badge";
-        eventBadge.className = "time-badge badge";
-        eventBadge.style.display = "none";
-        eventBadge.style.textShadow = "0 1px 2px rgba(0,0,0,0.5)"; 
-        leftGroup.appendChild(eventBadge);
-    }
-}
-// Garante a injeção assim que a tela carrega
-document.addEventListener('DOMContentLoaded', injectEventBadge);
-setTimeout(injectEventBadge, 500);
-
-
-// 3. Catálogo de Eventos
-const EVENTS = {
-    frenesi: {
-        id: "frenesi",
-        start: () => {
-            window.eventCastTimeMult = 0.4;  // Linha desce absurdamente rápido
-            window.eventBgSpeedMult = 2.0;   // Peixes de fundo mais rápidos
-            overlay.style.background = "radial-gradient(circle, rgba(255,255,255,0) 40%, rgba(41, 128, 185, 0.3) 100%)"; // Azul bebê suave
-            overlay.style.opacity = '1';
-            showEventMessage("🐟 Frenesi Alimentar!", "Os peixes estão agitados. A linha desce super rápido!", "linear-gradient(135deg, #2980b9, #6dd5ed)");
-        }
-    },
-    ouro: {
-        id: "ouro",
-        start: () => {
-            window.eventValueMult = 3.0;     // Lucro x3
-            window.eventLuckMult = 10;       // Equivalente a +1000 de Sorte Extra
-            overlay.style.background = "radial-gradient(circle, rgba(255,255,255,0) 30%, rgba(241, 196, 15, 0.25) 100%)"; // Dourado suave nas bordas
-            overlay.style.opacity = '1';
-            showEventMessage("✨ Maré Dourada!", "As águas brilham. O lucro de venda de qualquer peixe foi triplicado!", "linear-gradient(135deg, #f39c12, #f1c40f)");
-        }
-    },
-    tempestade: {
-        id: "tempestade",
-        start: () => {
-            window.eventLuckMult = 50;       // Equivalente a +5000 de Sorte
-            window.eventCastTimeMult = 1.3;  // Água pesada, linha demora um pouco mais
-            overlay.style.background = "linear-gradient(to bottom, rgba(44, 62, 80, 0.4) 0%, rgba(0,0,0,0.3) 100%)"; // Escurecimento suave do céu ao fundo
-            overlay.style.opacity = '1';
-            showEventMessage("⛈️ Tempestade Sombria!", "O clima fechou. O mar revolto atrai aberrações e lendas das profundezas.", "linear-gradient(135deg, #34495e, #2c3e50)");
-        }
-    },
-    misticismo: {
-        id: "misticismo",
-        start: () => {
-            window.eventLuckMult = 150;      // Equivalente a +15000 de Sorte
-            window.eventBgSpeedMult = 0.5;   // Peixes nadam bem devagarzinho
-            overlay.style.background = "radial-gradient(circle, rgba(255,255,255,0) 20%, rgba(155, 89, 182, 0.25) 100%)"; // Roxo místico
-            overlay.style.opacity = '1';
-            showEventMessage("🌌 Brisa Mística!", "Uma aura mágica paira no ar. As lendas despertaram...", "linear-gradient(135deg, #8e44ad, #9b59b6)");
-        }
-    }
-};
-
-function clearEvent() {
-    if (!currentEvent) return;
+// Finaliza o evento atual
+function endEvent() {
+    if (!window.currentEventID) return;
+    const ev = GAME_EVENTS[window.currentEventID];
     
-    // Reseta todos os modificadores
-    window.eventLuckMult = null;
-    window.eventCastTimeMult = null;
-    window.eventValueMult = null;
-    window.eventBgSpeedMult = null;
+    // Reseta as variáveis para o script.js
     window.currentEventID = null;
-    
-    // Desvanece a película visual
-    overlay.style.opacity = '0';
-    
-    // Oculta a plaquinha de evento SEM mexer no relógio de Dia/Noite
-    const eventBadge = document.getElementById('event-active-badge');
-    if (eventBadge) eventBadge.style.display = "none";
-    
-    currentEvent = null;
+    window.eventLuckMult = 0;
+    window.eventValueMult = 1;
+    window.eventCastTimeMult = 1;
+    window.eventBgSpeedMult = 1;
+
+    // Esconde a Interface
+    const badge = document.getElementById('event-indicator');
+    if (badge) badge.classList.add('hidden');
+
+    // Desvanece o Efeito Visual
+    const overlay = document.getElementById('event-overlay-fx');
+    if (overlay) overlay.style.opacity = '0';
+
+    // Notifica que o clima acalmou
+    if(window.showToast) window.showToast("Clima Normalizado", `O evento ${ev.name} chegou ao fim. As marés acalmaram.`, "info");
 }
 
-function processEvents() {
-    if (currentEvent) return; 
-
-    if (Math.random() < EVENT_CONFIG.chance) {
-        const keys = Object.keys(EVENTS);
-        const eventKey = keys[Math.floor(Math.random() * keys.length)];
-        
-        const event = EVENTS[eventKey];
-        currentEvent = eventKey;
-        window.currentEventID = event.id; // Marca globalmente o evento ativo
-        
-        event.start();
-
-        // Acende a Plaquinha de Evento ao lado da hora
-        const eventBadge = document.getElementById('event-active-badge');
-        if (eventBadge) {
-            let emoji = "✨";
-            let title = "Evento";
-            let bg = "rgba(0,0,0,0.5)";
-            
-            if(eventKey==='frenesi') { emoji="🐟"; title="Frenesi"; bg="linear-gradient(135deg, #2980b9, #6dd5ed)"; }
-            if(eventKey==='tempestade') { emoji="⛈️"; title="Tempestade"; bg="linear-gradient(135deg, #34495e, #2c3e50)"; }
-            if(eventKey==='misticismo') { emoji="🌌"; title="Mística"; bg="linear-gradient(135deg, #8e44ad, #9b59b6)"; }
-            if(eventKey==='ouro') { emoji="✨"; title="Maré Dourada"; bg="linear-gradient(135deg, #f39c12, #f1c40f)"; }
-            
-            eventBadge.innerText = `${emoji} ${title}`;
-            eventBadge.style.background = bg;
-            eventBadge.style.display = "inline-block";
+// ==========================================
+// INICIALIZAÇÃO E LOOP DE TEMPO
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    createEventUI();
+    
+    // O Loop Principal: A cada 2 minutos (120000ms), há 25% de chance de um evento natural acontecer
+    setInterval(() => {
+        if (!window.currentEventID && Math.random() < 0.25) {
+            triggerRandomEvent();
         }
+    }, 120000); 
 
-        // Agenda o fim do evento
-        setTimeout(clearEvent, EVENT_CONFIG.duration);
-    }
-}
-
-// Inicia os loops
-setInterval(processEvents, EVENT_CONFIG.checkInterval);
-setTimeout(processEvents, 15000); // Força uma tentativa de evento 15 segundos após abrir o jogo
+    // --- CÓDIGOS DE ADMINISTRAÇÃO (TESTE RÁPIDO) ---
+    // Você pode abrir o "Inspecionar Elemento > Console" e digitar:
+    // forceEvent('ouro')
+    // stopEvent()
+    window.forceEvent = startEvent;
+    window.stopEvent = endEvent;
+});

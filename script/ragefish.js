@@ -1,246 +1,255 @@
 /* ==========================================================================
-   RAGEBAIT FISH V5 - Correções de Catálogo e Mensagens Customizadas
+   TUTOR FISH (RAGE FISH) - SISTEMA REINVENTADO DE TUTORIAL DINÂMICO
    ========================================================================== */
 
-const RAGE_FISH_STATE = {
-    tipsGiven: 0,
-    maxTipsBeforeSushi: 5,
-    isCustomMode: false,
-    // Agora ele SALVA as mensagens no seu navegador para não esquecer!
-    customMessages: JSON.parse(localStorage.getItem('gatoPescador_customMsg')) || [],
-    currentIndex: 0,
-    currentScreen: 'main',
-    
-    tips: {
-        main: [
-            "Dica: Para pescar um peixe, você precisa jogar a isca na água. Óbvio, não?",
-            "Dica: Se a linha não descer, é porque você não tem vara equipada.",
-            "Dica: Peixes Divinos são mais raros que peixes Comuns. Genial, não?",
-            "Dica: Iscas caras dão lucros muito maiores. É matemática básica.",
-            "Dica: Você sabia que a água é molhada? O gato sabe."
-        ],
-        forge: [
-            "A Forja! Clique em uma planta à esquerda para ver os ingredientes.",
-            "Se o material estiver vermelho, significa que você é pobre e precisa comprar na Loja.",
-            "Lembre-se: Construir a vara NÃO equipa a vara. Use a Mesa de Trabalho ali em cima!",
-            "Faltam moedas? Volte a pescar, preguiçoso!"
-        ],
-        workbench: [
-            "Aqui na Mesa, ARRASTE os itens da direita para os espaços pontilhados na esquerda!",
-            "Você pode combinar varas de Madeira com Chumbadas que dão bônus para Madeira!",
-            "Se a isca acabar, o gato volta a pescar apenas lixo."
-        ],
-        shop: [
-            "Gaste seus Cat Coins aqui. Dinheiro não traz felicidade, mas traz varas de Titânio.",
-            "Materiais Brutos servem apenas para a Forja. Não tente pescar usando um pedaço de Plástico.",
-            "Algumas iscas raras garantem peixes gigantes de 67cm."
-        ]
-    }
+   const TUTOR_STATE = {
+    clicks: 0,
+    clicksToUnlockSushi: 7, 
+    isTalking: false,
+    lastContext: '',
+    hideTimeout: null
 };
 
-const fishStyles = document.createElement('style');
-fishStyles.innerHTML = `
-    #rage-fish-container {
-        position: fixed; bottom: 20px; right: 20px; z-index: 99999;
-        display: flex; flex-direction: column; align-items: flex-end; pointer-events: none;
-    }
-    #rage-fish-img {
-        width: 80px; height: 80px; cursor: pointer; pointer-events: auto;
-        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        animation: floatRage 3s ease-in-out infinite;
-    }
-    #rage-fish-img:hover { transform: scale(1.15) rotate(-5deg); }
+// O Dicionário de Sabedoria do Peixe (Textos limpos e didáticos)
+const TUTOR_TIPS = {
+    main: [
+        "🎣 Bem-vindo ao Cais! Pressione ESPAÇO ou clique no botão para pescar.",
+        "⏰ Peixes diferentes aparecem de Dia e de Noite. Fique de olho no relógio superior!",
+        "✨ Eventos Climáticos mudam as regras do jogo. A Tempestade traz monstros, a Maré Dourada traz riquezas!",
+        "💰 Faltam moedas? Pesque! Cada peixe tem o seu valor de mercado."
+    ],
+    'shop-modal': [
+        "🛒 Bem-vindo ao Bazar Marítimo! Compre Matérias-Primas e Catalisadores aqui.",
+        "📦 Use os botões 1x, 10x e 100x na base de cada item para comprar grandes quantidades rapidamente.",
+        "💸 Se o botão estiver escuro, significa que você não tem moedas suficientes."
+    ],
+    'craft-modal': [
+        "🔥 A Grande Forja! Onde as lendas são construídas.",
+        "📜 Clique num Diagrama à esquerda. Se tiver os materiais necessários, a fornalha acende e o botão é libertado!",
+        "⚠️ Lembre-se: Forjar um item NÃO o equipa. Você deve ir à Mesa de Montagem (⚙️) para usá-lo."
+    ],
+    'bait-forge-modal': [
+        "🧪 Bem-vindo ao Reator de Síntese! Aqui você fabrica Iscas.",
+        "♻️ As Iscas exigem Extratos de Lixo. Vá pescar sucata no mar para reciclá-las!",
+        "⚡ Quer iscas absurdas? Clique num Catalisador (Boost) do inventário inferior para injetá-lo nos tubos do reator!"
+    ],
+    'workbench-modal': [
+        "⚙️ A Mesa de Montagem! O coração do seu equipamento.",
+        "🖱️ Clique, SEGURE E ARRASTE os itens da aba da direita para as caixas correspondentes à esquerda.",
+        "🪝 Um Anzol Divino numa Vara de Madeira não faz milagres. Mantenha o seu equipamento equilibrado!"
+    ],
+    'collection-modal': [
+        "📖 O Seu Aquário Principal! Aqui fica o registo de todos os peixes que já capturou.",
+        "🔍 Clique num peixe desbloqueado (colorido) para abrir a sua ficha e ver os hábitos e raridade."
+    ],
+    'collection-67-modal': [
+        "🏆 O Aquário dos 67cm! O salão VIP da pesca.",
+        "📏 Somente peixes que atingiram o tamanho máximo e perfeito entram aqui. Use Boosts de tamanho nas suas iscas!"
+    ],
+    'collection-scrap-modal': [
+        "🗑️ O Museu do Lixo. Os humanos sujam, nós lucramos.",
+        "📦 Cada pedaço de sucata pescado concede-lhe um Extrato Químico vital para o Laboratório de Iscas."
+    ],
+    'sushi-modal': [
+        "🍣 O Restaurante de Sushi! Transforme peixes que estão a sobrar em dinheiro e materiais.",
+        "🔪 Clique em FILETAR e arraste o rato/dedo 4 vezes rapidamente sobre a imagem do peixe.",
+        "🤢 Cuidado... peixes raros dão grandes recompensas, mas às vezes podem estar podres por dentro!"
+    ]
+};
 
-    #rage-fish-bubble {
-        background: white; color: #333; padding: 15px; border-radius: 12px 12px 0 12px;
-        font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-width: 250px; margin-bottom: 15px; margin-right: 20px;
-        opacity: 0; transform: translateY(10px); transition: opacity 0.3s, transform 0.3s;
-        border: 2px solid #e67e22; pointer-events: auto;
-    }
-    #rage-fish-bubble::after {
-        content: ''; position: absolute; bottom: -10px; right: -2px;
-        border-width: 10px 10px 0 0; border-style: solid; border-color: #e67e22 transparent transparent transparent;
-    }
-    @keyframes floatRage { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-`;
-document.head.appendChild(fishStyles);
+// O Sistema injeta o próprio peixe no HTML para garantir 0 bugs
+function injectTutorFish() {
+    if (document.getElementById('tutor-fish-container')) return;
 
-const fishContainer = document.createElement('div');
-fishContainer.id = 'rage-fish-container';
-const fishBubble = document.createElement('div');
-fishBubble.id = 'rage-fish-bubble';
-const fishImg = document.createElement('img');
-fishImg.id = 'rage-fish-img';
-fishImg.src = '/img/DicaFish.png'; 
-fishImg.onerror = () => { fishImg.src = 'https://placehold.co/80x80?text=🐟'; };
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes tutorFloat {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+        }
+        @keyframes tutorSwim {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-20px); }
+        }
+        #tutor-fish-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999998;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            pointer-events: none; /* Ignora cliques no container invisível */
+        }
+        #tutor-fish-bubble {
+            background: white;
+            color: #2c3e50;
+            padding: 15px 25px;
+            border-radius: 18px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.4;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 4px solid #3498db;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            pointer-events: auto; /* Permite clicar no balão */
+            cursor: pointer;
+        }
+        #tutor-fish-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            right: 50px;
+            border-width: 15px 15px 0 0;
+            border-style: solid;
+            border-color: #3498db transparent transparent transparent;
+            display: block;
+            width: 0;
+        }
+        #tutor-fish-img {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            cursor: pointer;
+            pointer-events: auto;
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.5));
+            animation: tutorFloat 3.5s ease-in-out infinite, tutorSwim 10s ease-in-out infinite;
+            transition: transform 0.2s, filter 0.2s;
+            will-change: transform;
+        }
+        #tutor-fish-img:hover {
+            transform: scale(1.1) !important;
+            filter: drop-shadow(0 20px 25px rgba(52, 152, 219, 0.6));
+        }
+        #tutor-fish-img:active {
+            transform: scale(0.9) !important;
+        }
+    `;
+    document.head.appendChild(style);
 
-fishContainer.appendChild(fishBubble);
-fishContainer.appendChild(fishImg);
-document.body.appendChild(fishContainer);
+    const container = document.createElement('div');
+    container.id = 'tutor-fish-container';
 
-const fishModal = document.createElement('div');
-fishModal.id = 'fish-modal';
-fishModal.className = 'modal hidden';
-fishModal.style.zIndex = '999999';
-fishModal.innerHTML = `
-    <div class="modal-content" style="max-width: 450px;">
-        <div class="modal-header" style="background:#e67e22">
-            <h2>💬 Ensinar o Peixe</h2>
-            <button id="close-fish-modal" class="close-btn">&times;</button>
-        </div>
-        <div style="padding: 20px;">
-            <p style="font-size:0.9rem; color:#555; margin-bottom: 10px; font-weight: bold;">Adicione frases para o peixe dizer em sequência:</p>
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <input type="text" id="fish-new-msg" placeholder="Digite uma frase..." style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc; font-family:'Poppins', sans-serif;">
-                <button id="fish-add-msg" style="padding:10px 15px; background:#2ecc71; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-family:'Fredoka', sans-serif;">Adicionar</button>
-            </div>
-            <div id="fish-msg-list"><p style="text-align:center; color:#999; margin-top:20px;">Nenhuma frase adicionada.</p></div>
-        </div>
-    </div>
-`;
-document.body.appendChild(fishModal);
+    const bubble = document.createElement('div');
+    bubble.id = 'tutor-fish-bubble';
+    bubble.innerHTML = "E aí, novato? Clique em mim para receber dicas!";
+    bubble.addEventListener('click', () => { bubble.style.opacity = '0'; });
 
-document.getElementById('close-fish-modal').onclick = () => fishModal.classList.add('hidden');
+    const img = document.createElement('img');
+    img.id = 'tutor-fish-img';
+    img.src = '/img/DicaFish.png'; // A imagem original do seu projeto
+    img.onerror = () => { img.src = 'https://placehold.co/140x140/transparent/3498db?text=🐟'; };
 
-// Suporte para o clique no botão e na tecla ENTER
-function addCustomMessage() {
-    const input = document.getElementById('fish-new-msg');
-    const txt = input.value.trim();
-    if (txt) { 
-        RAGE_FISH_STATE.customMessages.push(txt); 
-        localStorage.setItem('gatoPescador_customMsg', JSON.stringify(RAGE_FISH_STATE.customMessages));
-        input.value = ''; 
-        renderCustomMessages(); 
-        
-        // Faz o peixe falar a mensagem IMEDIATAMENTE para você ver que funcionou!
-        window.showBubble(txt, 4000);
-    }
+    img.addEventListener('click', handleTutorClick);
+
+    container.appendChild(bubble);
+    container.appendChild(img);
+    document.body.appendChild(container);
+
+    // Dispara a primeira dica sozinho para mostrar que o peixe está vivo
+    setTimeout(() => triggerTip(), 2500);
+    
+    // Inicia a Inteligência de Contexto (sabe onde o jogador está)
+    setupContextObserver();
 }
-document.getElementById('fish-add-msg').onclick = addCustomMessage;
-document.getElementById('fish-new-msg').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addCustomMessage();
-});
 
-window.deleteFishMsg = function(index) {
-    RAGE_FISH_STATE.customMessages.splice(index, 1);
-    localStorage.setItem('gatoPescador_customMsg', JSON.stringify(RAGE_FISH_STATE.customMessages));
-    if (RAGE_FISH_STATE.currentIndex >= RAGE_FISH_STATE.customMessages.length) RAGE_FISH_STATE.currentIndex = 0;
-    renderCustomMessages();
-};
-
-function renderCustomMessages() {
-    const listMsg = document.getElementById('fish-msg-list');
-    listMsg.innerHTML = '';
-    if (RAGE_FISH_STATE.customMessages.length === 0) { listMsg.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">O peixe está sem palavras...</p>'; return; }
+function getCurrentContext() {
+    const modals = ['shop-modal', 'craft-modal', 'bait-forge-modal', 'workbench-modal', 'collection-modal', 'collection-67-modal', 'collection-scrap-modal', 'sushi-modal'];
     
-    RAGE_FISH_STATE.customMessages.forEach((msg, idx) => {
-        const item = document.createElement('div');
-        item.style.cssText = "display:flex; justify-content:space-between; margin-bottom:8px; background:#f1f1f1; padding:8px; border-radius:5px;";
-        item.innerHTML = `<span style="flex:1; word-break: break-word; font-size:0.85rem;">${idx + 1}. "${msg}"</span><button onclick="window.deleteFishMsg(${idx})" style="background:#e74c3c; color:white; border:none; border-radius:4px; cursor:pointer; padding:2px 8px;">X</button>`;
-        listMsg.appendChild(item);
-    });
+    for (let m of modals) {
+        const el = document.getElementById(m);
+        if (el && !el.classList.contains('hidden')) {
+            return m;
+        }
+    }
+    return 'main';
 }
 
-let bubbleTimeout;
-window.showBubble = function(message, duration = 5000) {
-    fishBubble.innerHTML = message;
-    fishBubble.style.opacity = 1; fishBubble.style.transform = 'translateY(0)';
-    clearTimeout(bubbleTimeout);
-    bubbleTimeout = setTimeout(() => { fishBubble.style.opacity = 0; fishBubble.style.transform = 'translateY(10px)'; }, duration);
-};
-
-window.unlockSushiFeature = function(silent = false) {
-    if (!silent) {
-        window.showBubble("Ok, ok! Pare de me clicar. Desbloqueando modo Sushi...<br><br>Ah, e agora eu estou no oceano. Tente me pescar!", 6000);
-    }
+function handleTutorClick() {
+    TUTOR_STATE.clicks++;
     
-    if (typeof window.updateUI === 'function') window.updateUI();
-    
-    RAGE_FISH_STATE.isCustomMode = true;
-
-    // TENTATIVA ROBUSTA: Fica tentando colocar o peixe no catálogo a cada 1 segundo até a Enciclopédia existir
-    const injectFishInterval = setInterval(() => {
-        if (window.RARITIES && window.RARITIES.SECRETO && window.GAME_STATE) {
-            
-            // CORREÇÃO CRÍTICA DO CATÁLOGO: events: [] agora está presente
-            const secretFish = { name: 'Tutor Irritante', image: '/img/DicaFish.png', time: 'all', events: [] };
-            const alreadyExists = window.RARITIES.SECRETO.variations.find(f => f.name === secretFish.name);
-            
-            if (!alreadyExists) {
-                window.RARITIES.SECRETO.variations.push(secretFish);
-                const img = new Image(); img.src = secretFish.image;
-                window.GAME_STATE.loadedImages[secretFish.image] = img;
-            }
-            clearInterval(injectFishInterval); // Sucesso! Para de tentar.
+    // O Desbloqueio Clássico do Sushi
+    if (window.GAME_STATE && !window.GAME_STATE.sushiUnlocked) {
+        if (TUTOR_STATE.clicks === TUTOR_STATE.clicksToUnlockSushi - 2) {
+            showBubbleForce("Ei! Pare de me cutucar, está-me a irritar!", "warning");
+            return;
         }
-    }, 1000);
-};
-
-const checkSaveInterval = setInterval(() => {
-    if (window.GAME_STATE && typeof window.GAME_STATE.sushiUnlocked !== 'undefined') {
-        if (window.GAME_STATE.sushiUnlocked) {
-            window.unlockSushiFeature(true);
+        if (TUTOR_STATE.clicks === TUTOR_STATE.clicksToUnlockSushi - 1) {
+            showBubbleForce("Eu avisei! Último aviso antes de... ah, que se dane.", "error");
+            return;
         }
-        clearInterval(checkSaveInterval);
-    }
-}, 1000);
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('open-craft-btn')?.addEventListener('click', () => {
-        RAGE_FISH_STATE.currentScreen = 'forge';
-        if (!RAGE_FISH_STATE.isCustomMode) window.showBubble("🔥 <b>Forja Ativada!</b><br><br>Selecione uma planta à esquerda.<br><br>⚠️ MUITO IMPORTANTE: Quando terminar de criar, clique no botão amarelo <b>'⚙️ Mesa de Trabalho'</b> ali em cima para EQUIPAR o item!", 8000);
-    });
-    document.getElementById('close-craft-btn')?.addEventListener('click', () => { RAGE_FISH_STATE.currentScreen = 'main'; });
-
-    document.getElementById('open-workbench-btn')?.addEventListener('click', () => {
-        RAGE_FISH_STATE.currentScreen = 'workbench';
-        if (!RAGE_FISH_STATE.isCustomMode) window.showBubble("⚙️ <b>Mesa de Trabalho!</b><br><br>Clique, segure e <b>ARRASTE</b> os itens das listas na direita para os quadrados escuros na esquerda.", 7000);
-    });
-    document.getElementById('close-workbench-btn')?.addEventListener('click', () => { RAGE_FISH_STATE.currentScreen = 'main'; });
-
-    document.getElementById('open-shop-btn')?.addEventListener('click', () => {
-        RAGE_FISH_STATE.currentScreen = 'shop';
-        if (!RAGE_FISH_STATE.isCustomMode) window.showBubble("🛒 <b>Loja!</b><br>Compre materiais brutos aqui para levá-los até a Forja depois.", 5000);
-    });
-    document.getElementById('close-shop-btn')?.addEventListener('click', () => { RAGE_FISH_STATE.currentScreen = 'main'; });
-});
-
-function giveRandomTip() {
-    if (RAGE_FISH_STATE.isCustomMode) {
-        if (RAGE_FISH_STATE.customMessages.length > 0) {
-            window.showBubble(RAGE_FISH_STATE.customMessages[RAGE_FISH_STATE.currentIndex]);
-            RAGE_FISH_STATE.currentIndex++;
-            if (RAGE_FISH_STATE.currentIndex >= RAGE_FISH_STATE.customMessages.length) RAGE_FISH_STATE.currentIndex = 0;
-        } else {
-            window.showBubble("Clique em mim para configurar o que eu devo falar!");
-        }
-        return;
-    }
-
-    const contextTips = RAGE_FISH_STATE.tips[RAGE_FISH_STATE.currentScreen] || RAGE_FISH_STATE.tips.main;
-    window.showBubble(contextTips[Math.floor(Math.random() * contextTips.length)]);
-    
-    if (RAGE_FISH_STATE.currentScreen === 'main' && !window.GAME_STATE.sushiUnlocked) {
-        RAGE_FISH_STATE.tipsGiven++;
-        if (RAGE_FISH_STATE.tipsGiven >= RAGE_FISH_STATE.maxTipsBeforeSushi) {
+        if (TUTOR_STATE.clicks >= TUTOR_STATE.clicksToUnlockSushi) {
             window.GAME_STATE.sushiUnlocked = true;
             if (typeof window.saveGame === "function") window.saveGame();
-            window.unlockSushiFeature(false);
+            if (typeof window.updateUI === "function") window.updateUI();
+            
+            showBubbleForce("🎉 VOCÊ VENCEU-ME! Toma a chave do Restaurante de Sushi. Vá fatiar uns peixes no botão acima!", "success");
+            if(window.showToast) window.showToast("Restaurante Aberto!", "A função FAZER SUSHI foi desbloqueada permanentemente.", "success");
+            return;
         }
     }
+
+    // Se já passou a fase de desbloqueio, dá dicas normais ao clicar
+    triggerTip();
 }
 
-fishImg.addEventListener('click', () => {
-    if (RAGE_FISH_STATE.isCustomMode) {
-        fishModal.classList.remove('hidden'); 
-        renderCustomMessages();
-        // Foca automaticamente no input pra digitar mais rápido
-        setTimeout(() => document.getElementById('fish-new-msg').focus(), 100);
-    } else {
-        giveRandomTip();
-    }
-});
+function triggerTip() {
+    const context = getCurrentContext();
+    const tipsArray = TUTOR_TIPS[context] || TUTOR_TIPS.main;
+    const randomTip = tipsArray[Math.floor(Math.random() * tipsArray.length)];
+    
+    showBubbleForce(randomTip, "info");
+}
 
-setInterval(() => { if (fishBubble.style.opacity === "0" || fishBubble.style.opacity === "") giveRandomTip(); }, 18000);
-setTimeout(() => window.showBubble("E aí, pronto para pescar? Espaço para jogar a linha!", 5000), 3000);
+function showBubbleForce(text, type = "info") {
+    const bubble = document.getElementById('tutor-fish-bubble');
+    if (!bubble) return;
+
+    let borderColor = '#3498db';
+    let textColor = '#2c3e50';
+
+    if (type === 'warning') { borderColor = '#f39c12'; textColor = '#b9770e'; }
+    if (type === 'error') { borderColor = '#e74c3c'; textColor = '#922b21'; }
+    if (type === 'success') { borderColor = '#2ecc71'; textColor = '#1d8348'; }
+
+    bubble.style.borderColor = borderColor;
+    bubble.style.color = textColor;
+    bubble.innerHTML = text;
+    bubble.style.opacity = '1';
+    bubble.style.transform = 'scale(1) translateY(0)';
+
+    clearTimeout(TUTOR_STATE.hideTimeout);
+    TUTOR_STATE.hideTimeout = setTimeout(() => {
+        bubble.style.opacity = '0';
+        bubble.style.transform = 'scale(0.8) translateY(20px)';
+    }, 7000); // 7 segundos é o tempo perfeito de leitura
+}
+
+function setupContextObserver() {
+    // Monitora a cada 0.6 segundos se o jogador mudou de aba
+    setInterval(() => {
+        const current = getCurrentContext();
+        if (current !== TUTOR_STATE.lastContext) {
+            TUTOR_STATE.lastContext = current;
+            
+            // Dá uma dica automática sempre que abre uma aba nova
+            if (current !== 'main') {
+                setTimeout(() => triggerTip(), 600);
+            }
+        }
+    }, 600);
+}
+
+// Inicializador à Prova de Falhas
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectTutorFish);
+} else {
+    injectTutorFish();
+}
