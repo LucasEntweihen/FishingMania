@@ -21,58 +21,41 @@
            .forge-diagram-card { background: rgba(15, 23, 42, 0.6); border-left: 3px solid transparent; transition: 0.2s ease; padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; min-height: 60px; font-family: 'Poppins', sans-serif; }
            .forge-diagram-card:hover { background: rgba(30, 41, 59, 0.9); padding-left: 20px; }
    
-           /* =========================================================
-              NOVOS ESTILOS DO INVENTÁRIO (QUADRADINHOS RPG)
-              ========================================================= */
+           /* ESTILOS DO INVENTÁRIO (QUADRADINHOS RPG) */
            .wb-item-card {
                background: linear-gradient(145deg, #1e293b, #0f172a);
                border: 1px solid #334155;
                border-radius: 12px;
                padding: 10px 5px;
-               display: flex;
-               flex-direction: column;
-               align-items: center;
-               justify-content: center;
-               cursor: pointer;
-               position: relative;
-               transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+               display: flex; flex-direction: column; align-items: center; justify-content: center;
+               cursor: pointer; position: relative; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                box-shadow: inset 0 2px 10px rgba(0,0,0,0.3), 0 4px 6px rgba(0,0,0,0.2);
-               user-select: none;
-               aspect-ratio: 1 / 1; /* Força a ser um quadradinho perfeito */
-               overflow: hidden;
+               user-select: none; aspect-ratio: 1 / 1; overflow: hidden;
            }
            .wb-item-card:hover {
-               transform: translateY(-4px);
-               border-color: #38bdf8;
+               transform: translateY(-4px); border-color: #38bdf8;
                box-shadow: 0 8px 20px rgba(56, 189, 248, 0.25), inset 0 2px 10px rgba(255,255,255,0.05);
                background: linear-gradient(145deg, #1e293b, #172554);
            }
            .wb-item-card.equipped {
-               border-color: #10b981;
-               background: linear-gradient(145deg, rgba(16, 185, 129, 0.2), #0f172a);
+               border-color: #10b981; background: linear-gradient(145deg, rgba(16, 185, 129, 0.2), #0f172a);
                box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.2);
            }
            .wb-badge-equipped {
                position: absolute; top: -1px; right: -1px; background: #10b981; color: white;
                font-size: 0.55rem; font-weight: 900; padding: 2px 6px; 
                border-bottom-left-radius: 8px; border-top-right-radius: 11px;
-               text-transform: uppercase; letter-spacing: 0.5px; box-shadow: -2px 2px 5px rgba(0,0,0,0.3);
-               z-index: 5;
+               text-transform: uppercase; letter-spacing: 0.5px; box-shadow: -2px 2px 5px rgba(0,0,0,0.3); z-index: 5;
            }
            
            .wb-slot-container {
                background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.9)) !important;
-               border: 2px dashed rgba(148, 163, 184, 0.3) !important;
-               border-radius: 12px !important;
-               padding: 12px !important;
-               margin-bottom: 10px !important;
-               transition: all 0.3s ease !important;
+               border: 2px dashed rgba(148, 163, 184, 0.3) !important; border-radius: 12px !important;
+               padding: 12px !important; margin-bottom: 10px !important; transition: all 0.3s ease !important;
                box-shadow: inset 0 4px 15px rgba(0,0,0,0.4) !important;
            }
            .wb-slot-container.drag-over {
-               border-color: #3b82f6 !important;
-               background: rgba(59, 130, 246, 0.15) !important;
-               transform: scale(1.02) !important;
+               border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.15) !important; transform: scale(1.02) !important;
            }
        `;
        document.head.appendChild(style);
@@ -106,20 +89,16 @@
        safeGet('open-workbench-btn')?.addEventListener('click', () => {
            safeGet('craft-modal')?.classList.add('hidden');
            safeGet('workbench-modal')?.classList.remove('hidden');
-           
            document.querySelectorAll('.wb-tab-btn').forEach(b => b.classList.remove('active'));
            document.querySelector('.wb-tab-btn[data-tab="rod"]').classList.add('active');
-           
-           renderWorkbench('rod'); 
-           updateWorkbenchSlots();
+           renderWorkbench('rod'); updateWorkbenchSlots();
        });
        safeGet('close-workbench-btn')?.addEventListener('click', () => safeGet('workbench-modal')?.classList.add('hidden'));
    
        document.querySelectorAll('.wb-tab-btn').forEach(btn => {
            btn.addEventListener('click', (e) => { 
                document.querySelectorAll('.wb-tab-btn').forEach(b => b.classList.remove('active')); 
-               e.target.classList.add('active'); 
-               renderWorkbench(e.target.dataset.tab); 
+               e.target.classList.add('active'); renderWorkbench(e.target.dataset.tab); 
            });
        });
    });
@@ -131,7 +110,7 @@
    }
    
    // ==========================================================================
-   // LOJA (MERCADO NEGRO) - Apenas consumíveis
+   // LOJA (MERCADO NEGRO) - COM BOTÃO DE FECHAR
    // ==========================================================================
    window.buyMaterial = function(id, basePrice, qty) {
        const totalCost = basePrice * qty;
@@ -151,6 +130,7 @@
        const container = safeGet('shop-container'); if (!container) return;
        const state = window.GAME_STATE || { materials: {}, coins: 0 };
        
+       // NOTA: O Botão de fechar (X) foi adicionado à direita do contador de moedas!
        let html = `
            <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 50;">
                <div>
@@ -158,8 +138,11 @@
                        <span style="background: -webkit-linear-gradient(45deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Mercado Negro</span>
                    </h2>
                </div>
-               <div id="shop-live-coins" style="background: rgba(0,0,0,0.5); padding: 10px 25px; border-radius: 30px; border: 1px solid rgba(251, 191, 36, 0.3); color: #f8fafc; font-weight: 800; font-size: 1.4rem; font-family: 'Poppins', sans-serif;">
-                   <span style="color:#fbbf24">🪙</span> ${state.coins.toLocaleString()}
+               <div style="display: flex; align-items: center; gap: 20px;">
+                   <div id="shop-live-coins" style="background: rgba(0,0,0,0.5); padding: 10px 25px; border-radius: 30px; border: 1px solid rgba(251, 191, 36, 0.3); color: #f8fafc; font-weight: 800; font-size: 1.4rem; font-family: 'Poppins', sans-serif;">
+                       <span style="color:#fbbf24">🪙</span> ${state.coins.toLocaleString()}
+                   </div>
+                   <button onclick="document.getElementById('shop-modal').classList.add('hidden')" style="background: none; border: none; color: #94a3b8; font-size: 2.5rem; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">&times;</button>
                </div>
            </div>
            <div class="custom-scrollbar" style="padding: 30px; background: url('/img/asset/bg-dark-pattern.png') repeat, #0f172a; overflow-y: auto; max-height: 65vh;">
@@ -306,7 +289,7 @@
    }
    
    // ==========================================================================
-   // LABORATÓRIO (MANTIDO INTACTO)
+   // LABORATÓRIO GENÉTICO
    // ==========================================================================
    let activeBaitRecipe = null;
    let activeBoosts = []; 
@@ -384,12 +367,11 @@
    }
    
    // ==========================================================================
-   // MESA TÁTICA (INVENTÁRIO QUADRADINHOS RPG) E SCROLLBAR
+   // MESA TÁTICA E INVENTÁRIO
    // ==========================================================================
    function renderWorkbench(tab) {
        const grid = safeGet('workbench-grid'); if(!grid) return; grid.innerHTML = ''; 
    
-       // Limpeza de duplicatas salvadas
        if(window.GAME_STATE) {
            if(window.GAME_STATE.ownedRods) window.GAME_STATE.ownedRods = [...new Set(window.GAME_STATE.ownedRods)];
            if(window.GAME_STATE.ownedSinkers) window.GAME_STATE.ownedSinkers = [...new Set(window.GAME_STATE.ownedSinkers)];
@@ -418,13 +400,12 @@
            grid.appendChild(div); 
        };
    
-       // Configuração do Grid para pequenos quadrados organizados e Scroll customizado
        grid.classList.add('custom-scrollbar');
        grid.style.display = 'grid'; 
        grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(85px, 1fr))'; 
        grid.style.gap = '10px'; 
        grid.style.padding = '15px';
-       grid.style.alignContent = 'start'; // Impede as cartas de se esticarem verticalmente
+       grid.style.alignContent = 'start'; 
    
        if (tab === 'rod') { if(window.GAME_STATE.ownedRods) window.GAME_STATE.ownedRods.forEach(id => { const item = window.GAME_STATE.rods ? window.GAME_STATE.rods.find(r => r.id === parseInt(id)) : null; if(item) createEquipCard(item.id, item, window.GAME_STATE.currentRodIndex === item.id, 'rod'); }); } 
        else if (tab === 'sink') { if(window.GAME_STATE.ownedSinkers) window.GAME_STATE.ownedSinkers.forEach(id => { const item = window.SINKERS ? window.SINKERS.find(s => s.id === id) : null; if(item) createEquipCard(id, item, window.GAME_STATE.currentSinker === item.id, 'sinker'); }); } 
@@ -462,8 +443,6 @@
        if (type === 'bait') window.GAME_STATE.currentBait = id;
        
        updateWorkbenchSlots(); 
-       
-       // O SEGREDO DO BUG RESOLVIDO: O mapeamento correto entre o "type" do item e a "tab" da interface
        const tabMap = { 'rod': 'rod', 'sinker': 'sink', 'hook': 'hook', 'knife': 'knife', 'bait': 'bait' };
        renderWorkbench(tabMap[type]);
        
