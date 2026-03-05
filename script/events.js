@@ -8,7 +8,7 @@
    window.eventCastTimeMult = 1;
    window.eventBgSpeedMult = 1;
    
-   let activeEventTimer = null; // Previne conflitos e bugs ao usar Orbes
+   let activeEventTimer = null;
    
    const GAME_EVENTS = {
        'tempestade': {
@@ -45,6 +45,14 @@
            duration: 180000, luckMult: 10.0, valueMult: 3.0, castTimeMult: 2.0, bgSpeedMult: 0.2,
            startMsg: "O oceano ruge e o fundo treme... O Mar das Bestas começou!",
            effectCSS: 'background: rgba(127, 29, 29, 0.4); mix-blend-mode: multiply; filter: contrast(1.2);'
+       },
+       'abismo_lixo': {
+           id: 'abismo_lixo', name: 'Abismo dos Descartados', icon: '🗑️', color: '#8b3b3b', // Vermelho-Acinzentado (Ferrugem)
+           desc: 'O lixo ganha vida! O mar vira um poço de sucata, mas relíquias Vândalas podem ser pescadas.',
+           duration: 150000, luckMult: -5.0, valueMult: 5.0, castTimeMult: 1.2, bgSpeedMult: 1.5,
+           startMsg: "O céu fica tóxico e o mar cospe as suas rejeições... O Abismo dos Descartados abriu-se!",
+           // Filtro Cinza-Avermelhado
+           effectCSS: 'background: rgba(40, 30, 30, 0.7); mix-blend-mode: multiply; filter: grayscale(0.8) sepia(0.4) hue-rotate(330deg) contrast(1.3);'
        }
    };
    
@@ -80,10 +88,13 @@
        const eventKeys = Object.keys(GAME_EVENTS);
        let randomKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
        
-       // O Mar das Bestas só tem 15% de chance de acontecer naturalmente. 
-       // Em 85% das vezes, o jogo "muda de ideias" e joga um evento normal.
        if (randomKey === 'mar_bestas' && Math.random() > 0.15) { 
-           const normalEvents = eventKeys.filter(k => k !== 'mar_bestas');
+           const normalEvents = eventKeys.filter(k => k !== 'mar_bestas' && k !== 'abismo_lixo');
+           randomKey = normalEvents[Math.floor(Math.random() * normalEvents.length)];
+       }
+       
+       if (randomKey === 'abismo_lixo' && Math.random() > 0.20) { 
+           const normalEvents = eventKeys.filter(k => k !== 'mar_bestas' && k !== 'abismo_lixo');
            randomKey = normalEvents[Math.floor(Math.random() * normalEvents.length)];
        }
    
@@ -94,7 +105,6 @@
        const ev = GAME_EVENTS[eventID];
        if (!ev) return;
    
-       // Se já estiver a decorrer um evento (ou um Orbe foi ativado em cima de outro), limpa tudo primeiro!
        if (window.currentEventID) {
            endEvent(true); 
        }
@@ -119,7 +129,6 @@
    
        if(window.showToast) window.showToast("⚠️ Alerta Climático", ev.startMsg, "warning");
        
-       // O Timer é gravado numa variável para não criar "fantasmas"
        activeEventTimer = setTimeout(() => { 
            endEvent(false); 
        }, ev.duration);
@@ -128,7 +137,6 @@
    function endEvent(silent = false) {
        if (!window.currentEventID) return;
        
-       // Se a função foi chamada, o timer é destruído para evitar cortes abruptos no futuro
        if (activeEventTimer) {
            clearTimeout(activeEventTimer);
            activeEventTimer = null;
@@ -156,14 +164,12 @@
    document.addEventListener('DOMContentLoaded', () => {
        createEventUI();
        
-       // A cada 2 minutos tenta spawnar um evento natural (25% de chance)
        setInterval(() => {
            if (!window.currentEventID && Math.random() < 0.25) {
                triggerRandomEvent();
            }
        }, 120000); 
    
-       // Expõe as funções globalmente para o `rituals.js` poder ativá-las via Orbes
        window.forceEvent = startEvent;
        window.stopEvent = () => endEvent(false);
    });

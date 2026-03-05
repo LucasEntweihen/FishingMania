@@ -237,7 +237,6 @@ window.BAITS = [
 ];
 
 window.RARITIES = {
-    // A NOVA RARIDADE ABSURDA
     COMUM: { id: 'comum', prob: 0.35, mult: 1, style: 'text-comum', border: 'border-comum', name: 'Comum', variations: [
         { name: 'Peixe Genérico', image: '/img/peixe/Genericfish001.webp', time: 'all', events: ["all"] },
         { name: 'Bombardilo', image: '/img/peixe/bombardilo crocarilho.webp', time: 'day', events: ["all"] },
@@ -291,14 +290,20 @@ window.RARITIES = {
         { name: 'Ex rei dos mares (fraco)', image: '/img/peixe/CARALHOFODAA.png', time: 'night', events: ["tempestade", "mar_bestas"] },
         { name: 'Salmão de lama', image: '/img/peixe/salmao_argila.gif', time: 'night', events: ["ouro", "misticismo"] }
     ]},
-    AURUDO: { id: 'aurudo', prob: 0.00005, mult: 100000, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
+    AURUDO: { id: 'aurudo', prob: 0.00005, mult: 5000, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
         { name: 'Triolho Diliça', image: '/img/peixe/triolho.webp', time: 'all', events: ["all"] },
         { name: 'Abueno Pasaber', image: '/img/peixe/abuenopasaber.png', time: 'all', events: ["all"] }
     ]},
-    BESTIAL: { id: 'bestial', prob: 0.00001, mult: 15000, style: 'text-bestial', border: 'border-bestial', name: 'Bestial', variations: [
-        { name: 'O Leviatã Maligno', image: '/img/peixe/LENDAS/esmGA BOLAS.png', time: 'night', events: ["mar_bestas"] },
-        { name: 'A Vaca Marítima', image: '/img/peixe/LENDAS/maedorenan.png', time: 'day', events: ["mar_bestas"] },
-        { name: 'Jörmungandr', image: '/img/peixe/LENDAS/melbil.aw.png', time: 'all', events: ["mar_bestas"] }
+    VANDALO: { id: 'vandalo', prob: 0.000005, mult: 20000, style: 'text-vandalo', border: 'border-vandalo', name: 'Vândalo', variations: [
+        { name: 'Tralha-Umbrella', image: '/img/peixe/VANDALOS/enjinFISH.png', time: 'all', events: ["abismo_lixo"] },
+        { name: 'Luvas das Guelras', image: '/img/peixe/VANDALOS/rudoFISH.png', time: 'all', events: ["abismo_lixo"] },
+        { name: 'Peixe Microfone', image: '/img/peixe/VANDALOS/mymoFISH.png', time: 'all', events: ["abismo_lixo"] },
+        { name: 'Beta Enjaquetado', image: '/img/peixe/VANDALOS/zodylFISH.png', time: 'all', events: ["abismo_lixo"] }
+    ]},
+    BESTIAL: { id: 'bestial', prob: 0.000001, mult: 15000, style: 'text-bestial', border: 'border-bestial', name: 'Bestial', variations: [
+        { name: 'O Leviatã Primordial', image: '/img/peixe/LENDAS/esmGA BOLAS.png', time: 'all', events: ["mar_bestas"] },
+        { name: 'Vaca Marinha', image: '/img/peixe/LENDAS/maedorenan.png', time: 'all', events: ["mar_bestas"] },
+        { name: 'Jörmungandr', image: '/img/peixe/LENDAS/melbil.aw.png', time: 'all', events: ["mar_bestas"] },
     ]}
 };
 

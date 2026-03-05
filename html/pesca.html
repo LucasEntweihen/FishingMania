@@ -9,102 +9,77 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="/favicom.svg">
 
     <link rel="stylesheet" href="/style/style.css">
     <link rel="stylesheet" href="/style/style2.css">
 
     <style>
         .dropdown { position: relative; display: inline-block; }
-        
         .dropdown-content {
-            display: none; position: absolute; right: 0; top: 110%;
-            background-color: #1e293b; min-width: 210px;
-            box-shadow: 0px 10px 30px rgba(0,0,0,0.8); z-index: 1000;
+            display: none; position: absolute; right: 0; top: 115%;
+            background-color: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px);
+            min-width: 230px; box-shadow: 0px 15px 40px rgba(0,0,0,0.8); z-index: 1000;
             border-radius: 12px; overflow: hidden; flex-direction: column;
-            animation: dropFadeIn 0.2s ease-in-out; border: 2px solid #dc2626;
+            animation: dropFadeIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* RESET NUCLEAR: Força o estilo exato e ignora o seu style.css antigo para evitar a falha visual */
-        .dropdown-content button,
-        .dropdown-content #sushi-btn,
-        .dropdown-content #open-rituals-btn {
-            all: unset !important;
-            box-sizing: border-box !important;
-            display: block !important;
-            width: 100% !important;
-            background: transparent !important;
-            color: #f8fafc !important;
-            padding: 12px 16px !important;
-            font-family: 'Poppins', sans-serif !important;
-            font-weight: bold !important;
-            font-size: 0.95rem !important;
-            text-align: left !important;
-            cursor: pointer !important;
-            border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-            transition: background 0.2s, padding-left 0.2s !important;
-        }
-
-        .dropdown-content button:last-child { border-bottom: none !important; }
-        
-        .dropdown-content button:hover,
-        .dropdown-content #open-rituals-btn:hover,
-        .dropdown-content #sushi-btn:not(.locked):hover { 
-            background-color: rgba(220, 38, 38, 0.2) !important; 
-            color: #ef4444 !important; 
-            padding-left: 24px !important; 
-        }
-        
-        .dropdown-content #sushi-btn.locked {
-            color: #475569 !important;
-            text-decoration: line-through !important;
-            cursor: not-allowed !important;
-        }
-        .dropdown-content #sushi-btn.locked:hover { padding-left: 16px !important; }
-        
         .dropdown.active .dropdown-content { display: flex; }
-        .dropdown.active .dropbtn { filter: brightness(1.1); transform: scale(1.05); }
+        .dropdown.active .dropbtn { filter: brightness(1.2); transform: scale(1.05); }
         
         @keyframes dropFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        html body div#game-container div#ui-layer div#left-sidebar div.dropdown div.dropdown-content button#sushi-btn,
+        html body div#game-container div#ui-layer div#left-sidebar div.dropdown div.dropdown-content button#open-rituals-btn,
+        html body div#game-container div#ui-layer div.menu-buttons div.dropdown div.dropdown-content button {
+            all: unset !important; box-sizing: border-box !important; display: block !important; width: 100% !important;
+            padding: 14px 20px !important; background: transparent !important; color: #f8fafc !important;
+            font-family: 'Poppins', sans-serif !important; font-weight: 600 !important; font-size: 0.95rem !important;
+            cursor: pointer !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+            transition: background 0.2s, padding-left 0.2s, color 0.2s !important;
+        }
+
+        html body div#game-container div#ui-layer .dropdown-content button:last-child { border-bottom: none !important; }
+        html body div#game-container div#ui-layer div.menu-buttons div.dropdown div.dropdown-content button:hover { background-color: rgba(59, 130, 246, 0.15) !important; color: #60a5fa !important; padding-left: 28px !important; }
+        html body div#game-container div#ui-layer div#left-sidebar div.dropdown div.dropdown-content button#sushi-btn:not(.locked):hover,
+        html body div#game-container div#ui-layer div#left-sidebar div.dropdown div.dropdown-content button#open-rituals-btn:hover { background-color: rgba(220, 38, 38, 0.15) !important; color: #f87171 !important; padding-left: 28px !important; }
+        html body div#game-container div#ui-layer div#left-sidebar div.dropdown div.dropdown-content button#sushi-btn.locked { color: #475569 !important; background-color: rgba(0,0,0,0.3) !important; text-decoration: line-through !important; cursor: not-allowed !important; }
+        
+        .uniform-btn {
+            width: 170px !important; height: 45px !important; display: flex !important; justify-content: center !important;
+            align-items: center !important; box-sizing: border-box; border-radius: 12px; font-family: 'Poppins', sans-serif;
+            font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important; text-transform: uppercase;
+        }
+        .uniform-btn:hover { filter: brightness(1.15) !important; transform: scale(1.05) translateY(-2px) !important; }
 
         .custom-scrollbar::-webkit-scrollbar { width: 10px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 8px; border: 2px solid rgba(0,0,0,0.2); }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 
         .badge { border-radius: 25px !important; padding: 6px 16px !important; font-family: 'Poppins', sans-serif; font-weight: bold; }
         #event-indicator { border-radius: 25px !important; padding: 6px 16px !important; font-family: 'Poppins', sans-serif; font-weight: bold; }
 
-        .uniform-btn {
-            width: 170px !important;
-            height: 45px !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            box-sizing: border-box;
-            border-radius: 12px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: transform 0.2s, filter 0.2s;
-        }
-        .uniform-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
-
-        .wb-slot-container { background: rgba(15, 23, 42, 0.6); border: 2px dashed #475569; border-radius: 12px; padding: 12px; margin-bottom: 12px; transition: all 0.2s ease; text-align: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); }
+        .wb-slot-container { background: rgba(15, 23, 42, 0.8); border: 2px dashed #475569; border-radius: 12px; padding: 12px; margin-bottom: 12px; transition: all 0.2s ease; text-align: center; }
         .wb-slot-container.drag-over { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; transform: scale(1.02); }
         .wb-tab-btn { flex: 1; background: transparent; color: #94a3b8; border: none; padding: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; text-transform: uppercase; font-size: 0.85rem; }
-        .wb-tab-btn.active { background: #3b82f6; color: #fff; }
-        .wb-tab-btn:hover:not(.active) { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+        .wb-tab-btn.active { background: #3b82f6; color: #fff; border-radius: 8px 8px 0 0; }
+        
+        #music-toggle-btn { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; padding: 6px 16px !important; margin-left: 10px; font-size: 1rem; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        #music-toggle-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
     </style>
 </head>
 <body>
+
+    <audio id="bg-music" loop preload="auto">
+        <source src="/Tides_of_the_Silent_Hunt.mp3" type="audio/mpeg">
+    </audio>
 
     <div id="game-container" class="day-mode">
         <canvas id="bg-canvas"></canvas>
 
         <div id="ui-layer">
-            
             <div class="top-bar">
                 <div class="left-group">
                     <div class="currency badge tooltip" data-tip="Suas economias">
@@ -112,20 +87,21 @@
                         <span id="cat-coins">0</span>
                     </div>
                     <div id="time-indicator" class="time-badge badge">☀️ Dia</div>
+                    <button id="music-toggle-btn" class="badge tooltip" data-tip="Mutar/Desmutar Trilha">🔇 Música</button>
                 </div>
                 
                 <div class="menu-buttons">
                     <div class="dropdown">
-                        <button class="icon-btn dropbtn uniform-btn" style="background: #8e44ad; color: white; border: 2px solid white;">🛠️ Criação ▼</button>
+                        <button class="icon-btn dropbtn uniform-btn" style="background: linear-gradient(135deg, #8e44ad, #6c3483); color: white; border: 2px solid #d2b4de;">🛠️ Criação ▼</button>
                         <div class="dropdown-content">
-                            <button id="open-shop-btn">🛒 Loja de Materiais</button>
+                            <button id="open-shop-btn">🛒 Mercado Negro</button>
                             <button id="open-craft-btn">🔥 Grande Forja</button>
                             <button id="open-bait-forge-btn">🧪 Laboratório Genético</button>
                         </div>
                     </div>
 
                     <div class="dropdown">
-                        <button class="icon-btn dropbtn uniform-btn" style="background: #3498db; color: white; border: 2px solid white;">📚 Galeria ▼</button>
+                        <button class="icon-btn dropbtn uniform-btn" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: 2px solid #a9cce3;">📚 Galeria ▼</button>
                         <div class="dropdown-content">
                             <button id="open-collection-btn">📖 Aquário Principal</button>
                             <button id="open-67-btn">🏆 Aquário dos 67s</button>
@@ -133,14 +109,14 @@
                         </div>
                     </div>
 
-                    <button id="exit-game-btn" class="icon-btn exit-btn uniform-btn" style="background: #e74c3c; color: white; border: 2px solid white;">🚪 Sair</button>
+                    <button id="exit-game-btn" class="icon-btn exit-btn uniform-btn" style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: 2px solid #f5b7b1;">🚪 Sair</button>
                 </div>
             </div>
 
             <div id="left-sidebar" style="position: absolute; left: 20px; top: 90px; z-index: 100;">
                 <div class="dropdown">
-                    <button class="icon-btn dropbtn uniform-btn" style="background: #dc2626; color: white; border: 2px solid white;">⚔️ Ações ▼</button>
-                    <div class="dropdown-content" style="left: 0; right: auto;">
+                    <button class="icon-btn dropbtn uniform-btn" style="background: linear-gradient(135deg, #dc2626, #991b1b); color: white; border: 2px solid #fca5a5;">⚔️ Ações ▼</button>
+                    <div class="dropdown-content" style="left: 0; right: auto; border-color: #ef4444;">
                         <button id="sushi-btn" class="locked">🍣 Fazer Sushi</button>
                         <button id="open-rituals-btn">🔮 Rituais Ocultos</button>
                     </div>
@@ -156,7 +132,6 @@
                         <div id="equipped-sinker-visual"></div>
                     </div>
                 </div>
-                
                 <div id="line-container">
                     <div id="fishing-line"></div>
                     <div id="hook-group">
@@ -173,57 +148,81 @@
                     <div class="gear-slot tooltip" id="hook-display-slot" data-tip="Anzol Especial Atual">🪝 Padrão</div>
                     <div class="gear-slot tooltip" id="bait-slot" data-tip="Isca atual">🪝 Sem Isca</div>
                 </div>
-
                 <button id="cast-btn" class="main-action-btn">PESCAR (ESPAÇO)</button>
                 <div id="current-rod-display">Vara Atual: Galho Seco</div>
                 <div id="save-status">Carregando...</div>
             </div>
 
             <div id="shop-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 850px;">
-                    <div class="modal-header">
-                        <h2>🏪 Loja de Materiais</h2>
-                        <button id="close-shop-btn" class="close-btn">&times;</button>
-                    </div>
-                    <div id="shop-container" style="padding: 20px; overflow-y: auto; max-height: 75vh;"></div>
+                <div class="modal-content" style="max-width: 1000px; max-height: 85vh; padding: 0; background: #0f172a; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+                    <div id="shop-container"></div>
                 </div>
             </div>
 
             <div id="craft-modal" class="modal hidden">
                 <div class="modal-content" style="max-width: 1400px; max-height: 90vh; background: #0d0d0d; border: 2px solid #d35400; border-radius: 15px; box-shadow: 0 0 50px rgba(211, 84, 0, 0.4); overflow: hidden; padding: 0;">
-                    <div class="modal-header" style="background: linear-gradient(90deg, #111, #4a1505, #111); border-bottom: 3px solid #e67e22; padding: 20px 25px;">
-                        <h2 style="margin: 0; color: #fff; font-family: 'Fredoka', sans-serif; text-shadow: 0 2px 5px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 10px; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 2px;">🔥 Grande Forja</h2>
+                    <div class="modal-header" style="background: linear-gradient(90deg, #111, #4a1505, #111); border-bottom: 3px solid #e67e22; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="margin: 0; color: #fff; font-family: 'Fredoka', sans-serif; text-transform: uppercase; letter-spacing: 2px;">🔥 Grande Forja</h2>
                         <div style="display: flex; gap: 15px; align-items: center;">
-                            <button id="open-workbench-btn" class="icon-btn uniform-btn" style="width: auto !important; padding: 0 20px !important; background: #2c3e50; color: #f1c40f; border: 2px solid #f1c40f;">⚙️ Montagem</button>
-                            <button id="close-craft-btn" class="close-btn" style="color: #e74c3c; text-shadow: 0 2px 4px #000; font-size: 2rem;">&times;</button>
+                            <button id="open-workbench-btn" class="uniform-btn" style="background: #2c3e50; color: #f1c40f; border: 2px solid #f1c40f; height: 35px !important; width: auto !important; padding: 0 15px !important;">⚙️ Mesa Tática</button>
+                            <button id="close-craft-btn" class="close-btn" style="color: #e74c3c; font-size: 2.5rem; background: none; border: none; cursor: pointer;">&times;</button>
                         </div>
                     </div>
                     <div style="display: flex; height: 65vh; min-height: 600px;">
-                        <div style="width: 75%; border-right: 3px solid #222; overflow-y: auto; overflow-x: hidden; background: url('/img/asset/bg-dark-pattern.png') repeat, #151515; padding: 25px 15px 25px 25px; scroll-behavior: smooth;" id="recipe-list" class="custom-scrollbar"></div>
-                        <div style="width: 25%; padding: 30px 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; background: radial-gradient(circle at bottom, #4a1505 0%, #0d0d0d 70%); position: relative;" id="crafting-area" class="custom-scrollbar">
+                        <div style="width: 75%; border-right: 3px solid #222; overflow-y: auto; background: url('/img/asset/bg-dark-pattern.png') repeat, #151515; padding: 25px 15px 25px 25px;" id="recipe-list" class="custom-scrollbar"></div>
+                        <div style="width: 25%; padding: 30px 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at bottom, #4a1505 0%, #0d0d0d 70%);" id="crafting-area">
                             <div style="font-size: 5rem; margin-bottom: 20px; filter: drop-shadow(0 0 20px #e67e22); opacity: 0.5;">⚒️</div>
-                            <h3 style="color: #f39c12; margin-bottom: 10px; text-align:center; font-family: 'Fredoka', sans-serif; text-shadow: 0 2px 4px #000; font-size: 1.5rem;">Fornalha Inativa</h3>
-                            <p style="color: #7f8c8d; font-size: 0.9rem; text-align: center; line-height: 1.5;">Selecione um diagrama mestre à esquerda para analisar os custos, fundir materiais e aquecer a bigorna.</p>
+                            <h3 style="color: #f39c12; margin-bottom: 10px; font-family: 'Fredoka';">Fornalha Inativa</h3>
+                            <p style="color: #7f8c8d; font-size: 0.9rem; text-align: center;">Selecione um diagrama à esquerda.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="workbench-modal" class="modal hidden">
+                <div class="modal-content" style="max-width: 900px; background: #0f172a; border: 2px solid #3b82f6; border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #1e3a8a, #0f172a); border-bottom: 2px solid #3b82f6; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="margin: 0; color: #fff; font-family: 'Fredoka', sans-serif;">⚙️ Mesa Tática</h2>
+                        <button id="close-workbench-btn" style="color: #60a5fa; font-size: 2.5rem; background: none; border: none; cursor: pointer;">&times;</button>
+                    </div>
+                    <div style="display: flex; height: 60vh; min-height: 500px;">
+                        <div style="width: 35%; background: #1e293b; padding: 20px; overflow-y: auto; border-right: 2px solid #334155;" class="custom-scrollbar">
+                            <h3 style="color: #94a3b8; font-family: 'Poppins', sans-serif; font-size: 0.9rem; text-transform: uppercase; text-align: center; margin-bottom: 20px;">Loadout Ativo</h3>
+                            <div class="wb-slot-container dropzone" data-droptype="rod" id="wb-rod-slot"><div style="font-size: 0.75rem; color: #94a3b8;">🎣 Vara</div><div id="wb-rod-content" style="color: #f8fafc; font-weight: bold;">Vazio</div></div>
+                            <div class="wb-slot-container dropzone" data-droptype="sinker" id="wb-sinker-slot"><div style="font-size: 0.75rem; color: #94a3b8;">🪨 Peso</div><div id="wb-sinker-content" style="color: #f8fafc; font-weight: bold;">Vazio</div></div>
+                            <div class="wb-slot-container dropzone" data-droptype="hook" id="wb-hook-slot"><div style="font-size: 0.75rem; color: #94a3b8;">🪝 Anzol</div><div id="wb-hook-content" style="color: #f8fafc; font-weight: bold;">Vazio</div></div>
+                            <div class="wb-slot-container dropzone" data-droptype="knife" id="wb-knife-slot"><div style="font-size: 0.75rem; color: #94a3b8;">🔪 Faca</div><div id="wb-knife-content" style="color: #f8fafc; font-weight: bold;">Vazio</div></div>
+                            <div class="wb-slot-container dropzone" data-droptype="bait" id="wb-bait-slot"><div style="font-size: 0.75rem; color: #94a3b8;">🪱 Isca</div><div id="wb-bait-content" style="color: #f8fafc; font-weight: bold;">Vazio</div></div>
+                        </div>
+                        <div style="width: 65%; display: flex; flex-direction: column; background: #0f172a;">
+                            <div class="backpack-tabs" style="display: flex; background: #0f172a; border-bottom: 2px solid #334155;">
+                                <button class="wb-tab-btn active" data-tab="rod">Varas</button>
+                                <button class="wb-tab-btn" data-tab="sink">Pesos</button>
+                                <button class="wb-tab-btn" data-tab="hook">Anzóis</button>
+                                <button class="wb-tab-btn" data-tab="knife">Facas</button>
+                                <button class="wb-tab-btn" data-tab="bait">Iscas</button>
+                            </div>
+                            <div id="workbench-grid" class="custom-scrollbar" style="flex: 1; overflow-y: auto; padding: 20px;"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="bait-forge-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 1100px; max-height: 90vh; background: #020617; border: 2px solid #22c55e; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); overflow: hidden; padding: 0;">
-                    <div class="modal-header" style="background: linear-gradient(90deg, #064e3b, #022c22); border-bottom: 2px solid #10b981; padding: 20px;">
-                        <h2 style="font-family: 'Fredoka', sans-serif; margin: 0; color: #4ade80; display: flex; align-items: center; gap: 10px; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px;">🧪 Laboratório Genético</h2>
-                        <button id="close-bait-forge-btn" class="close-btn" style="color: #10b981;">&times;</button>
+                <div class="modal-content" style="max-width: 1100px; max-height: 90vh; background: #020617; border: 2px solid #22c55e; border-radius: 16px; overflow: hidden; padding: 0;">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #064e3b, #022c22); border-bottom: 2px solid #10b981; padding: 20px; display: flex; justify-content: space-between;">
+                        <h2 style="font-family: 'Fredoka'; margin: 0; color: #4ade80;">🧪 Laboratório Genético</h2>
+                        <button id="close-bait-forge-btn" style="color: #10b981; font-size: 2rem; background:none; border:none; cursor:pointer;">&times;</button>
                     </div>
-                    <div style="display: flex; height: 65vh; min-height: 600px;">
+                    <div style="display: flex; height: 65vh;">
                         <div style="width: 30%; border-right: 1px solid rgba(255,255,255,0.1); overflow-y: auto; background: rgba(15, 23, 42, 0.5); padding: 20px;" id="bait-recipe-list" class="custom-scrollbar"></div>
-                        <div style="width: 70%; display: flex; flex-direction: column; background: #0f172a; position: relative;">
-                            <div style="background: radial-gradient(circle at top, #1e293b, #0f172a); padding: 30px; box-shadow: inset 0 -5px 15px rgba(0,0,0,0.5); border-bottom: 2px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="width: 70%; display: flex; flex-direction: column; background: #0f172a;">
+                            <div style="background: radial-gradient(circle at top, #1e293b, #0f172a); padding: 30px; border-bottom: 2px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center;">
                                 <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; width: 100%;">
                                     <div class="equip-slot" id="bait-slot-1"><div class="slot-content" id="bait-content-1">🧪</div></div>
                                     <div style="font-size: 1.5rem; color: #64748b; font-weight:bold;">+</div>
                                     <div class="equip-slot" id="bait-slot-2"><div class="slot-content" id="bait-content-2">🧪</div></div>
-                                    <div style="font-size: 1.5rem; color: #f59e0b; font-weight:bold; margin-left: 20px; text-shadow: 0 0 10px rgba(245,158,11,0.5);">⚡</div>
+                                    <div style="font-size: 1.5rem; color: #f59e0b; font-weight:bold; margin-left: 20px;">⚡</div>
                                     <div class="equip-slot hover-boost" id="bait-slot-3" onclick="window.removeBoost(0)"><div class="slot-content" id="bait-content-3">Vazio</div></div>
                                     <div class="equip-slot hover-boost" id="bait-slot-4" onclick="window.removeBoost(1)"><div class="slot-content" id="bait-content-4">Vazio</div></div>
                                 </div>
@@ -235,111 +234,31 @@
                 </div>
             </div>
 
-            <div id="collection-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 1000px; max-height: 85vh; background: #0f172a; border: 1px solid #38bdf8; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
-                    <div class="modal-header" style="background: linear-gradient(90deg, #0369a1, #1e3a8a); padding: 20px; border-bottom: 2px solid #38bdf8;">
-                        <h2 style="color: #f8fafc; font-family: 'Fredoka', sans-serif; margin: 0;">📖 Aquário Principal <span id="collection-progress" style="color: #7dd3fc; font-size: 1rem;">(0/0)</span></h2>
-                        <button id="close-collection-btn" class="close-btn" style="color: #bae6fd;">&times;</button>
-                    </div>
-                    <div id="collection-grid" class="custom-scrollbar" style="max-height: 65vh; overflow-y: auto; padding: 20px;"></div>
-                </div>
-            </div>
-
-            <div id="collection-67-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 1000px; max-height: 85vh; background: #0f172a; border: 1px solid #fbbf24; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
-                    <div class="modal-header" style="background: linear-gradient(90deg, #b45309, #78350f); padding: 20px; border-bottom: 2px solid #fbbf24;">
-                        <h2 style="color: #f8fafc; font-family: 'Fredoka', sans-serif; margin: 0;">🏆 Aquário dos 67cm <span id="collection-67-progress" style="color: #fde68a; font-size: 1rem;">(0/0)</span></h2>
-                        <button id="close-67-btn" class="close-btn" style="color: #fef08a;">&times;</button>
-                    </div>
-                    <div id="collection-67-grid" class="custom-scrollbar" style="max-height: 65vh; overflow-y: auto; padding: 20px;"></div>
-                </div>
-            </div>
-
-            <div id="collection-scrap-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 1000px; max-height: 85vh; background: #0f172a; border: 1px solid #94a3b8; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
-                    <div class="modal-header" style="background: linear-gradient(90deg, #475569, #1e293b); padding: 20px; border-bottom: 2px solid #94a3b8;">
-                        <h2 style="color: #f8fafc; font-family: 'Fredoka', sans-serif; margin: 0;">🗑️ Museu do Lixo <span id="collection-scrap-progress" style="color: #cbd5e1; font-size: 1rem;">(0/0)</span></h2>
-                        <button id="close-scrap-btn" class="close-btn" style="color: #e2e8f0;">&times;</button>
-                    </div>
-                    <div id="collection-scrap-grid" class="custom-scrollbar" style="max-height: 65vh; overflow-y: auto; padding: 20px;"></div>
-                </div>
-            </div>
-
-            <div id="workbench-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 900px; background: #0f172a; border: 2px solid #3b82f6; border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
-                    <div class="modal-header" style="background: linear-gradient(90deg, #1e3a8a, #0f172a); border-bottom: 2px solid #3b82f6; padding: 20px 25px;">
-                        <h2 style="margin: 0; color: #fff; font-family: 'Fredoka', sans-serif; display: flex; align-items: center; gap: 10px;">⚙️ Mesa Tática</h2>
-                        <button id="close-workbench-btn" class="close-btn" style="color: #60a5fa;">&times;</button>
-                    </div>
-                    <div style="display: flex; height: 60vh; min-height: 500px;">
-                        <div style="width: 35%; background: #1e293b; padding: 20px; overflow-y: auto; border-right: 2px solid #334155;" class="custom-scrollbar">
-                            <h3 style="color: #94a3b8; font-family: 'Poppins', sans-serif; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; text-align: center; margin-bottom: 20px;">Loadout Ativo</h3>
-                            <div class="wb-slot-container dropzone" data-droptype="rod" id="wb-rod-slot">
-                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🎣 Vara</div>
-                                <div id="wb-rod-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
-                            </div>
-                            <div class="wb-slot-container dropzone" data-droptype="sinker" id="wb-sinker-slot">
-                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🪨 Peso</div>
-                                <div id="wb-sinker-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
-                            </div>
-                            <div class="wb-slot-container dropzone" data-droptype="hook" id="wb-hook-slot">
-                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🪝 Anzol</div>
-                                <div id="wb-hook-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
-                            </div>
-                            <div class="wb-slot-container dropzone" data-droptype="knife" id="wb-knife-slot">
-                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🔪 Faca</div>
-                                <div id="wb-knife-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
-                            </div>
-                            <div class="wb-slot-container dropzone" data-droptype="bait" id="wb-bait-slot">
-                                <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">🪱 Isca</div>
-                                <div id="wb-bait-content" style="color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Vazio</div>
-                            </div>
-                        </div>
-                        <div style="width: 65%; display: flex; flex-direction: column; background: #0f172a;">
-                            <div class="backpack-tabs" style="display: flex; background: #0f172a; border-bottom: 2px solid #334155;">
-                                <button class="wb-tab-btn active" data-tab="rod">Varas</button>
-                                <button class="wb-tab-btn" data-tab="sink">Pesos</button>
-                                <button class="wb-tab-btn" data-tab="hook">Anzóis</button>
-                                <button class="wb-tab-btn" data-tab="knife">Facas</button>
-                                <button class="wb-tab-btn" data-tab="bait">Iscas</button>
-                            </div>
-                            <div id="workbench-grid" class="custom-scrollbar" style="flex: 1; overflow-y: auto;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div id="collection-modal" class="modal hidden"><div class="modal-content" style="max-width: 1000px; max-height: 85vh; background: #0f172a; border: 1px solid #38bdf8; border-radius: 16px; padding: 0; overflow: hidden;"><div class="modal-header" style="background: linear-gradient(90deg, #0369a1, #1e3a8a); padding: 20px; border-bottom: 2px solid #38bdf8; display:flex; justify-content:space-between;"><h2 style="color: #f8fafc; font-family: 'Fredoka'; margin: 0;">📖 Aquário Principal <span id="collection-progress"></span></h2><button id="close-collection-btn" style="color: #bae6fd; background:none; border:none; font-size:2rem; cursor:pointer;">&times;</button></div><div id="collection-grid" class="custom-scrollbar" style="max-height: 65vh; overflow-y: auto; padding: 20px;"></div></div></div>
+            <div id="collection-67-modal" class="modal hidden"><div class="modal-content" style="max-width: 1000px; max-height: 85vh; background: #0f172a; border: 1px solid #fbbf24; border-radius: 16px; padding: 0; overflow: hidden;"><div class="modal-header" style="background: linear-gradient(90deg, #b45309, #78350f); padding: 20px; border-bottom: 2px solid #fbbf24; display:flex; justify-content:space-between;"><h2 style="color: #f8fafc; font-family: 'Fredoka'; margin: 0;">🏆 Aquário dos 67cm <span id="collection-67-progress"></span></h2><button id="close-67-btn" style="color: #fef08a; background:none; border:none; font-size:2rem; cursor:pointer;">&times;</button></div><div id="collection-67-grid" class="custom-scrollbar" style="max-height: 65vh; overflow-y: auto; padding: 20px;"></div></div></div>
+            <div id="collection-scrap-modal" class="modal hidden"><div class="modal-content" style="max-width: 1000px; max-height: 85vh; background: #0f172a; border: 1px solid #94a3b8; border-radius: 16px; padding: 0; overflow: hidden;"><div class="modal-header" style="background: linear-gradient(90deg, #475569, #1e293b); padding: 20px; border-bottom: 2px solid #94a3b8; display:flex; justify-content:space-between;"><h2 style="color: #f8fafc; font-family: 'Fredoka'; margin: 0;">🗑️ Museu do Lixo <span id="collection-scrap-progress"></span></h2><button id="close-scrap-btn" style="color: #e2e8f0; background:none; border:none; font-size:2rem; cursor:pointer;">&times;</button></div><div id="collection-scrap-grid" class="custom-scrollbar" style="max-height: 65vh; overflow-y: auto; padding: 20px;"></div></div></div>
 
             <div id="rituals-modal" class="modal hidden">
-                <div class="modal-content" style="max-width: 1200px; max-height: 90vh; background: #09090b; border: 2px solid #8b5cf6; border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
-                    <div class="modal-header" style="background: linear-gradient(90deg, #4c1d95, #2e1065); border-bottom: 2px solid #8b5cf6; padding: 20px 30px;">
-                        <h2 style="margin: 0; color: #f5f3ff; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; display: flex; align-items: center; gap: 10px;">🔮 Rituais Ocultos</h2>
-                        <button id="close-rituals-btn" class="close-btn" style="color: #c4b5fd;">&times;</button>
+                <div class="modal-content" style="max-width: 1200px; max-height: 90vh; background: #09090b; border: 2px solid #8b5cf6; border-radius: 20px; padding: 0; overflow: hidden;">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #4c1d95, #2e1065); border-bottom: 2px solid #8b5cf6; padding: 20px 30px; display:flex; justify-content:space-between;">
+                        <h2 style="margin: 0; color: #f5f3ff; font-family: 'Fredoka';">🔮 Rituais Ocultos</h2>
+                        <button id="close-rituals-btn" style="color: #c4b5fd; background:none; border:none; font-size:2.5rem; cursor:pointer;">&times;</button>
                     </div>
                     <div style="display: flex; height: 65vh; min-height: 600px;">
                         <div style="width: 30%; background: #18181b; border-right: 2px solid #27272a; padding: 20px; overflow-y: auto;" class="custom-scrollbar" id="ritual-list-container"></div>
                         <div style="width: 70%; position: relative; background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px;">
-                            <h2 id="ritual-title" style="color: #ddd6fe; font-family: 'Fredoka', sans-serif; font-size: 2rem; text-shadow: 0 0 15px #8b5cf6; margin-bottom: 30px; margin-top: 0; text-align: center;">Selecione um Ritual</h2>
-                            <div style="display: flex; gap: 40px; justify-content: center; align-items: stretch; width: 100%; margin-bottom: 40px;">
-                                <div style="flex: 1; max-width: 350px; background: rgba(255,255,255,0.02); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 20px; text-align: center; box-shadow: inset 0 0 30px rgba(139, 92, 246, 0.1); position: relative; overflow: hidden; backdrop-filter: blur(5px);">
-                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, transparent, #8b5cf6, transparent);"></div>
-                                    <h3 style="color: #a78bfa; font-family: 'Poppins', sans-serif; font-size: 1rem; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;">Caixa de Vidro</h3>
-                                    <p style="font-size: 0.75rem; color: #71717a; margin-bottom: 20px;">Exige almas raras (Secreto ao Aurudo)</p>
-                                    <div id="ritual-fish-req" style="display: flex; flex-direction: column; gap: 10px;">
-                                        <div style="color: #52525b; font-style: italic;">Nenhum ritual ativo.</div>
-                                    </div>
+                            <h2 id="ritual-title" style="color: #ddd6fe; font-family: 'Fredoka'; text-shadow: 0 0 15px #8b5cf6; margin-bottom: 30px; text-align: center;">Selecione um Ritual</h2>
+                            <div style="display: flex; gap: 40px; justify-content: center; width: 100%; margin-bottom: 40px;">
+                                <div style="flex: 1; max-width: 350px; background: rgba(255,255,255,0.02); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
+                                    <h3 style="color: #a78bfa; text-transform: uppercase;">Caixa de Vidro</h3>
+                                    <div id="ritual-fish-req" style="display: flex; flex-direction: column; gap: 10px;"></div>
                                 </div>
-                                <div style="flex: 1; max-width: 350px; background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(139, 92, 246, 0.1) 100%); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 20px; text-align: center; position: relative; border-bottom: 10px solid #4c1d95;">
-                                    <h3 style="color: #a78bfa; font-family: 'Poppins', sans-serif; font-size: 1rem; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;">Pedestal</h3>
-                                    <p style="font-size: 0.75rem; color: #71717a; margin-bottom: 20px;">Exige catalisadores absolutos</p>
-                                    <div id="ritual-mat-req" style="display: flex; flex-direction: column; gap: 10px;">
-                                        <div style="color: #52525b; font-style: italic;">Aguardando oferenda...</div>
-                                    </div>
+                                <div style="flex: 1; max-width: 350px; background: rgba(255,255,255,0.02); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
+                                    <h3 style="color: #a78bfa; text-transform: uppercase;">Pedestal</h3>
+                                    <div id="ritual-mat-req" style="display: flex; flex-direction: column; gap: 10px;"></div>
                                 </div>
                             </div>
-                            <button id="btn-execute-ritual" disabled style="background: #27272a; color: #52525b; border: 1px solid #3f3f46; padding: 15px 50px; font-size: 1.2rem; font-family: 'Fredoka', sans-serif; font-weight: bold; border-radius: 30px; text-transform: uppercase; letter-spacing: 2px; cursor: not-allowed; transition: all 0.3s;">
-                                Realizar Ritual
-                            </button>
-                            <p style="color: #ef4444; font-size: 0.8rem; font-family: 'Poppins', sans-serif; margin-top: 15px; font-weight: bold;">⚠️ Atenção: Rituais têm uma chance de falhar e destruir todos os sacrifícios!</p>
+                            <button id="btn-execute-ritual" disabled style="background: #27272a; padding: 15px 50px; border-radius: 30px;">Realizar Ritual</button>
                         </div>
                     </div>
                 </div>
@@ -360,13 +279,26 @@
                     if (!isActive) d.classList.add('active'); 
                 });
             });
-            document.addEventListener('click', () => {
-                dropdowns.forEach(d => d.classList.remove('active'));
-            });
-            document.querySelectorAll('.dropdown-content button').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    dropdowns.forEach(d => d.classList.remove('active'));
-                });
+            document.addEventListener('click', () => { dropdowns.forEach(d => d.classList.remove('active')); });
+            
+            // Audio Playback
+            const bgMusic = document.getElementById('bg-music');
+            const musicBtn = document.getElementById('music-toggle-btn');
+            let isPlaying = false;
+            bgMusic.volume = 0.3; 
+            function startMusic() {
+                if (!isPlaying) {
+                    bgMusic.play().then(() => {
+                        isPlaying = true; musicBtn.innerHTML = '🔊 Música';
+                        document.removeEventListener('click', startMusic);
+                    }).catch(e => console.log("Aguardando interação..."));
+                }
+            }
+            document.addEventListener('click', startMusic);
+            musicBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                if (isPlaying) { bgMusic.pause(); isPlaying = false; musicBtn.innerHTML = '🔇 Música'; } 
+                else { bgMusic.play(); isPlaying = true; musicBtn.innerHTML = '🔊 Música'; }
             });
         });
     </script>
@@ -377,7 +309,6 @@
     <script src="/script/ragefish.js" defer></script>
     <script src="/script/crafting.js" defer></script>
     <script src="/script/rituals.js" defer></script>
-    
     <script type="module" src="/script/admin.js"></script>
 </body>
 </html>

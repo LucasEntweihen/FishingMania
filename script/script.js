@@ -144,10 +144,14 @@ function iniciarMotorDoJogo() {
     };
 
     function preloadImages() {
-        if (!window.RARITIES) return;
-        Object.values(window.RARITIES).forEach(rarity => {
-            rarity.variations.forEach(fish => { const img = new Image(); img.src = fish.image; window.GAME_STATE.loadedImages[fish.image] = img; });
-        });
+        if (window.RARITIES) {
+            Object.values(window.RARITIES).forEach(rarity => {
+                rarity.variations.forEach(fish => { const img = new Image(); img.src = fish.image; window.GAME_STATE.loadedImages[fish.image] = img; });
+            });
+        }
+        if (window.SUCATAS) {
+            window.SUCATAS.forEach(scrap => { const img = new Image(); img.src = scrap.image; window.GAME_STATE.loadedImages[scrap.image] = img; });
+        }
         ['/img/asset/67comum.jpg', '/img/asset/67raro.jpg', '/img/asset/67muitoraro.webp'].forEach(src => { const img = new Image(); img.src = src; });
     }
     preloadImages();
@@ -186,7 +190,7 @@ function iniciarMotorDoJogo() {
 
     window.saveGame = function() {
         if (isGuestMode) { if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Convidado"; return; }
-        const playerSave = { coins: window.GAME_STATE.coins, currentRodIndex: window.GAME_STATE.currentRodIndex, ownedRods: window.GAME_STATE.ownedRods, ownedSinkers: window.GAME_STATE.ownedSinkers, currentSinker: window.GAME_STATE.currentSinker, ownedHooks: window.GAME_STATE.ownedHooks, currentHook: window.GAME_STATE.currentHook, ownedKnives: window.GAME_STATE.ownedKnives, currentKnife: window.GAME_STATE.currentKnife, baitInventory: window.GAME_STATE.baitInventory, currentBait: window.GAME_STATE.currentBait, collection: window.GAME_STATE.collection, collection67: window.GAME_STATE.collection67, scrapCollection: window.GAME_STATE.scrapCollection, materials: window.GAME_STATE.materials, sushiUnlocked: window.GAME_STATE.sushiUnlocked };
+        const playerSave = { coins: window.GAME_STATE.coins, currentRodIndex: window.GAME_STATE.currentRodIndex, ownedRods: window.GAME_STATE.ownedRods, ownedSinkers: window.GAME_STATE.ownedSinkers, currentSinker: window.GAME_STATE.currentSinker, ownedHooks: window.GAME_STATE.ownedHooks, currentHook: window.GAME_STATE.currentHook, ownedKnives: window.GAME_STATE.ownedKnives, currentKnife: window.GAME_STATE.currentKnife, baitInventory: window.GAME_STATE.baitInventory, currentBait: window.GAME_STATE.currentBait, collection: window.GAME_STATE.collection, collection67: window.GAME_STATE.collection67, scrapCollection: window.GAME_STATE.scrapCollection, materials: window.GAME_STATE.materials, sushiUnlocked: window.GAME_STATE.sushiUnlocked, orbs: window.GAME_STATE.orbs || {} };
         if (currentUser && db) {
             localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
             set(ref(db, 'users/' + currentUser.uid), playerSave).then(() => { if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Salvo"; }).catch((e) => console.error("Erro ao salvar:", e));
@@ -205,6 +209,7 @@ function iniciarMotorDoJogo() {
                 try {
                     Object.assign(window.GAME_STATE, JSON.parse(localData));
                     if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
+                    if (!window.GAME_STATE.orbs) window.GAME_STATE.orbs = {};
                     if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
                     if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
                     if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
@@ -223,6 +228,7 @@ function iniciarMotorDoJogo() {
                 Object.assign(window.GAME_STATE, snapshot.val());
                 window.GAME_STATE.isFishing = false;
                 if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
+                if (!window.GAME_STATE.orbs) window.GAME_STATE.orbs = {};
                 if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
                 if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
                 if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
@@ -277,6 +283,10 @@ function iniciarMotorDoJogo() {
         if (window.eventLuckMult) luckFactor += (window.eventLuckMult * 100); 
 
         let sucataChance = 0.15 - (luckFactor / 100000);
+        
+        // NO EVENTO ABISMO DOS DESCARTADOS, CHANCE DE LIXO É MASSIVA
+        if (window.currentEventID === 'abismo_lixo') sucataChance += 0.60;
+        
         if (sucataChance < 0.05) sucataChance = 0.05; 
 
         if (hook && hook.target === 'sucata') sucataChance += hook.power;
@@ -304,14 +314,15 @@ function iniciarMotorDoJogo() {
         if (!bypassedByHook) {
             let fishRoll = Math.random() - (luckFactor / 25000); 
 
-            // CÓDIGO INJETADO DO MAR DAS BESTAS!
-            // Diminui muito as chances de cair nas faixas das raridades fracas
             if (window.currentEventID === 'mar_bestas') {
                 fishRoll -= 0.15; 
             }
+            if (window.currentEventID === 'abismo_lixo') {
+                fishRoll -= 0.10; 
+            }
 
-            // O BESTIAL foi integrado no fluxo normal para que o Mar das Bestas ou a mega-sorte atinjam este nível!
             if (window.currentEventID === 'mar_bestas' && fishRoll < window.RARITIES.BESTIAL.prob) caughtRarity = window.RARITIES.BESTIAL;
+            else if (window.currentEventID === 'abismo_lixo' && fishRoll < window.RARITIES.VANDALO.prob) caughtRarity = window.RARITIES.VANDALO;
             else if (fishRoll < window.RARITIES.AURUDO.prob) caughtRarity = window.RARITIES.AURUDO;
             else if (fishRoll < window.RARITIES.DIVINO.prob) caughtRarity = window.RARITIES.DIVINO;
             else if (fishRoll < window.RARITIES.SECRETO.prob) caughtRarity = window.RARITIES.SECRETO;
@@ -344,7 +355,6 @@ function iniciarMotorDoJogo() {
 
         let validVariations = getValidFishes(caughtRarity);
 
-        // SALVAGUARDA DE EMERGÊNCIA (Impede crashes se o BESTIAL for sorteado mas ainda não tiver peixes no JSON)
         if (validVariations.length === 0) {
             caughtRarity = window.RARITIES.COMUM;
             validVariations = getValidFishes(caughtRarity);
@@ -357,9 +367,14 @@ function iniciarMotorDoJogo() {
 
         let specificFish = validVariations.length > 0 ? validVariations[0] : window.RARITIES.COMUM.variations[0];
 
-        const sizeBase = 10 + (Object.keys(window.RARITIES).indexOf(caughtRarity.id.toUpperCase()) * 15);
-        let finalSize = sizeBase + Math.floor(Math.random() * 60);
-        if (Math.random() < chance67) finalSize = 67;
+        let finalSize;
+        if (caughtRarity.id === 'bestial') {
+            finalSize = 800 + Math.floor(Math.random() * 1700); 
+        } else {
+            const sizeBase = 10 + (Object.keys(window.RARITIES).indexOf(caughtRarity.id.toUpperCase()) * 15);
+            finalSize = sizeBase + Math.floor(Math.random() * 60);
+            if (Math.random() < chance67) finalSize = 67;
+        }
 
         let finalValue = Math.floor(finalSize * caughtRarity.mult * valueMult);
         if (window.eventValueMult) finalValue = Math.floor(finalValue * window.eventValueMult);
@@ -418,6 +433,21 @@ function iniciarMotorDoJogo() {
                 if(fishImg){ 
                     fishImg.onerror = () => { fishImg.src = 'https://placehold.co/80x80?text=🐟'; };
                     fishImg.src = catchResult.type === 'sucata' ? catchResult.data.image : catchResult.variation.image; 
+                    
+                    if (catchResult.type === 'fish' && catchResult.rarity.id === 'bestial') {
+                        fishImg.style.transform = 'scale(3) translateY(10px)';
+                        fishImg.style.filter = 'drop-shadow(0 0 20px #7f1d1d)';
+                        fishImg.style.zIndex = '100'; 
+                    } else if (catchResult.type === 'fish' && catchResult.rarity.id === 'vandalo') {
+                        fishImg.style.transform = 'scale(1.5)';
+                        fishImg.style.filter = 'drop-shadow(0 0 15px #10b981)';
+                        fishImg.style.zIndex = '10'; 
+                    } else {
+                        fishImg.style.transform = 'scale(1)';
+                        fishImg.style.filter = 'none';
+                        fishImg.style.zIndex = '1';
+                    }
+
                     fishImg.style.display = 'block'; 
                 }
                 
@@ -435,7 +465,7 @@ function iniciarMotorDoJogo() {
 
             setTimeout(() => {
                 try {
-                    const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'bestial': '#7f1d1d' };
+                    const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'vandalo': '#10b981', 'bestial': '#7f1d1d' };
 
                     const div = document.createElement('div');
                     div.className = `modern-loot-popup`;
@@ -463,10 +493,12 @@ function iniciarMotorDoJogo() {
                         window.GAME_STATE.coins += (fish.value || 0);
                         let sealImage = null;
 
-                        if (fish.size === 67) {
+                        if (fish.size >= 67) {
                             if (!window.GAME_STATE.collection67) window.GAME_STATE.collection67 = {};
                             window.GAME_STATE.collection67[fish.variation.name] = (window.GAME_STATE.collection67[fish.variation.name] || 0) + 1;
-                            sealImage = (fish.rarity.id === 'comum' || fish.rarity.id === 'raro') ? '/img/asset/67comum.jpg' : (fish.rarity.id === 'epico' || fish.rarity.id === 'lendario') ? '/img/asset/67raro.jpg' : '/img/asset/67muitoraro.webp';
+                            
+                            if(fish.rarity.id === 'bestial' || fish.rarity.id === 'vandalo') sealImage = '/img/asset/67muitoraro.webp';
+                            else sealImage = (fish.rarity.id === 'comum' || fish.rarity.id === 'raro') ? '/img/asset/67comum.jpg' : (fish.rarity.id === 'epico' || fish.rarity.id === 'lendario') ? '/img/asset/67raro.jpg' : '/img/asset/67muitoraro.webp';
                         } else {
                             if (!window.GAME_STATE.collection) window.GAME_STATE.collection = {};
                             window.GAME_STATE.collection[fish.variation.name] = (window.GAME_STATE.collection[fish.variation.name] || 0) + 1;
@@ -477,9 +509,12 @@ function iniciarMotorDoJogo() {
                         div.style.setProperty('--loot-glow', `${color}66`);
                         let timeIcon = fish.variation.time === 'day' ? '☀️ Dia' : (fish.variation.time === 'night' ? '🌙 Noite' : '🌗 Ambos');
 
+                        let imgSize = fish.rarity.id === 'bestial' ? '260px' : '140px';
+                        let filterDrop = fish.rarity.id === 'bestial' ? 'drop-shadow(0 25px 40px rgba(127,29,29,0.9))' : (fish.rarity.id === 'vandalo' ? 'drop-shadow(0 15px 20px rgba(16,185,129,0.8))' : 'drop-shadow(0 15px 20px rgba(0,0,0,0.6))');
+
                         div.innerHTML = `
-                            <div style="position:relative; display:inline-block; margin-bottom:15px; animation: floatItem 3s ease-in-out infinite;">
-                                <img src="${fish.variation.image}" style="width: 140px; height: 140px; object-fit: contain; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.6)); will-change: transform; transform: translateZ(0);" onerror="this.src='https://placehold.co/80x80?text=🐟'">
+                            <div style="position:relative; display:inline-block; margin-bottom:15px; animation: floatItem 3s ease-in-out infinite; will-change: transform; transform: translateZ(0);">
+                                <img src="${fish.variation.image}" style="width: ${imgSize}; height: ${imgSize}; object-fit: contain; filter: ${filterDrop}; will-change: transform; transform: translateZ(0);" onerror="this.src='https://placehold.co/80x80?text=🐟'">
                                 ${sealImage ? `<img src="${sealImage}" style="position: absolute; bottom:-10px; right:-10px; width:50px; height:50px; object-fit:contain; filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.6)); transform: rotate(15deg);">` : ''}
                             </div>
                             <div style="color: #f8fafc; font-family:'Fredoka', sans-serif; font-size: 1.8rem; margin-bottom: 5px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${fish.variation.name}</div>
@@ -556,11 +591,11 @@ function iniciarMotorDoJogo() {
 
         let seal = '';
         if (is67) {
-            const s = (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
+            const s = (rarity.id==='bestial' || rarity.id==='vandalo') ? '/img/asset/67muitoraro.webp' : (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
             seal = `<img src="${s}" style="position:absolute; bottom:-20px; right:-20px; width:110px; height:110px; object-fit:contain; transform:rotate(15deg); filter:drop-shadow(2px 8px 10px rgba(0,0,0,0.8));">`;
         }
 
-        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'bestial': '#7f1d1d' };
+        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'vandalo': '#10b981', 'bestial': '#7f1d1d' };
         const borderColor = colors[rarity.id] || '#ffffff';
 
         let eventsText = "Qualquer Clima";
@@ -573,11 +608,14 @@ function iniciarMotorDoJogo() {
         const box = document.createElement('div');
         box.style.cssText = `position: relative; background: radial-gradient(circle at top right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); padding: 50px 40px; border-radius: 24px; text-align: center; max-width: 650px; width: 90%; box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.1), inset 0 0 40px ${borderColor}22; transform: scale(0.95) translateY(20px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-top: 2px solid ${borderColor};`;
         
+        let imgDisplayWidth = rarity.id === 'bestial' ? '450px' : '380px';
+        let filterEff = rarity.id === 'bestial' ? 'drop-shadow(0 0 40px rgba(127,29,29,0.8))' : (rarity.id === 'vandalo' ? 'drop-shadow(0 0 20px rgba(16,185,129,0.8))' : 'drop-shadow(0 20px 30px rgba(0,0,0,0.8))');
+
         box.innerHTML = `
             <button id="close-detail-btn" style="position:absolute; top:20px; right:25px; background:none; border:none; color: rgba(255,255,255,0.4); font-size:2.5rem; cursor:pointer; transition:0.2s; padding:0; line-height:1;">&times;</button>
             
             <div style="position:relative; display:inline-block; margin-bottom:30px; animation: floatItem 4s ease-in-out infinite; will-change: transform; transform: translateZ(0);">
-                <img src="${fish.image}" style="max-width:380px; max-height:380px; object-fit:contain; filter:drop-shadow(0 20px 30px rgba(0,0,0,0.8));">
+                <img src="${fish.image}" style="max-width:${imgDisplayWidth}; max-height:${imgDisplayWidth}; object-fit:contain; filter:${filterEff};">
                 ${seal}
             </div>
             
@@ -605,7 +643,7 @@ function iniciarMotorDoJogo() {
     };
 
     function getCollectionColor(rarityId) {
-        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'bestial': '#7f1d1d' };
+        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'vandalo': '#10b981', 'bestial': '#7f1d1d' };
         return colors[rarityId] || '#fff';
     }
 
@@ -678,7 +716,7 @@ function iniciarMotorDoJogo() {
 
         let seal = ''; 
         if(is67 && isUnlocked) { 
-            const s = (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
+            const s = (rarity.id==='bestial' || rarity.id==='vandalo') ? '/img/asset/67muitoraro.webp' : (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
             seal = `<img src="${s}" loading="lazy" style="position: absolute; bottom: 35px; right: 5px; width: 35px; height: 35px; transform: rotate(15deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">`; 
         }
 
@@ -709,24 +747,45 @@ function iniciarMotorDoJogo() {
     function resizeCanvas() { if(canvas){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } }
     window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
+    // ==========================================================================
+    // ANIMAÇÕES DO FUNDO (PEIXES, POEIRA E LIXO)
+    // ==========================================================================
     class SwimmingFish {
         constructor() { this.reset(true); }
         reset(initial = false) {
             const rands = Math.random(); let r = window.RARITIES ? window.RARITIES.COMUM : null;
             if (!r) return;
-            if(rands < 0.005) r = window.RARITIES.AURUDO; else if(rands < 0.005) r = window.RARITIES.DIVINO; else if(rands < 0.01) r = window.RARITIES.SECRETO; else if(rands < 0.03) r = window.RARITIES.MITICO; else if(rands < 0.08) r = window.RARITIES.LENDARIO; else if(rands < 0.20) r = window.RARITIES.EPICO; else if(rands < 0.40) r = window.RARITIES.RARO;
+            
+            if (window.currentEventID === 'mar_bestas' && rands < 0.15) {
+                r = window.RARITIES.BESTIAL;
+            }
+            else if (window.currentEventID === 'abismo_lixo' && rands < 0.15) {
+                r = window.RARITIES.VANDALO;
+            }
+            else if(rands < 0.005) r = window.RARITIES.AURUDO; 
+            else if(rands < 0.005) r = window.RARITIES.DIVINO; 
+            else if(rands < 0.01) r = window.RARITIES.SECRETO; 
+            else if(rands < 0.03) r = window.RARITIES.MITICO; 
+            else if(rands < 0.08) r = window.RARITIES.LENDARIO; 
+            else if(rands < 0.20) r = window.RARITIES.EPICO; 
+            else if(rands < 0.40) r = window.RARITIES.RARO;
+            
             const valid = r.variations.filter(v => v.time === 'all' || (window.GAME_STATE.isDay && v.time === 'day') || (!window.GAME_STATE.isDay && v.time === 'night'));
-            if (valid.length === 0) return; // Evita o erro se a variação for do Bestial e estiver vazia
+            if (valid.length === 0) return; 
             this.specificImage = valid[Math.floor(Math.random() * valid.length)].image;
             this.depth = Math.random(); this.direction = Math.random() > 0.5 ? 1 : -1;
             this.y = canvas ? Math.random() * (canvas.height - 200) + 200 : 300;
-            this.width = (40 + Math.min(60, r.mult * 0.8)) * (0.4 + (this.depth * 0.6));
-            this.x = initial && canvas ? Math.random() * canvas.width : (this.direction === 1 ? -300 : (canvas ? canvas.width + 300 : 2000));
-            this.speed = (0.5 + (this.depth * 1.5)) * this.direction; this.opacity = 0.1 + (this.depth * 0.4);
+            
+            let baseWidth = r.id === 'bestial' ? 500 : (40 + Math.min(60, r.mult * 0.8));
+            this.width = baseWidth * (0.4 + (this.depth * 0.6));
+            
+            this.x = initial && canvas ? Math.random() * canvas.width : (this.direction === 1 ? -this.width-100 : (canvas ? canvas.width + this.width+100 : 2000));
+            this.speed = (0.5 + (this.depth * 1.5)) * this.direction; 
+            this.opacity = r.id === 'bestial' ? (0.4 + (this.depth * 0.4)) : (0.1 + (this.depth * 0.4));
         }
         update() { 
             this.x += (this.speed * (window.eventBgSpeedMult || 1)); 
-            if (canvas && ((this.direction === 1 && this.x > canvas.width + 300) || (this.direction === -1 && this.x < -300))) this.reset(); 
+            if (canvas && ((this.direction === 1 && this.x > canvas.width + this.width + 100) || (this.direction === -1 && this.x < -this.width - 100))) this.reset(); 
         }
         draw() {
             if(!ctx || !this.specificImage) return; 
@@ -741,12 +800,93 @@ function iniciarMotorDoJogo() {
         }
     }
 
+    // NOVA CLASSE: Partículas de Poeira/Sujeira (Sobe e treme)
+    class DustParticle {
+        constructor() { this.reset(true); }
+        reset(initial) {
+            this.x = canvas ? Math.random() * canvas.width : Math.random() * 2000;
+            this.y = initial && canvas ? Math.random() * canvas.height : (canvas ? canvas.height + 10 : 1000);
+            this.size = Math.random() * 4 + 1;
+            this.speedY = -(Math.random() * 0.8 + 0.2);
+            this.speedX = (Math.random() - 0.5) * 1.0;
+            this.opacity = Math.random() * 0.4 + 0.1;
+        }
+        update() {
+            this.y += this.speedY;
+            this.x += this.speedX;
+            if (this.y < -20) this.reset(false);
+        }
+        draw() {
+            if (!ctx) return;
+            ctx.fillStyle = `rgba(160, 150, 140, ${this.opacity})`; // Tom de areia/ferrugem
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // NOVA CLASSE: Sucatas flutuando no fundo
+    class DriftingTrash {
+        constructor() { this.reset(true); }
+        reset(initial) {
+            if(!window.SUCATAS || window.SUCATAS.length === 0) return;
+            this.imageSrc = window.SUCATAS[Math.floor(Math.random() * window.SUCATAS.length)].image;
+            this.size = Math.random() * 80 + 40;
+            this.x = initial && canvas ? Math.random() * canvas.width : -this.size - 50;
+            this.y = canvas ? Math.random() * (canvas.height - 100) + 100 : Math.random() * 1000;
+            this.speedX = Math.random() * 0.8 + 0.3;
+            this.speedY = (Math.random() - 0.5) * 0.3;
+            this.rotation = Math.random() * Math.PI * 2;
+            this.rotSpeed = (Math.random() - 0.5) * 0.01;
+            this.depth = Math.random(); 
+            this.opacity = 0.05 + (this.depth * 0.25); // Muito sombrio, ao fundo
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            this.rotation += this.rotSpeed;
+            if (canvas && this.x > canvas.width + this.size) {
+                this.x = -this.size - 50;
+                this.y = Math.random() * canvas.height;
+            }
+        }
+        draw() {
+            if (!ctx || !this.imageSrc) return;
+            const img = window.GAME_STATE.loadedImages[this.imageSrc];
+            if (!img) return;
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation);
+            ctx.filter = 'grayscale(0.9) sepia(0.6) hue-rotate(-20deg) brightness(0.4)'; // Deixa a sucata velha e sombria
+            ctx.drawImage(img, -this.size/2, -this.size/2, this.size, this.size);
+            ctx.restore();
+        }
+    }
+
     for (let i = 0; i < 10; i++) { fishes.push(new SwimmingFish()); }
+    
+    // Arrays para o evento de Lixo
+    const dustParticles = Array.from({length: 120}, () => new DustParticle());
+    const bgTrash = Array.from({length: 15}, () => new DriftingTrash());
 
     function animateBg() { 
         if(ctx && canvas && !document.hidden) { 
-            ctx.fillStyle = window.GAME_STATE.isDay ? '#0288D1' : '#0f172a'; 
+            
+            // Fundo base dinâmico
+            if (window.currentEventID === 'abismo_lixo') {
+                ctx.fillStyle = '#1c1515'; // Base vermelha bem escura e enferrujada
+            } else {
+                ctx.fillStyle = window.GAME_STATE.isDay ? '#0288D1' : '#0f172a'; 
+            }
             ctx.fillRect(0, 0, canvas.width, canvas.height); 
+
+            // Se for Abismo, desenha os detritos por trás dos peixes
+            if (window.currentEventID === 'abismo_lixo') {
+                bgTrash.forEach(t => { t.update(); t.draw(); });
+                dustParticles.forEach(d => { d.update(); d.draw(); });
+            }
+
             fishes.forEach(f => { f.update(); f.draw(); }); 
         } 
         requestAnimationFrame(animateBg); 
@@ -759,6 +899,9 @@ function iniciarMotorDoJogo() {
     }, 45000);
     setTimeout(() => { window.updateUI(); if(canvas) animateBg(); }, 500);
 
+    // ==========================================================================
+    // SISTEMA DE SUSHI E CORTES
+    // ==========================================================================
     window.SushiMode = {
         pendingSushi: null, 
         targets: [],
@@ -771,7 +914,6 @@ function iniciarMotorDoJogo() {
 
             const style = document.createElement('style');
             style.innerHTML = `
-                #sushi-btn.locked { background: #334155 !important; color: #64748b !important; border-color: #1e293b !important; cursor: not-allowed !important; transform: none !important; box-shadow: none !important; filter: grayscale(100%); }
                 #sushi-modal .modal-content { background: #111827; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9); border-radius: 20px; overflow: hidden; padding: 0; }
                 
                 .sushi-board-bg {
@@ -859,6 +1001,7 @@ function iniciarMotorDoJogo() {
                 'secreto': { coins: 60000, mats: ['meteorito', 'cristal'], matQty: 3 },
                 'divino': { coins: 300000, mats: ['materia_escura', 'essencia'], matQty: 4 },
                 'aurudo': { coins: 10000000, mats: ['poeira_cosmica'], matQty: 5 },
+                'vandalo': { coins: 25000000, mats: ['tecido_magico', 'uranio_vazado'], matQty: 8 },
                 'bestial': { coins: 50000000, mats: ['tecido_realidade'], matQty: 10 } 
             };
             return tables[rarityId] || tables['comum'];
