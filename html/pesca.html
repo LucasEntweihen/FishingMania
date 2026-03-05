@@ -9,59 +9,61 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     
-    <link rel="icon" type="image/svg+xml" href="/favicom.svg">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <link rel="stylesheet" href="/style/style.css">
     <link rel="stylesheet" href="/style/style2.css">
 
     <style>
         .dropdown { position: relative; display: inline-block; }
+        
         .dropdown-content {
             display: none; position: absolute; right: 0; top: 110%;
-            background-color: #ffffff; min-width: 210px;
-            box-shadow: 0px 8px 25px rgba(0,0,0,0.4); z-index: 1000;
+            background-color: #1e293b; min-width: 210px;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.8); z-index: 1000;
             border-radius: 12px; overflow: hidden; flex-direction: column;
-            animation: dropFadeIn 0.2s ease-in-out; border: 2px solid #bdc3c7;
+            animation: dropFadeIn 0.2s ease-in-out; border: 2px solid #dc2626;
         }
-        .dropdown-content button {
-            color: #333; padding: 12px 16px; text-decoration: none; display: block;
-            background: none; border: none; width: 100%; text-align: left;
-            font-family: 'Poppins', sans-serif; font-weight: bold; font-size: 0.95rem;
-            cursor: pointer; transition: background 0.2s, color 0.2s, padding-left 0.2s;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .dropdown-content button:last-child { border-bottom: none; }
-        .dropdown-content button:hover { background-color: #f1f8ff; color: #0277BD; padding-left: 24px; }
-        .dropdown.active .dropdown-content { display: flex; }
-        .dropdown.active .dropbtn { filter: brightness(1.1); transform: scale(1.05); }
 
-        /* RESET ABSOLUTO: Garante que o Sushi-btn e o Rituais ficam idênticos e não puxam lixo do style.css */
+        /* RESET NUCLEAR: Força o estilo exato e ignora o seu style.css antigo para evitar a falha visual */
+        .dropdown-content button,
         .dropdown-content #sushi-btn,
         .dropdown-content #open-rituals-btn {
-            position: static !important;
+            all: unset !important;
+            box-sizing: border-box !important;
+            display: block !important;
             width: 100% !important;
-            height: auto !important;
-            margin: 0 !important;
-            border: none !important;
-            border-bottom: 1px solid #7822ae !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
+            background: transparent !important;
+            color: #f8fafc !important;
             padding: 12px 16px !important;
+            font-family: 'Poppins', sans-serif !important;
+            font-weight: bold !important;
+            font-size: 0.95rem !important;
             text-align: left !important;
-            transform: none !important;
+            cursor: pointer !important;
+            border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+            transition: background 0.2s, padding-left 0.2s !important;
         }
+
         .dropdown-content button:last-child { border-bottom: none !important; }
         
-        /* O estado bloqueado do Sushi dentro do Dropdown */
+        .dropdown-content button:hover,
+        .dropdown-content #open-rituals-btn:hover,
+        .dropdown-content #sushi-btn:not(.locked):hover { 
+            background-color: rgba(220, 38, 38, 0.2) !important; 
+            color: #ef4444 !important; 
+            padding-left: 24px !important; 
+        }
+        
         .dropdown-content #sushi-btn.locked {
-            background-color: #f3f4f6 !important;
-            color: #9ca3af !important;
+            color: #475569 !important;
             text-decoration: line-through !important;
             cursor: not-allowed !important;
         }
-        .dropdown-content #sushi-btn.locked:hover {
-            padding-left: 16px !important;
-        }
+        .dropdown-content #sushi-btn.locked:hover { padding-left: 16px !important; }
+        
+        .dropdown.active .dropdown-content { display: flex; }
+        .dropdown.active .dropbtn { filter: brightness(1.1); transform: scale(1.05); }
         
         @keyframes dropFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -89,9 +91,7 @@
         }
         .uniform-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
 
-        .wb-slot-container {
-            background: rgba(15, 23, 42, 0.6); border: 2px dashed #475569; border-radius: 12px; padding: 12px; margin-bottom: 12px; transition: all 0.2s ease; text-align: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
-        }
+        .wb-slot-container { background: rgba(15, 23, 42, 0.6); border: 2px dashed #475569; border-radius: 12px; padding: 12px; margin-bottom: 12px; transition: all 0.2s ease; text-align: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); }
         .wb-slot-container.drag-over { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; transform: scale(1.02); }
         .wb-tab-btn { flex: 1; background: transparent; color: #94a3b8; border: none; padding: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; text-transform: uppercase; font-size: 0.85rem; }
         .wb-tab-btn.active { background: #3b82f6; color: #fff; }
@@ -220,20 +220,12 @@
                         <div style="width: 70%; display: flex; flex-direction: column; background: #0f172a; position: relative;">
                             <div style="background: radial-gradient(circle at top, #1e293b, #0f172a); padding: 30px; box-shadow: inset 0 -5px 15px rgba(0,0,0,0.5); border-bottom: 2px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center;">
                                 <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; width: 100%;">
-                                    <div class="equip-slot" id="bait-slot-1">
-                                        <div class="slot-content" id="bait-content-1">🧪</div>
-                                    </div>
+                                    <div class="equip-slot" id="bait-slot-1"><div class="slot-content" id="bait-content-1">🧪</div></div>
                                     <div style="font-size: 1.5rem; color: #64748b; font-weight:bold;">+</div>
-                                    <div class="equip-slot" id="bait-slot-2">
-                                        <div class="slot-content" id="bait-content-2">🧪</div>
-                                    </div>
+                                    <div class="equip-slot" id="bait-slot-2"><div class="slot-content" id="bait-content-2">🧪</div></div>
                                     <div style="font-size: 1.5rem; color: #f59e0b; font-weight:bold; margin-left: 20px; text-shadow: 0 0 10px rgba(245,158,11,0.5);">⚡</div>
-                                    <div class="equip-slot hover-boost" id="bait-slot-3" onclick="window.removeBoost(0)">
-                                        <div class="slot-content" id="bait-content-3">Vazio</div>
-                                    </div>
-                                    <div class="equip-slot hover-boost" id="bait-slot-4" onclick="window.removeBoost(1)">
-                                        <div class="slot-content" id="bait-content-4">Vazio</div>
-                                    </div>
+                                    <div class="equip-slot hover-boost" id="bait-slot-3" onclick="window.removeBoost(0)"><div class="slot-content" id="bait-content-3">Vazio</div></div>
+                                    <div class="equip-slot hover-boost" id="bait-slot-4" onclick="window.removeBoost(1)"><div class="slot-content" id="bait-content-4">Vazio</div></div>
                                 </div>
                                 <div id="bait-craft-result" style="width: 100%;"></div>
                             </div>
@@ -323,44 +315,31 @@
                         <h2 style="margin: 0; color: #f5f3ff; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; display: flex; align-items: center; gap: 10px;">🔮 Rituais Ocultos</h2>
                         <button id="close-rituals-btn" class="close-btn" style="color: #c4b5fd;">&times;</button>
                     </div>
-                    
                     <div style="display: flex; height: 65vh; min-height: 600px;">
-                        
-                        <div style="width: 30%; background: #18181b; border-right: 2px solid #27272a; padding: 20px; overflow-y: auto;" class="custom-scrollbar" id="ritual-list-container">
-                            </div>
-
+                        <div style="width: 30%; background: #18181b; border-right: 2px solid #27272a; padding: 20px; overflow-y: auto;" class="custom-scrollbar" id="ritual-list-container"></div>
                         <div style="width: 70%; position: relative; background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px;">
-                            
                             <h2 id="ritual-title" style="color: #ddd6fe; font-family: 'Fredoka', sans-serif; font-size: 2rem; text-shadow: 0 0 15px #8b5cf6; margin-bottom: 30px; margin-top: 0; text-align: center;">Selecione um Ritual</h2>
-                            
                             <div style="display: flex; gap: 40px; justify-content: center; align-items: stretch; width: 100%; margin-bottom: 40px;">
-                                
                                 <div style="flex: 1; max-width: 350px; background: rgba(255,255,255,0.02); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 20px; text-align: center; box-shadow: inset 0 0 30px rgba(139, 92, 246, 0.1); position: relative; overflow: hidden; backdrop-filter: blur(5px);">
                                     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, transparent, #8b5cf6, transparent);"></div>
                                     <h3 style="color: #a78bfa; font-family: 'Poppins', sans-serif; font-size: 1rem; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;">Caixa de Vidro</h3>
                                     <p style="font-size: 0.75rem; color: #71717a; margin-bottom: 20px;">Exige almas raras (Secreto ao Aurudo)</p>
-                                    
                                     <div id="ritual-fish-req" style="display: flex; flex-direction: column; gap: 10px;">
                                         <div style="color: #52525b; font-style: italic;">Nenhum ritual ativo.</div>
                                     </div>
                                 </div>
-
                                 <div style="flex: 1; max-width: 350px; background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(139, 92, 246, 0.1) 100%); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 20px; text-align: center; position: relative; border-bottom: 10px solid #4c1d95;">
                                     <h3 style="color: #a78bfa; font-family: 'Poppins', sans-serif; font-size: 1rem; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;">Pedestal</h3>
                                     <p style="font-size: 0.75rem; color: #71717a; margin-bottom: 20px;">Exige catalisadores absolutos</p>
-                                    
                                     <div id="ritual-mat-req" style="display: flex; flex-direction: column; gap: 10px;">
                                         <div style="color: #52525b; font-style: italic;">Aguardando oferenda...</div>
                                     </div>
                                 </div>
-
                             </div>
-
                             <button id="btn-execute-ritual" disabled style="background: #27272a; color: #52525b; border: 1px solid #3f3f46; padding: 15px 50px; font-size: 1.2rem; font-family: 'Fredoka', sans-serif; font-weight: bold; border-radius: 30px; text-transform: uppercase; letter-spacing: 2px; cursor: not-allowed; transition: all 0.3s;">
                                 Realizar Ritual
                             </button>
                             <p style="color: #ef4444; font-size: 0.8rem; font-family: 'Poppins', sans-serif; margin-top: 15px; font-weight: bold;">⚠️ Atenção: Rituais têm uma chance de falhar e destruir todos os sacrifícios!</p>
-
                         </div>
                     </div>
                 </div>
@@ -398,5 +377,7 @@
     <script src="/script/ragefish.js" defer></script>
     <script src="/script/crafting.js" defer></script>
     <script src="/script/rituals.js" defer></script>
+    
+    <script type="module" src="/script/admin.js"></script>
 </body>
 </html>
