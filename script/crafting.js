@@ -480,7 +480,7 @@
            zone.addEventListener('drop', (e) => {
                e.preventDefault(); 
                zone.classList.remove('drag-over');
-               
+    
                if (draggedItem && draggedItem.type === zone.dataset.droptype) {
                    equipItem(draggedItem.type, draggedItem.id);
                }

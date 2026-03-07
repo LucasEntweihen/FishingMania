@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenda do Ancião - Grimórios</title>
+    <link rel="stylesheet" href="/style/tenda_anciao.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <button class="back-btn" onclick="window.location.href='/html/pesca.html'">⬅ Voltar à Vila</button>
+            <h1>⛺ Tenda do Ancião</h1>
+            <p>Os seus grimórios de conhecimento. O Ancião está pronto para responder às suas dúvidas.</p>
+        </header>
+
+        <main class="notebook-grid" id="notebookGrid"></main>
+    </div>
+
+    <div id="uploadModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Consagrar Novo Grimório</h2>
+            <p class="modal-subtitle">Dê um nome ao tomo e adicione os pergaminhos (PDFs).</p>
+            
+            <input type="text" id="nomeGrimorio" placeholder="Ex: Manual de Pesca Ancestral" class="input-text">
+            
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('arquivoPdf').click()">
+                <div class="drop-icon">📂</div>
+                <p><strong>Arraste os seus PDFs aqui</strong> ou clique para procurar no baú.</p>
+                <input type="file" id="arquivoPdf" accept=".pdf" multiple class="hidden">
+            </div>
+
+            <ul id="listaArquivos" class="file-list"></ul>
+
+            <div class="modal-actions">
+                <button onclick="window.fecharModal()" class="btn-cancel">Cancelar</button>
+                <button onclick="window.enviarParaPython()" class="btn-confirm" id="btnConjurar">Conjurar Magia</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script type="module" src="tenda_anciao.js"></script>
+</body>
+</html>

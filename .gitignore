@@ -1,2 +1,4 @@
 .env
 gitCommands.txt
+__pycache__/
+chroma_sqlite.db
