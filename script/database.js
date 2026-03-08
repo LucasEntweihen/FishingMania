@@ -257,7 +257,7 @@ window.RARITIES = {
         { name: 'Mahi-Mahi', image: '/img/peixe/Mahi-Mahifish square.webp', time: 'all', events: ["all"] },
         { name: 'Peixe Otário', image: '/img/peixe/PeixeOtario.png', time: 'day', events: ["all"] },
         { name: 'Peixe Lhapaço', image: '/img/peixe/peixe-palhaco.png', time: 'all', events: ["all"] },
-        { name: 'Carlos a Cardume', image: '/img/peixe/Carlosacardume.png', time: 'day', events: ["all"] },
+        { name: 'Cardume Carloso', image: '/img/peixe/Carlosacardume.png', time: 'day', events: ["all"] },
         { name: 'Betíssimo', image: '/img/peixe/betaMaximo.webp', time: 'all', events: ["all"] },
         { name: 'Lanterna Gay', image: '/img/peixe/angler-cliparte.png', time: 'night', events: ["all"] }
     ]},
