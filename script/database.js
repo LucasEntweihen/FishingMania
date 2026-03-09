@@ -249,10 +249,10 @@ window.RARITIES = {
     RARO: { id: 'raro', prob: 0.30, mult: 3, style: 'text-raro', border: 'border-raro', name: 'Raro', variations: [
         { name: 'Peixe Estranho', image: '/img/peixe/UnderWaterAhhFish.png', time: 'night', events: ["all"] },
         { name: 'Meu çélebro', image: '/img/peixe/tarlalareo fish.png', time: 'all', events: ["all"] },
-        { name: 'Cubic Boccacete', image: '/img/peixe/hyt.gif', time: 'day', events: ["all"] },
+        { name: 'Cubic Boccacete', image: '/img/peixe/hyt.png', time: 'day', events: ["all"] },
         { name: 'PUTAPEIXE', image: '/img/peixe/PUTARALHOFISH, porra.png', time: 'all', events: ["all"] },
         { name: 'Peixe Burrinho', image: '/img/peixe/dumbAssFish.png', time: 'all', events: ["all"] },
-        { name: 'Meio Peixe', image: '/img/peixe/meio-epixe.gif', time: 'night', events: ["all"] }
+        { name: 'Meio Peixe', image: '/img/peixe/meio-epixe.png', time: 'night', events: ["all"] }
     ]},
     EPICO: { id: 'epico', prob: 0.15, mult: 8, style: 'text-epico', border: 'border-epico', name: 'Épico', variations: [
         { name: 'Mahi-Mahi', image: '/img/peixe/Mahi-Mahifish square.webp', time: 'all', events: ["all"] },
@@ -264,32 +264,32 @@ window.RARITIES = {
     ]},
     LENDARIO: { id: 'lendario', prob: 0.08, mult: 20, style: 'text-lendario', border: 'border-lendario', name: 'Lendário', variations: [
         { name: 'Peixe Motosserra', image: '/img/peixe/Chainsawfish.webp', time: 'night', events: ["all"] },
-        { name: 'Grande Olho', image: '/img/peixe/hytal.gif', time: 'day', events: ["all"] },
+        { name: 'Grande Olho', image: '/img/peixe/hytal.png', time: 'day', events: ["all"] },
         { name: 'Peixe Demônio negro', image: '/img/peixe/DemonicAHHfish (1).png', time: 'night', events: ["tempestade"] },
         { name: 'Peixe Entulhado', image: '/img/peixe/EntulhoFish.png', time: 'day', events: ["all"] },
-        { name: 'Tenham respeito!', image: '/img/peixe/vcsestaoempublicomaisrespeito.gif', time: 'all', events: ["tempestade", "frenesi", "misticismo"] }
+        { name: 'Tenham respeito!', image: '/img/peixe/vcsestaoempublicomaisrespeito.png', time: 'all', events: ["tempestade", "frenesi", "misticismo"] }
     ]},
     MITICO: { id: 'mitico', prob: 0.03, mult: 50, style: 'text-mitico', border: 'border-mitico', name: 'Mítico', variations: [
         { name: 'Jogo do Peixe Retardo', image: '/img/peixe/GameofRetardedfish.png', time: 'night', events: ["ouro", "frenesi", "misticismo"] },
         { name: 'Peixe Câncer', image: '/img/peixe/PeixeCancer.png', time: 'all', events: ["all"] },
-        { name: 'Meus filhos ', image: '/img/peixe/cardume dos meus filhos.png', time: 'all', events: ["all"] },
+        { name: 'Cardume Fecundador', image: '/img/peixe/cardume dos meus filhos.png', time: 'all', events: ["all"] },
         { name: 'Peixe das Águas Reais', image: '/img/peixe/aquoso.webp', time: 'day', events: ["ouro", "misticismo"] },
-        { name: 'Darwin?!?!', image: '/img/peixe/darwin.gif', time: 'all', events: ["all"] },
+        { name: 'Darwin?!?!', image: '/img/peixe/darwin.png', time: 'all', events: ["all"] },
         { name: 'Baleia Gorda', image: '/img/peixe/baleia.webp', time: 'day', events: ["all"] }
     ]},
     SECRETO: { id: 'secreto', prob: 0.005, mult: 150, style: 'text-secreto', border: 'border-secreto', name: 'Secreto', variations: [
         { name: 'Peixe Retardado', image: '/img/peixe/Retardedfish.png', time: 'all', events: ["all"] },
         { name: 'Meu Almoço Delicioso', image: '/img/peixe/receitas-de-peixes-destaque.png', time: 'day', events: ["ouro", "misticismo"] },
-        { name: 'Pai Solteiro', image: '/img/peixe/pai-solteiro.gif', time: 'all', events: ["all"] },
-        { name: 'QUE CARA LEGAL!', image: '/img/peixe/coolASSfish.gif', time: 'all', events: ["all"] },
+        { name: 'Pai Solteiro', image: '/img/peixe/pai-solteiro.png', time: 'all', events: ["all"] },
+        { name: 'QUE CARA LEGAL!', image: '/img/peixe/coolASSfish.png', time: 'all', events: ["all"] },
         { name: 'Alien Fish REF!!!', image: '/img/peixe/alien_ref_fish.png', time: 'night', events: ["ouro", "frenesi", "misticismo"] }
     ]},
     DIVINO: { id: 'divino', prob: 0.001, mult: 500, style: 'text-divino', border: 'border-divino', name: 'Divino', variations: [
         { name: 'Quase Arco-íris', image: '/img/peixe/Semi-rainbowfish.png', time: 'day', events: ["misticismo"] },
-        { name: 'Golfizza Pescado', image: '/img/peixe/golfizza.gif', time: 'night', events: ["all"] },
+        { name: 'Golfizza Pescado', image: '/img/peixe/golfizza.png', time: 'night', events: ["all"] },
         { name: 'Só mais um pouco', image: '/img/peixe/meus porrinhas.png', time: 'night', events: ["all"] },
         { name: 'Ex rei dos mares (fraco)', image: '/img/peixe/CARALHOFODAA.png', time: 'night', events: ["tempestade", "mar_bestas"] },
-        { name: 'Salmão de lama', image: '/img/peixe/salmao_argila.gif', time: 'night', events: ["ouro", "misticismo"] }
+        { name: 'Salmão de lama', image: '/img/peixe/salmao_argila.png', time: 'night', events: ["ouro", "misticismo"] }
     ]},
     AURUDO: { id: 'aurudo', prob: 0.00005, mult: 5000, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
         { name: 'Triolho Diliça', image: '/img/peixe/triolho.webp', time: 'all', events: ["all"] },
