@@ -243,7 +243,8 @@ window.RARITIES = {
         { name: 'Ah, peixe legal', image: '/img/peixe/PeixeLegal.avif', time: 'day', events: ["all"] },
         { name: 'Cruel kidfish', image: '/img/peixe/KidFish.png', time: 'night', events: ["all"] },
         { name: 'Pexudo', image: '/img/peixe/peixebala.png', time: 'all', events: ["all"] },
-        { name: 'Ah, peixe legal..?', image: '/img/peixe/lolidasaguas.png', time: 'night', events: ["all"] }
+        { name: 'Ah, peixe legal..?', image: '/img/peixe/lolidasaguas.png', time: 'night', events: ["all"] },
+        { name: 'Peixe Feinho', image: '/img/peixe/PeixinhoFeio.webp', time: 'night', events: ["tempestade"] }
     ]},
     RARO: { id: 'raro', prob: 0.30, mult: 3, style: 'text-raro', border: 'border-raro', name: 'Raro', variations: [
         { name: 'Peixe Estranho', image: '/img/peixe/UnderWaterAhhFish.png', time: 'night', events: ["all"] },
