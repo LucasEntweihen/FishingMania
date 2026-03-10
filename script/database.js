@@ -264,10 +264,10 @@ window.RARITIES = {
     ]},
     LENDARIO: { id: 'lendario', prob: 0.08, mult: 20, style: 'text-lendario', border: 'border-lendario', name: 'Lendário', variations: [
         { name: 'Peixe Motosserra', image: '/img/peixe/Chainsawfish.webp', time: 'night', events: ["all"] },
-        { name: 'Grande Olho', image: '/img/peixe/hytal.png', time: 'day', events: ["all"] },
+        { name: 'Big Eye Bocaccete', image: '/img/peixe/hytal.png', time: 'day', events: ["all"] },
         { name: 'Peixe Demônio negro', image: '/img/peixe/DemonicAHHfish (1).png', time: 'night', events: ["tempestade"] },
         { name: 'Peixe Entulhado', image: '/img/peixe/EntulhoFish.png', time: 'day', events: ["all"] },
-        { name: 'Tenham respeito!', image: '/img/peixe/vcsestaoempublicomaisrespeito.png', time: 'all', events: ["tempestade", "frenesi", "misticismo"] }
+        { name: 'Peixes Fófos Juntos', image: '/img/peixe/vcsestaoempublicomaisrespeito.png', time: 'all', events: ["tempestade", "frenesi", "misticismo"] } 
     ]},
     MITICO: { id: 'mitico', prob: 0.03, mult: 50, style: 'text-mitico', border: 'border-mitico', name: 'Mítico', variations: [
         { name: 'Jogo do Peixe Retardo', image: '/img/peixe/GameofRetardedfish.png', time: 'night', events: ["ouro", "frenesi", "misticismo"] },
@@ -287,12 +287,12 @@ window.RARITIES = {
     DIVINO: { id: 'divino', prob: 0.001, mult: 500, style: 'text-divino', border: 'border-divino', name: 'Divino', variations: [
         { name: 'Quase Arco-íris', image: '/img/peixe/Semi-rainbowfish.png', time: 'day', events: ["misticismo"] },
         { name: 'Golfizza Pescado', image: '/img/peixe/golfizza.png', time: 'night', events: ["all"] },
-        { name: 'Só mais um pouco', image: '/img/peixe/meus porrinhas.png', time: 'night', events: ["all"] },
+        { name: 'Eles estão quase lá', image: '/img/peixe/meus porrinhas.png', time: 'night', events: ["all"] },
         { name: 'Ex rei dos mares (fraco)', image: '/img/peixe/CARALHOFODAA.png', time: 'night', events: ["tempestade", "mar_bestas"] },
         { name: 'Salmão de lama', image: '/img/peixe/salmao_argila.png', time: 'night', events: ["ouro", "misticismo"] }
     ]},
     AURUDO: { id: 'aurudo', prob: 0.00005, mult: 5000, style: 'text-auraMAX', border: 'border-auraMAX', name: 'Aurudo', variations: [
-        { name: 'Triolho Diliça', image: '/img/peixe/triolho.webp', time: 'all', events: ["all"] },
+        { name: 'Aurudo Diliça', image: '/img/peixe/triolho.webp', time: 'all', events: ["all"] },
         { name: 'Abueno Pasaber', image: '/img/peixe/abuenopasaber.png', time: 'all', events: ["all"] }
     ]},
     VANDALO: { id: 'vandalo', prob: 0.000005, mult: 20000, style: 'text-vandalo', border: 'border-vandalo', name: 'Vândalo', variations: [
