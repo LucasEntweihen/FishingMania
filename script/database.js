@@ -267,11 +267,11 @@ window.RARITIES = {
         { name: 'Big Eye Bocaccete', image: '/img/peixe/hytal.png', time: 'day', events: ["all"] },
         { name: 'Peixe Demônio negro', image: '/img/peixe/DemonicAHHfish (1).png', time: 'night', events: ["tempestade"] },
         { name: 'Peixe Entulhado', image: '/img/peixe/EntulhoFish.png', time: 'day', events: ["all"] },
-        { name: 'Peixes Fófos Juntos', image: '/img/peixe/vcsestaoempublicomaisrespeito.png', time: 'all', events: ["tempestade", "frenesi", "misticismo"] } 
+        { name: 'Peixes Fófos Juntos <3', image: '/img/peixe/vcsestaoempublicomaisrespeito.png', time: 'all', events: ["tempestade", "frenesi", "misticismo"] } 
     ]},
     MITICO: { id: 'mitico', prob: 0.03, mult: 50, style: 'text-mitico', border: 'border-mitico', name: 'Mítico', variations: [
         { name: 'Jogo do Peixe Retardo', image: '/img/peixe/GameofRetardedfish.png', time: 'night', events: ["ouro", "frenesi", "misticismo"] },
-        { name: 'Peixe Câncer', image: '/img/peixe/PeixeCancer.png', time: 'all', events: ["all"] },
+        { name: 'Peixe Dor Cabeçaa', image: '/img/peixe/PeixeCancer.png', time: 'all', events: ["all"] },
         { name: 'Cardume Fecundador', image: '/img/peixe/cardume dos meus filhos.png', time: 'all', events: ["all"] },
         { name: 'Peixe das Águas Reais', image: '/img/peixe/aquoso.webp', time: 'day', events: ["ouro", "misticismo"] },
         { name: 'Darwin?!?!', image: '/img/peixe/darwin.png', time: 'all', events: ["all"] },
@@ -287,7 +287,7 @@ window.RARITIES = {
     DIVINO: { id: 'divino', prob: 0.001, mult: 500, style: 'text-divino', border: 'border-divino', name: 'Divino', variations: [
         { name: 'Quase Arco-íris', image: '/img/peixe/Semi-rainbowfish.png', time: 'day', events: ["misticismo"] },
         { name: 'Golfizza Pescado', image: '/img/peixe/golfizza.png', time: 'night', events: ["all"] },
-        { name: 'Eles estão quase lá', image: '/img/peixe/meus porrinhas.png', time: 'night', events: ["all"] },
+        { name: 'Peixe molhado', image: '/img/peixe/meus porrinhas.png', time: 'night', events: ["all"] },
         { name: 'Ex rei dos mares (fraco)', image: '/img/peixe/CARALHOFODAA.png', time: 'night', events: ["tempestade", "mar_bestas"] },
         { name: 'Salmão de lama', image: '/img/peixe/salmao_argila.png', time: 'night', events: ["ouro", "misticismo"] }
     ]},
@@ -303,7 +303,7 @@ window.RARITIES = {
     ]},
     BESTIAL: { id: 'bestial', prob: 0.000001, mult: 15000, style: 'text-bestial', border: 'border-bestial', name: 'Bestial', variations: [
         { name: 'O Leviatã Primordial', image: '/img/peixe/LENDAS/esmGA BOLAS.png', time: 'all', events: ["mar_bestas"] },
-        { name: 'Vaca Marinha', image: '/img/peixe/LENDAS/maedorenan.png', time: 'all', events: ["mar_bestas"] },
+        { name: 'Vaca Marinha', image: '/img/peixe/LENDAS/vaca.png', time: 'all', events: ["mar_bestas"] },
         { name: 'Jörmungandr', image: '/img/peixe/LENDAS/melbil.aw.png', time: 'all', events: ["mar_bestas"] },
     ]}
 };
