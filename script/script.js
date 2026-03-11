@@ -152,7 +152,7 @@ function iniciarMotorDoJogo() {
         if (window.SUCATAS) {
             window.SUCATAS.forEach(scrap => { const img = new Image(); img.src = scrap.image; window.GAME_STATE.loadedImages[scrap.image] = img; });
         }
-        ['/img/asset/67comum.jpg', '/img/asset/67raro.jpg', '/img/asset/67muitoraro.webp'].forEach(src => { const img = new Image(); img.src = src; });
+        ['/img/asset/67comum.jpeg', '/img/asset/67raro.png', '/img/asset/67muitoraro.webp'].forEach(src => { const img = new Image(); img.src = src; });
     }
     preloadImages();
 
@@ -284,7 +284,6 @@ function iniciarMotorDoJogo() {
 
         let sucataChance = 0.15 - (luckFactor / 100000);
         
-        // NO EVENTO ABISMO DOS DESCARTADOS, CHANCE DE LIXO É MASSIVA
         if (window.currentEventID === 'abismo_lixo') sucataChance += 0.60;
         
         if (sucataChance < 0.05) sucataChance = 0.05; 
@@ -332,6 +331,31 @@ function iniciarMotorDoJogo() {
             else if (fishRoll < window.RARITIES.RARO.prob) caughtRarity = window.RARITIES.RARO;
         }
 
+        // =========================================================
+        // SISTEMA RÍGIDO DE PROGRESSÃO DE VARAS
+        // =========================================================
+        const rodTier = rod ? rod.id : 0;
+        let maxRarityIndex = 0; // Comum por padrão
+
+        // Define o limite máximo que a vara suporta pescar
+        if (rodTier >= 2) maxRarityIndex = 1; // Raro (Bambu Reforçado+)
+        if (rodTier >= 4) maxRarityIndex = 2; // Épico (Vara de Plástico+)
+        if (rodTier >= 7) maxRarityIndex = 3; // Lendário (Polímero Flexível+)
+        if (rodTier >= 10) maxRarityIndex = 4; // Mítico (Liga de Titânio+)
+        if (rodTier >= 13) maxRarityIndex = 5; // Secreto (Vara Eletrônica+)
+        if (rodTier >= 16) maxRarityIndex = 6; // Divino (Vara Oceânica+)
+        if (rodTier >= 19) maxRarityIndex = 7; // Aurudo (Vara Galáctica+)
+        if (rodTier >= 22) maxRarityIndex = 9; // Bestial e Vandalo liberados
+
+        const rarityOrder = ['comum', 'raro', 'epico', 'lendario', 'mitico', 'secreto', 'divino', 'aurudo', 'vandalo', 'bestial'];
+        let currentRarityIndex = rarityOrder.indexOf(caughtRarity.id);
+
+        // Se o peixe pescado for forte demais para a vara atual, ele "escapa" e dá o melhor peixe que a vara aguenta
+        if (currentRarityIndex > maxRarityIndex) {
+            caughtRarity = window.RARITIES[rarityOrder[maxRarityIndex].toUpperCase()];
+        }
+        // =========================================================
+
         const getValidFishes = (rarityObj) => {
             return rarityObj.variations.filter(v => {
                 const timeMatch = (!v.time || v.time === 'all') || 
@@ -373,7 +397,16 @@ function iniciarMotorDoJogo() {
         } else {
             const sizeBase = 10 + (Object.keys(window.RARITIES).indexOf(caughtRarity.id.toUpperCase()) * 15);
             finalSize = sizeBase + Math.floor(Math.random() * 60);
-            if (Math.random() < chance67) finalSize = 67;
+            
+            // Impede que o tamanho caia no 67 "na sorte" gerando selos falsos. Se bater 67 naturalmente, cai pra 66.
+            if (finalSize === 67) {
+                finalSize = 66;
+            }
+
+            // O verdadeiro status de chance67 é o ÚNICO que pode cravar o tamanho exato de 67
+            if (Math.random() < chance67) {
+                finalSize = 67;
+            }
         }
 
         let finalValue = Math.floor(finalSize * caughtRarity.mult * valueMult);
@@ -493,12 +526,13 @@ function iniciarMotorDoJogo() {
                         window.GAME_STATE.coins += (fish.value || 0);
                         let sealImage = null;
 
-                        if (fish.size >= 67) {
+                        // GARANTE QUE SÓ RECEBE O SELO QUEM FOR EXATAMENTE 67CM
+                        if (fish.size === 67) {
                             if (!window.GAME_STATE.collection67) window.GAME_STATE.collection67 = {};
                             window.GAME_STATE.collection67[fish.variation.name] = (window.GAME_STATE.collection67[fish.variation.name] || 0) + 1;
                             
                             if(fish.rarity.id === 'bestial' || fish.rarity.id === 'vandalo') sealImage = '/img/asset/67muitoraro.webp';
-                            else sealImage = (fish.rarity.id === 'comum' || fish.rarity.id === 'raro') ? '/img/asset/67comum.jpg' : (fish.rarity.id === 'epico' || fish.rarity.id === 'lendario') ? '/img/asset/67raro.jpg' : '/img/asset/67muitoraro.webp';
+                            else sealImage = (fish.rarity.id === 'comum' || fish.rarity.id === 'raro') ? '/img/asset/67comum.jpeg' : (fish.rarity.id === 'epico' || fish.rarity.id === 'lendario') ? '/img/asset/67raro.png' : '/img/asset/67muitoraro.webp';
                         } else {
                             if (!window.GAME_STATE.collection) window.GAME_STATE.collection = {};
                             window.GAME_STATE.collection[fish.variation.name] = (window.GAME_STATE.collection[fish.variation.name] || 0) + 1;
@@ -591,7 +625,7 @@ function iniciarMotorDoJogo() {
 
         let seal = '';
         if (is67) {
-            const s = (rarity.id==='bestial' || rarity.id==='vandalo') ? '/img/asset/67muitoraro.webp' : (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
+            const s = (rarity.id==='bestial' || rarity.id==='vandalo') ? '/img/asset/67muitoraro.webp' : (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpeg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.png':'/img/asset/67muitoraro.webp'; 
             seal = `<img src="${s}" style="position:absolute; bottom:-20px; right:-20px; width:110px; height:110px; object-fit:contain; transform:rotate(15deg); filter:drop-shadow(2px 8px 10px rgba(0,0,0,0.8));">`;
         }
 
@@ -716,7 +750,7 @@ function iniciarMotorDoJogo() {
 
         let seal = ''; 
         if(is67 && isUnlocked) { 
-            const s = (rarity.id==='bestial' || rarity.id==='vandalo') ? '/img/asset/67muitoraro.webp' : (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.jpg':'/img/asset/67muitoraro.webp'; 
+            const s = (rarity.id==='bestial' || rarity.id==='vandalo') ? '/img/asset/67muitoraro.webp' : (rarity.id==='comum'||rarity.id==='raro')?'/img/asset/67comum.jpeg':(rarity.id==='epico'||rarity.id==='lendario')?'/img/asset/67raro.png':'/img/asset/67muitoraro.webp'; 
             seal = `<img src="${s}" loading="lazy" style="position: absolute; bottom: 35px; right: 5px; width: 35px; height: 35px; transform: rotate(15deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">`; 
         }
 
@@ -800,7 +834,6 @@ function iniciarMotorDoJogo() {
         }
     }
 
-    // NOVA CLASSE: Partículas de Poeira/Sujeira (Sobe e treme)
     class DustParticle {
         constructor() { this.reset(true); }
         reset(initial) {
@@ -818,14 +851,13 @@ function iniciarMotorDoJogo() {
         }
         draw() {
             if (!ctx) return;
-            ctx.fillStyle = `rgba(160, 150, 140, ${this.opacity})`; // Tom de areia/ferrugem
+            ctx.fillStyle = `rgba(160, 150, 140, ${this.opacity})`;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             ctx.fill();
         }
     }
 
-    // NOVA CLASSE: Sucatas flutuando no fundo
     class DriftingTrash {
         constructor() { this.reset(true); }
         reset(initial) {
@@ -839,7 +871,7 @@ function iniciarMotorDoJogo() {
             this.rotation = Math.random() * Math.PI * 2;
             this.rotSpeed = (Math.random() - 0.5) * 0.01;
             this.depth = Math.random(); 
-            this.opacity = 0.05 + (this.depth * 0.25); // Muito sombrio, ao fundo
+            this.opacity = 0.05 + (this.depth * 0.25);
         }
         update() {
             this.x += this.speedX;
@@ -858,7 +890,7 @@ function iniciarMotorDoJogo() {
             ctx.globalAlpha = this.opacity;
             ctx.translate(this.x, this.y);
             ctx.rotate(this.rotation);
-            ctx.filter = 'grayscale(0.9) sepia(0.6) hue-rotate(-20deg) brightness(0.4)'; // Deixa a sucata velha e sombria
+            ctx.filter = 'grayscale(0.9) sepia(0.6) hue-rotate(-20deg) brightness(0.4)';
             ctx.drawImage(img, -this.size/2, -this.size/2, this.size, this.size);
             ctx.restore();
         }
@@ -866,22 +898,19 @@ function iniciarMotorDoJogo() {
 
     for (let i = 0; i < 10; i++) { fishes.push(new SwimmingFish()); }
     
-    // Arrays para o evento de Lixo
     const dustParticles = Array.from({length: 120}, () => new DustParticle());
     const bgTrash = Array.from({length: 15}, () => new DriftingTrash());
 
     function animateBg() { 
         if(ctx && canvas && !document.hidden) { 
             
-            // Fundo base dinâmico
             if (window.currentEventID === 'abismo_lixo') {
-                ctx.fillStyle = '#1c1515'; // Base vermelha bem escura e enferrujada
+                ctx.fillStyle = '#1c1515';
             } else {
                 ctx.fillStyle = window.GAME_STATE.isDay ? '#0288D1' : '#0f172a'; 
             }
             ctx.fillRect(0, 0, canvas.width, canvas.height); 
 
-            // Se for Abismo, desenha os detritos por trás dos peixes
             if (window.currentEventID === 'abismo_lixo') {
                 bgTrash.forEach(t => { t.update(); t.draw(); });
                 dustParticles.forEach(d => { d.update(); d.draw(); });
