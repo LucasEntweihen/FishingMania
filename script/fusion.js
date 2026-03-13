@@ -49,6 +49,15 @@ window.FUSIONS = {
         desc: "O fruto do amor marítimo. Luta com o poder da amizade (e dentes muito afiados).",
         tactical_stats: { HP: 100, AP: 3, MP: 5, ATK: 25, DEF: 15, SPD: 10, RNG: 1 },
         available_skills: ['amor_de_peixe', 'mordida_padrao', 'jato_agua', 'canto_sereia', 'escudo_bolha']
+    },
+    // O HÍBRIDO LENDÁRIO E SECRETO (Big Eye Bocaccete + Meu Almoço Delicioso)
+    "Big Eye Bocaccete+Meu Almoço Delicioso": {
+        id: "hibrido_food_eye",
+        name: "Bocaccete Delicioso",
+        image: "/img/peixe/fusion/food-eye-bocaccete.png",
+        desc: "Uma refeição incrivelmente suculenta que fica te encarando enquanto você tenta comer. Aterrorizante.",
+        tactical_stats: { HP: 220, AP: 3, MP: 4, ATK: 45, DEF: 35, SPD: 12, RNG: 2 },
+        available_skills: ['mordida_padrao', 'olhar_abissal', 'canto_sereia', 'amor_de_peixe', 'jato_agua']
     }
 };
 

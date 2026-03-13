@@ -260,7 +260,7 @@ window.RARITIES = {
         { name: 'Peixe Lhapaço', image: '/img/peixe/peixe-palhaco.png', time: 'all', events: ["all"], compat: 'amigavel' },
         { name: 'Cardume Carloso', image: '/img/peixe/Carlosacardume.png', time: 'day', events: ["all"], compat: 'agressivo' },
         { name: 'Peixe Olho Pentagonal', image: '/img/peixe/betaMaximo.webp', time: 'all', events: ["all"], compat: 'monstruoso' },
-        { name: 'Lanterna Gay', image: '/img/peixe/angler-cliparte.png', time: 'night', events: ["all"], compat: 'amigavel' }
+        { name: 'Lanternudo', image: '/img/peixe/angler-cliparte.png', time: 'night', events: ["all"], compat: 'amigavel' }
     ]},
     LENDARIO: { id: 'lendario', prob: 0.08, mult: 20, style: 'text-lendario', border: 'border-lendario', name: 'Lendário', variations: [
         { name: 'Peixe Motosserra', image: '/img/peixe/Chainsawfish.webp', time: 'night', events: ["all"], compat: 'agressivo' },
