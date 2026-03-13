@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FishingMania - Quartel Tático</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@500;600;800&display=swap" rel="stylesheet">
+    <script src="/script/database.js"></script>
+    <script src="/script/fusion.js"></script>
+    
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #020617; font-family: 'Poppins', sans-serif; color: #f8fafc; overflow: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+        .header { background: linear-gradient(90deg, #1e1b4b, #0f172a, #1e1b4b); padding: 20px 40px; border-bottom: 2px solid #6366f1; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 10; position: relative; }
+        .header h1 { margin: 0; font-family: 'Fredoka', sans-serif; font-size: 2.2rem; color: #a5b4fc; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+        .btn-back { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Poppins'; backdrop-filter: blur(5px); }
+        .btn-back:hover { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.5); }
+        .main-container { display: flex; flex-direction: column; height: calc(100vh - 90px); padding: 20px 40px; box-sizing: border-box; gap: 20px; position: relative; z-index: 1; }
+        .squad-bar { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 25px; display: flex; justify-content: center; gap: 25px; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); backdrop-filter: blur(10px); }
+        .squad-slot { width: 130px; height: 150px; background: rgba(0,0,0,0.6); border: 2px dashed #475569; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; position: relative; box-shadow: inset 0 5px 15px rgba(0,0,0,0.5); }
+        .squad-slot:hover { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); transform: translateY(-5px); }
+        .squad-slot.filled { border: 2px solid #10b981; background: rgba(16, 185, 129, 0.1); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.1); }
+        .squad-slot img { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.6)); transition: 0.2s; }
+        .squad-slot.filled:hover img { transform: scale(1.1); }
+        .remove-btn { position: absolute; top: -12px; right: -12px; background: #ef4444; border: 2px solid #b91c1c; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0,0,0,0.8); display: none; transition: 0.2s; z-index: 10; }
+        .remove-btn:hover { background: #f87171; transform: scale(1.1); }
+        .squad-slot.filled:hover .remove-btn { display: flex; }
+        .bottom-area { display: flex; gap: 30px; flex: 1; min-height: 0; }
+        .roster-panel { flex: 1; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 25px; display: flex; flex-direction: column; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        .roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; overflow-y: auto; padding-right: 15px; align-content: start;}
+        .fish-card { background: linear-gradient(145deg, #1e293b, #020617); border: 1px solid #334155; border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 8px 15px rgba(0,0,0,0.4); position: relative; overflow: hidden; }
+        .fish-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); transition: left 0.4s; }
+        .fish-card:hover::before { left: 100%; }
+        .fish-card:hover { transform: translateY(-5px); border-color: #6366f1; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4); }
+        .fish-card.selected { border-color: #f59e0b; box-shadow: 0 0 20px rgba(245, 158, 11, 0.5); background: linear-gradient(145deg, #332108, #0f172a); }
+        .fish-card img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+        .inspector-panel { width: 480px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; display: flex; flex-direction: column; overflow-y: auto; box-shadow: -10px 0 30px rgba(0,0,0,0.6); }
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-box { text-align: center; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #94a3b8; border-bottom: 2px solid #334155; }
+        .stat-box b { display: block; color: #f8fafc; font-size: 1.4rem; font-family: 'Fredoka'; margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .skill-list { display: flex; flex-direction: column; gap: 12px; }
+        .skill-item { background: rgba(0,0,0,0.5); border: 2px solid #334155; border-radius: 12px; padding: 15px; display: flex; gap: 15px; cursor: pointer; transition: 0.2s; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+        .skill-item:hover { background: rgba(255,255,255,0.05); border-color: #64748b; transform: translateX(5px); }
+        .skill-item.active { border-color: #10b981; background: rgba(16, 185, 129, 0.15); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 15px rgba(16, 185, 129, 0.1); }
+        .skill-item.disabled { opacity: 0.4; filter: grayscale(1); cursor: not-allowed; }
+        .skill-item.disabled:hover { transform: none; border-color: #ef4444; }
+        .skill-icon { font-size: 2.2rem; background: rgba(0,0,0,0.6); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .skill-info { flex: 1; }
+        .skill-name { font-family: 'Fredoka'; font-size: 1.2rem; color: #e2e8f0; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;}
+        .skill-desc { font-size: 0.8rem; color: #94a3b8; line-height: 1.4; }
+        .skill-cost { background: #3b82f6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>⚔️ Quartel Tático Central</h1>
+        <button class="btn-back" onclick="if(window.saveGame) { window.saveGame().then(() => window.location.href='/html/menu.html'); this.innerText = 'Salvando...'; } else { window.location.href='/html/menu.html'; }">⬅ Voltar ao Acampamento</button>
+    </div>
+
+    <div class="main-container">
+        
+        <div class="squad-bar" id="squad-container"></div>
+
+        <div class="bottom-area">
+            <div class="roster-panel">
+                <h3 style="margin: 0 0 20px 0; color: #38bdf8; font-family: 'Fredoka'; font-size: 1.8rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">🧬 Pelotão de Quimeras Prontas</h3>
+                <div class="roster-grid custom-scrollbar" id="roster-grid"></div>
+            </div>
+
+            <div class="inspector-panel custom-scrollbar" id="inspector-panel">
+                <div style="text-align: center; color: #64748b; padding: 80px 20px; font-size: 1.2rem; line-height: 1.5;">
+                    <div style="font-size: 5rem; opacity: 0.3; margin-bottom: 20px;">🔍</div>
+                    Selecione um soldado do Pelotão para equipá-lo e configurar a sua Matriz de Habilidades.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDHz1W47O5kTiEPw7OjEjSXD0eH_ICtfDA", authDomain: "fishingmania-6dced.firebaseapp.com", databaseURL: "https://fishingmania-6dced-default-rtdb.firebaseio.com", projectId: "fishingmania-6dced", storageBucket: "fishingmania-6dced.firebasestorage.app", messagingSenderId: "761476396898", appId: "1:761476396898:web:2b81f955acbf622a4c9e3b" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getDatabase(app); let currentUser = null;
+        
+        window.GAME_STATE = {}; window.inspectingUid = null;
+
+        window.saveGame = async function() {
+            // VACINA: Força a Array a continuar sendo Array no banco
+            let safeInstances = window.GAME_STATE.hybridInstances || [];
+            if (!Array.isArray(safeInstances)) safeInstances = Object.values(safeInstances);
+
+            const playerSave = { 
+                coins: window.GAME_STATE.coins || 0, currentRodIndex: window.GAME_STATE.currentRodIndex || 0, ownedRods: window.GAME_STATE.ownedRods || [0], ownedSinkers: window.GAME_STATE.ownedSinkers || ['chumbo'], currentSinker: window.GAME_STATE.currentSinker || 'chumbo', ownedHooks: window.GAME_STATE.ownedHooks || ['anzol_padrao'], currentHook: window.GAME_STATE.currentHook || 'anzol_padrao', hookCustomTarget: window.GAME_STATE.hookCustomTarget || null, ownedKnives: window.GAME_STATE.ownedKnives || ['faca_cozinha'], currentKnife: window.GAME_STATE.currentKnife || 'faca_cozinha', baitInventory: window.GAME_STATE.baitInventory || {}, currentBait: window.GAME_STATE.currentBait || null, collection: window.GAME_STATE.collection || {}, collection67: window.GAME_STATE.collection67 || {}, scrapCollection: window.GAME_STATE.scrapCollection || {}, materials: window.GAME_STATE.materials || {}, sushiUnlocked: window.GAME_STATE.sushiUnlocked || false, orbs: window.GAME_STATE.orbs || {}, 
+                tacticalSquad: window.GAME_STATE.tacticalSquad || [null, null, null, null, null],
+                hybridInstances: safeInstances,
+                customFusions: window.GAME_STATE.customFusions || {} 
+            };
+
+            if (currentUser) {
+                localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
+                try { await set(ref(db, 'users/' + currentUser.uid), playerSave); } catch(e) { console.error(e); }
+            } else { localStorage.setItem('gatoPescadorSave_visitante', JSON.stringify(playerSave)); }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                get(child(ref(db), `users/${user.uid}`)).then((snapshot) => {
+                    if (snapshot.exists()) { window.GAME_STATE = snapshot.val(); } else { window.GAME_STATE = JSON.parse(localStorage.getItem('gatoPescadorSave_' + user.uid)) || {}; }
+                    iniciarQuartel();
+                });
+            } else { window.GAME_STATE = JSON.parse(localStorage.getItem('gatoPescadorSave_visitante')) || {}; iniciarQuartel(); }
+        });
+
+        function iniciarQuartel() {
+            if (!window.GAME_STATE.tacticalSquad) window.GAME_STATE.tacticalSquad = [null, null, null, null, null];
+            if (!window.GAME_STATE.hybridInstances) window.GAME_STATE.hybridInstances = [];
+            if (!window.GAME_STATE.customFusions) window.GAME_STATE.customFusions = {};
+            window.renderSquad(); window.renderRoster();
+        }
+
+        window.getHybridData = function(speciesId) {
+            let fishDataKey = Object.keys(window.FUSIONS || {}).find(k => window.FUSIONS[k].id === speciesId);
+            if (fishDataKey) return window.FUSIONS[fishDataKey];
+            
+            if (window.GAME_STATE.customFusions && window.GAME_STATE.customFusions[speciesId]) {
+                return window.GAME_STATE.customFusions[speciesId];
+            }
+            return null;
+        };
+
+        window.renderSquad = function() {
+            const container = document.getElementById('squad-container'); container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const slot = document.createElement('div'); const instUid = window.GAME_STATE.tacticalSquad[i];
+                if (instUid) {
+                    // VACINA: Firebase convertendo Array pra Object
+                    let safeInstances = window.GAME_STATE.hybridInstances || [];
+                    if (!Array.isArray(safeInstances)) safeInstances = Object.values(safeInstances);
+
+                    const inst = safeInstances.find(h => h.uid === instUid); if(!inst) continue;
+                    const fishData = window.getHybridData(inst.speciesId); if(!fishData) continue;
+                    
+                    slot.className = 'squad-slot filled';
+                    slot.innerHTML = `<div class="remove-btn" onclick="window.removeFromSquad(${i}, event)">X</div><img src="${fishData.image}" onerror="this.onerror=null; this.src='${fishData.fallbackImage || 'https://placehold.co/80x80?text=?'}'"><div style="font-size:0.8rem; font-weight:bold; margin-top:10px; color:#f8fafc; text-shadow:0 2px 4px rgba(0,0,0,0.8); text-align:center;">${fishData.name}</div>`;
+                    slot.onclick = () => window.inspectFish(instUid);
+                } else {
+                    slot.className = 'squad-slot';
+                    slot.innerHTML = `<span style="font-size:3rem; opacity:0.2;">+</span><div style="font-size:0.8rem; color:#64748b; margin-top:8px; font-weight:bold;">VAZIO</div>`;
+                }
+                container.appendChild(slot);
+            }
+        };
+
+        window.renderRoster = function() {
+            const grid = document.getElementById('roster-grid'); grid.innerHTML = '';
+
+            // VACINA 2: Evita o erro de forEach não é uma função
+            let safeInstances = window.GAME_STATE.hybridInstances || [];
+            if (!Array.isArray(safeInstances)) safeInstances = Object.values(safeInstances);
+
+            if (safeInstances.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 30px;">O Pelotão está vazio. Vá para a Fazenda de Quimeras forjar seus soldados mutantes!</div>`;
+                return;
+            }
+
+            safeInstances.forEach(inst => {
+                const fishData = window.getHybridData(inst.speciesId); 
+                if(!fishData) return;
+
+                const card = document.createElement('div'); card.className = `fish-card ${window.inspectingUid === inst.uid ? 'selected' : ''}`;
+                const isInSquad = window.GAME_STATE.tacticalSquad.includes(inst.uid);
+                const customBadge = fishData.isCustom ? `<div style="position:absolute; top:-5px; left:-5px; font-size:1.5rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8)); z-index:5;" title="Mutante Procedural Único">🧬</div>` : '';
+
+                card.innerHTML = `
+                    ${customBadge}
+                    ${isInSquad ? '<div style="position:absolute; top:8px; right:8px; background:#10b981; font-size:0.65rem; padding:3px 6px; border-radius:6px; color:white; font-weight:900; box-shadow:0 2px 5px rgba(0,0,0,0.5); z-index:5;">EM USO</div>' : ''}
+                    <img src="${fishData.image}" onerror="this.onerror=null; this.src='${fishData.fallbackImage || 'https://placehold.co/80x80?text=?'}'">
+                    <div style="font-size:0.9rem; font-weight:bold; font-family:'Poppins'; color:#f8fafc; line-height:1.2;">${fishData.name}</div>
+                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:8px; font-weight:600;"><span style="color:${(inst.equippedSkills || []).length === 3 ? '#4ade80' : '#f8fafc'};">${(inst.equippedSkills || []).length}</span>/3 Skills</div>
+                `;
+                card.onclick = () => window.inspectFish(inst.uid);
+                grid.appendChild(card);
+            });
+        };
+
+        window.inspectFish = function(uid) {
+            window.inspectingUid = uid; window.renderRoster(); 
+            
+            let safeInstances = window.GAME_STATE.hybridInstances || [];
+            if (!Array.isArray(safeInstances)) safeInstances = Object.values(safeInstances);
+
+            const inst = safeInstances.find(h => h.uid === uid); if(!inst) return;
+            const fishData = window.getHybridData(inst.speciesId); const stats = fishData.tactical_stats;
+            const panel = document.getElementById('inspector-panel'); const isInSquad = window.GAME_STATE.tacticalSquad.includes(uid);
+            const customTag = fishData.isCustom ? `<span style="background:#a855f7; color:white; font-size:0.6rem; padding:3px 8px; border-radius:6px; vertical-align:middle; margin-left:10px; text-shadow:none; font-weight:900; letter-spacing:1px; box-shadow:0 2px 4px rgba(0,0,0,0.5);">DNA ÚNICO</span>` : '';
+
+            let html = `
+                <div style="display:flex; align-items:center; gap:25px; margin-bottom:25px; padding-bottom:25px; border-bottom:2px solid rgba(255,255,255,0.05);">
+                    <img src="${fishData.image}" onerror="this.onerror=null; this.src='${fishData.fallbackImage || 'https://placehold.co/80x80?text=?'}'" style="width:120px; height:120px; object-fit:contain; filter:drop-shadow(0 10px 15px rgba(0,0,0,0.6));">
+                    <div>
+                        <h2 style="margin:0; font-family:'Fredoka'; color:${fishData.isCustom ? '#c084fc' : '#f8fafc'}; font-size:2.2rem; text-shadow:0 2px 4px rgba(0,0,0,0.8);">${fishData.name}${customTag}</h2>
+                        <p style="margin:8px 0 15px 0; font-size:0.85rem; color:#94a3b8; line-height:1.4;">${fishData.desc}</p>
+                        ${!isInSquad ? `<button onclick="window.addToSquad('${uid}')" style="background:#3b82f6; color:white; border:2px solid #60a5fa; padding:10px 20px; border-radius:8px; font-weight:900; font-size:1rem; cursor:pointer; transition:0.2s; box-shadow:0 4px 10px rgba(59,130,246,0.4);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">✚ Colocar no Esquadrão</button>` : `<button disabled style="background:#064e3b; color:#4ade80; border:2px solid #10b981; padding:10px 20px; border-radius:8px; font-weight:900; font-size:1rem; opacity:0.8;">✔ Em Posição</button>`}
+                    </div>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-box" style="border-color:#ef4444;">HP <b style="color:#f87171;">${stats.HP}</b></div>
+                    <div class="stat-box" style="border-color:#3b82f6;">AP (Ação) <b style="color:#60a5fa;">${stats.AP}</b></div>
+                    <div class="stat-box" style="border-color:#10b981;">MP (Mov.) <b style="color:#4ade80;">${stats.MP}</b></div>
+                    <div class="stat-box" style="border-color:#f59e0b;">ATK <b style="color:#fbbf24;">${stats.ATK}</b></div>
+                    <div class="stat-box" style="border-color:#a855f7;">DEF <b style="color:#c084fc;">${stats.DEF}</b></div>
+                    <div class="stat-box" style="border-color:#ec4899;">SPD <b style="color:#f472b6;">${stats.SPD}</b></div>
+                </div>
+                <h3 style="margin:0 0 20px 0; color:#fcd34d; font-family:'Fredoka'; font-size:1.4rem; display:flex; justify-content:space-between; align-items:center;">Matriz de Habilidades<span style="font-size:1rem; color:#94a3b8; font-family:'Poppins'; background:rgba(0,0,0,0.5); padding:4px 12px; border-radius:20px; box-shadow:inset 0 0 10px rgba(0,0,0,0.5);"><span style="color:${(inst.equippedSkills||[]).length === 3 ? '#10b981' : '#f8fafc'}; font-weight:bold;">${(inst.equippedSkills||[]).length}</span>/3 Equipadas</span></h3>
+                <div class="skill-list">
+            `;
+
+            (fishData.available_skills || []).forEach(skillId => {
+                const skill = window.SKILLS ? window.SKILLS[skillId] : null; if(!skill) return; 
+                const isActive = (inst.equippedSkills || []).includes(skillId); 
+                const canAdd = (inst.equippedSkills || []).length < 3 || isActive;
+
+                html += `
+                    <div class="skill-item ${isActive ? 'active' : ''} ${!canAdd ? 'disabled' : ''}" onclick="${canAdd ? `window.toggleSkill('${uid}', '${skillId}')` : ''}">
+                        <div class="skill-icon">${skill.icon}</div>
+                        <div class="skill-info">
+                            <div class="skill-name">${skill.name} <span class="skill-cost">⚡ ${skill.cost} AP</span></div>
+                            <div class="skill-desc"><span style="color:#fbbf24; font-weight:bold; letter-spacing:1px; text-transform:uppercase; font-size:0.7rem;">Alcance: ${skill.rng === 0 ? 'Próprio' : skill.rng} | Tipo: ${skill.type}</span><br><span style="margin-top:3px; display:inline-block;">${skill.desc}</span></div>
+                        </div>
+                        <div style="font-size:1.8rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5)); opacity:${isActive ? '1' : '0.1'};">${isActive ? '✅' : '○'}</div>
+                    </div>
+                `;
+            });
+            panel.innerHTML = html + `</div>`;
+        };
+
+        window.toggleSkill = async function(uid, skillId) {
+            let safeInstances = window.GAME_STATE.hybridInstances || [];
+            if (!Array.isArray(safeInstances)) safeInstances = Object.values(safeInstances);
+
+            const inst = safeInstances.find(h => h.uid === uid);
+            if (!inst) return;
+            if (!inst.equippedSkills) inst.equippedSkills = [];
+
+            const index = inst.equippedSkills.indexOf(skillId);
+            if (index > -1) { inst.equippedSkills.splice(index, 1); } else { if (inst.equippedSkills.length < 3) inst.equippedSkills.push(skillId); }
+            await window.saveGame(); window.inspectFish(uid); window.renderRoster();
+        };
+
+        window.addToSquad = async function(uid) {
+            const emptyIndex = window.GAME_STATE.tacticalSquad.indexOf(null);
+            if (emptyIndex === -1) { alert("⚠ O esquadrão tático está cheio! Remova alguém primeiro."); return; }
+            window.GAME_STATE.tacticalSquad[emptyIndex] = uid;
+            await window.saveGame(); window.renderSquad(); window.inspectFish(uid);
+        };
+
+        window.removeFromSquad = async function(slotIndex, event) {
+            event.stopPropagation(); window.GAME_STATE.tacticalSquad[slotIndex] = null;
+            await window.saveGame(); window.renderSquad();
+            if (window.inspectingUid) window.inspectFish(window.inspectingUid);
+        };
+    </script>
+</body>
+</html>

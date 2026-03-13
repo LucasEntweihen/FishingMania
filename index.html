@@ -406,12 +406,12 @@
         });
 
         mainCtaBtn.addEventListener('click', () => {
-            if (isUserLoggedIn) { window.location.href = 'html/pesca.html'; } 
+            if (isUserLoggedIn) { window.location.href = 'html/menu.html'; } 
             else { loginModal.classList.add('active'); errorMsg.style.display = 'none'; }
         });
 
         mainGuestBtn.addEventListener('click', () => {
-            window.location.href = 'html/pesca.html?guest=true';
+            window.location.href = 'html/menu.html?guest=true';
         });
 
         btnLogout.addEventListener('click', () => { signOut(auth).catch((error) => console.error(error)); });
@@ -425,9 +425,9 @@
             errorMsg.innerText = message;
         }
 
-        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = 'html/pesca.html'; }).catch((e) => { showError(e.code); }); });
-        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) { errorMsg.style.display = 'block'; return errorMsg.innerText = "Forneça e-mail e senha."; } signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
-        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) { errorMsg.style.display = 'block'; return errorMsg.innerText = "Forneça e-mail e senha para o registro."; } createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/pesca.html'; }).catch((err) => { showError(err.code); }); });
+        document.getElementById('btn-google').addEventListener('click', () => { signInWithPopup(auth, googleProvider).then(() => { window.location.href = 'html/menu.html'; }).catch((e) => { showError(e.code); }); });
+        document.getElementById('btn-login-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) { errorMsg.style.display = 'block'; return errorMsg.innerText = "Forneça e-mail e senha."; } signInWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/menu.html'; }).catch((err) => { showError(err.code); }); });
+        document.getElementById('btn-register-email').addEventListener('click', () => { const e = document.getElementById('email-input').value; const p = document.getElementById('password-input').value; if(!e || !p) { errorMsg.style.display = 'block'; return errorMsg.innerText = "Forneça e-mail e senha para o registro."; } createUserWithEmailAndPassword(auth, e, p).then(() => { window.location.href = 'html/menu.html'; }).catch((err) => { showError(err.code); }); });
     </script>
 </body>
 </html>

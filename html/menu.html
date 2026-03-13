@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FishingMania: Tactics - Acampamento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@500;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #020617; font-family: 'Poppins', sans-serif; }
+        
+        #parallax-bg { 
+            position: absolute; top: -5%; left: -5%; width: 110%; height: 110%; 
+            background-image: url('/img/screen/backpack-menu.png'); 
+            background-size: cover; background-position: center center; 
+            transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94); z-index: 1; 
+        }
+        
+        #shadow-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(2, 6, 23, 0.95) 0%, rgba(2, 6, 23, 0.6) 35%, transparent 100%); z-index: 2; pointer-events: none; }
+        
+        #sidebar-menu { position: absolute; top: 0; left: 0; width: 380px; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.05); z-index: 10; display: flex; flex-direction: column; padding: 50px 35px; box-sizing: border-box; box-shadow: 20px 0 50px rgba(0,0,0,0.6); }
+        
+        .game-title { color: #f8fafc; font-family: 'Fredoka', sans-serif; font-size: 3rem; line-height: 1; margin-bottom: 40px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+        .subtitle { color: #38bdf8; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 4px; font-weight: 800; display: block; margin-top: 5px; }
+        
+        .menu-list { display: flex; flex-direction: column; gap: 15px; flex: 1; }
+        
+        .hub-btn { 
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; 
+            padding: 16px 20px; border-radius: 12px; font-family: 'Fredoka', sans-serif; font-size: 1.15rem; 
+            text-align: left; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            display: flex; align-items: center; gap: 15px; position: relative; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); width: 100%; box-sizing: border-box;
+        }
+        
+        .hub-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transition: left 0.5s; }
+        .hub-btn:hover::before { left: 100%; }
+        
+        .btn-pesca:hover { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #fff; transform: translateX(10px); box-shadow: -5px 5px 20px rgba(59, 130, 246, 0.3); }
+        .btn-lab:hover { background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #fff; transform: translateX(10px); box-shadow: -5px 5px 20px rgba(16, 185, 129, 0.3); }
+        .btn-tatico:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fff; transform: translateX(10px); box-shadow: -5px 5px 20px rgba(239, 68, 68, 0.3); }
+        .btn-campanha:hover { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fff; transform: translateX(10px); box-shadow: -5px 5px 20px rgba(245, 158, 11, 0.3); }
+        .btn-cidade:hover { background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #fff; transform: translateX(10px); box-shadow: -5px 5px 20px rgba(168, 85, 247, 0.3); }
+        .btn-sair { margin-top: auto; border-color: rgba(239, 68, 68, 0.3); }
+        .btn-sair:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fff; transform: translateX(10px); box-shadow: -5px 5px 20px rgba(239, 68, 68, 0.3); }
+        
+        .btn-icon { font-size: 1.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); width: 30px; text-align: center; }
+
+        #particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; overflow: hidden; }
+        .particle { position: absolute; background: rgba(255, 255, 255, 0.6); border-radius: 50%; box-shadow: 0 0 10px rgba(255, 255, 255, 0.4); bottom: -10px; animation: floatUp linear infinite; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(-100vh) scale(1.2); opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div id="parallax-bg"></div>
+    <div id="shadow-overlay"></div>
+    <div id="particles"></div>
+
+    <div id="sidebar-menu">
+        <div class="game-title">FishingMania<span class="subtitle">Tactics</span></div>
+        <div class="menu-list">
+            <button class="hub-btn btn-pesca" onclick="window.location.href='/html/pesca.html'"><span class="btn-icon">🎣</span> Ir Pescar</button>
+            <button class="hub-btn btn-lab" onclick="window.location.href='/html/fazenda.html'"><span class="btn-icon">🧬</span> Cruzar Peixes</button>
+            <button class="hub-btn btn-tatico" onclick="window.location.href='/html/tactics.html'"><span class="btn-icon">⚔️</span> Combate Tático</button>
+            <button class="hub-btn btn-campanha" onclick="alert('Abrindo Mapa da História (Em Desenvolvimento)')"><span class="btn-icon">📖</span> Modo História</button>
+            <button class="hub-btn btn-cidade" onclick="alert('Indo para a Cidade (Em Desenvolvimento)')"><span class="btn-icon">🏙️</span> Explorar a Cidade</button>
+            <button class="hub-btn btn-sair" onclick="window.location.href='/index.html'"><span class="btn-icon">🚪</span> Sair do Jogo</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('mousemove', (e) => {
+            const bg = document.getElementById('parallax-bg');
+            const x = (window.innerWidth / 2 - e.pageX) / 40;
+            const y = (window.innerHeight / 2 - e.pageY) / 40;
+            bg.style.transform = `translate(${x}px, ${y}px) scale(1.05)`;
+        });
+
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 40; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.width = p.style.height = `${Math.random() * 4 + 1}px`;
+            p.style.left = `${Math.random() * 100}vw`;
+            p.style.animationDuration = `${Math.random() * 10 + 5}s`;
+            p.style.animationDelay = `${Math.random() * 10}s`;
+            p.style.background = Math.random() > 0.5 ? 'rgba(186, 230, 253, 0.6)' : 'rgba(253, 230, 138, 0.6)';
+            particlesContainer.appendChild(p);
+        }
+    </script>
+</body>
+</html>

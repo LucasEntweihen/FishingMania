@@ -1,8 +1,14 @@
 // ==========================================================================
-// 1. IMPORTAÇÕES E SETUP DO FIREBASE
+// 1. IMPORTAÇÕES E SETUP DO FIREBASE E ADMINISTRAÇÃO DE SEGURANÇA
 // ==========================================================================
 const urlParams = new URLSearchParams(window.location.search);
 const isGuestMode = urlParams.get('guest') === 'true';
+
+// 👑 LISTA ESTRITA DE CONTAS ADMINISTRADORAS
+const ADM_LIST = [
+    "WvffNHmkdCWQ5IPMnbh0SPP9XkY2",
+    "ZstYdvauD0fOHlqvZ4xox7zDS6W2"
+];
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -28,6 +34,35 @@ try {
 } catch (error) {
     console.error("Erro ao inicializar Firebase. Jogo rodando localmente.", error);
 }
+
+// 🛡️ FUNÇÃO DE SEGURANÇA GLOBAL
+window.checkIsAdmin = function() {
+    if (!currentUser) return false;
+    const uidAtual = currentUser.uid.trim();
+    return ADM_LIST.some(admId => admId.trim() === uidAtual);
+};
+
+// 👑 INJEÇÃO DE EQUIPAMENTO EXCLUSIVO ADM
+window.injectAdminGear = function() {
+    if (!window.checkIsAdmin() || !window.GAME_STATE) return;
+
+    const admRodId = 9999;
+    const admHookId = 'anzol_adm_supremo';
+
+    if (window.ROD_TEMPLATES && !window.ROD_TEMPLATES.find(r => r.id === admRodId)) {
+        const admRod = { id: admRodId, name: "👑 Vara do Administrador", type: "divino", price: 0, speed: 999.0, luck: 9999999, lore: "⚙️ Função: Controle do Servidor. ✨ Diferencial: Exclusiva para os Desenvolvedores." };
+        window.ROD_TEMPLATES.push(admRod);
+        if (window.GAME_STATE.rods && !window.GAME_STATE.rods.find(r => r.id === admRodId)) {
+            window.GAME_STATE.rods.push(admRod);
+        }
+    }
+    if (!window.GAME_STATE.ownedRods.includes(admRodId)) window.GAME_STATE.ownedRods.push(admRodId);
+
+    if (window.HOOKS && !window.HOOKS.find(h => h.id === admHookId)) {
+        window.HOOKS.push({ id: admHookId, name: '👑 Anzol do Administrador', color: '#ef4444', target: 'bestial', power: 0.99, lore: "⚙️ Função: Impor as regras. ✨ Diferencial: Bypassa o RNG do jogo." });
+    }
+    if (!window.GAME_STATE.ownedHooks.includes(admHookId)) window.GAME_STATE.ownedHooks.push(admHookId);
+};
 
 async function carregarBancoDeDadosEIniciar() {
     if (window.CRAFTING_DB && window.KNIVES && window.RARITIES && window.HOOKS) {
@@ -84,6 +119,16 @@ function injectScriptStyles() {
         }
 
         .rotten-fish { filter: drop-shadow(0 15px 20px rgba(0,0,0,0.8)) hue-rotate(260deg) saturate(3) contrast(1.3) brightness(0.6) sepia(0.5) !important; }
+
+        /* Estilos do Painel ADM */
+        .admin-btn {
+            background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #fca5a5; padding: 12px 20px;
+            border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 700; cursor: pointer; transition: 0.2s;
+            text-transform: uppercase; letter-spacing: 1px; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px;
+        }
+        .admin-btn:hover { background: #ef4444; color: #fff; box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); transform: translateX(5px); }
+        .admin-btn:active { transform: scale(0.98); }
+        .admin-btn-icon { font-size: 1.5rem; }
     `;
     document.head.appendChild(style);
 }
@@ -93,7 +138,7 @@ function iniciarMotorDoJogo() {
 
     window.GAME_STATE = {
         coins: 0, currentRodIndex: 0, isFishing: false, rods: [], ownedRods: [0], ownedSinkers: ['chumbo'], currentSinker: 'chumbo',
-        ownedHooks: ['anzol_padrao'], currentHook: 'anzol_padrao', ownedKnives: ['faca_cozinha'], currentKnife: 'faca_cozinha',
+        ownedHooks: ['anzol_padrao'], currentHook: 'anzol_padrao', hookCustomTarget: null, ownedKnives: ['faca_cozinha'], currentKnife: 'faca_cozinha',
         baitInventory: {}, currentBait: null, loadedImages: {}, collection: {}, collection67: {}, scrapCollection: {}, 
         isDay: true, materials: {}, sushiUnlocked: false 
     };
@@ -143,6 +188,322 @@ function iniciarMotorDoJogo() {
         window.showToast(title, body, isSuccess ? 'success' : 'error');
     };
 
+    // =========================================================
+    // SALVAMENTO GLOBAL DE DADOS (COM CUSTOM FUSIONS)
+    // =========================================================
+    window.saveGame = async function() {
+        if (isGuestMode) { 
+            if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Convidado"; 
+            return; 
+        }
+        
+        const playerSave = { 
+            coins: window.GAME_STATE.coins || 0, 
+            currentRodIndex: window.GAME_STATE.currentRodIndex || 0, 
+            ownedRods: window.GAME_STATE.ownedRods || [0], 
+            ownedSinkers: window.GAME_STATE.ownedSinkers || ['chumbo'], 
+            currentSinker: window.GAME_STATE.currentSinker || 'chumbo', 
+            ownedHooks: window.GAME_STATE.ownedHooks || ['anzol_padrao'], 
+            currentHook: window.GAME_STATE.currentHook || 'anzol_padrao', 
+            hookCustomTarget: window.GAME_STATE.hookCustomTarget || null, 
+            ownedKnives: window.GAME_STATE.ownedKnives || ['faca_cozinha'], 
+            currentKnife: window.GAME_STATE.currentKnife || 'faca_cozinha', 
+            baitInventory: window.GAME_STATE.baitInventory || {}, 
+            currentBait: window.GAME_STATE.currentBait || null, 
+            collection: window.GAME_STATE.collection || {}, 
+            collection67: window.GAME_STATE.collection67 || {}, 
+            scrapCollection: window.GAME_STATE.scrapCollection || {}, 
+            materials: window.GAME_STATE.materials || {}, 
+            sushiUnlocked: window.GAME_STATE.sushiUnlocked || false, 
+            orbs: window.GAME_STATE.orbs || {}, 
+            hybridInstances: window.GAME_STATE.hybridInstances || [], 
+            tacticalSquad: window.GAME_STATE.tacticalSquad || [null, null, null, null, null],
+            customFusions: window.GAME_STATE.customFusions || {} // ESSE AQUI GARANTE AS FUSÕES
+        };
+        
+        if (currentUser && db) {
+            localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
+            try {
+                await set(ref(db, 'users/' + currentUser.uid), playerSave);
+                if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Salvo"; 
+            } catch (e) {
+                console.error("Erro Crítico ao salvar no Firebase:", e);
+                if(safeGet('save-status')) safeGet('save-status').innerText = "❌ Erro Nuvem";
+            }
+        } else {
+            localStorage.setItem('gatoPescadorSave_visitante', JSON.stringify(playerSave));
+            if(safeGet('save-status')) safeGet('save-status').innerText = "✅ Salvo Local";
+        }
+    };
+
+    // =========================================================
+    // MODAL DE SINTONIA DO ANZOL (TARGET SELECTOR)
+    // =========================================================
+    function initHookTargetModal() {
+        if (document.getElementById('hook-target-modal')) return;
+
+        const modal = document.createElement('div');
+        modal.id = 'hook-target-modal';
+        modal.className = 'modal hidden';
+        modal.style.zIndex = '9999999';
+
+        let buttonsHtml = '';
+        const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'vandalo': '#10b981', 'bestial': '#7f1d1d' };
+
+        buttonsHtml += `<button onclick="window.setHookTarget('padrao')" style="background: rgba(255,255,255,0.1); border: 1px solid #fff; color: #fff; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; flex: 1 1 40%; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">Padrão (Desligado)</button>`;
+        buttonsHtml += `<button onclick="window.setHookTarget('sucata')" style="background: rgba(100,116,139,0.1); border: 1px solid #64748b; color: #94a3b8; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; flex: 1 1 40%; transition: 0.2s;" onmouseover="this.style.background='rgba(100,116,139,0.3)'" onmouseout="this.style.background='rgba(100,116,139,0.1)'">🗑️ Lixo / Sucata</button>`;
+
+        if (window.RARITIES) {
+            Object.values(window.RARITIES).forEach(r => {
+                const color = colors[r.id] || '#fff';
+                buttonsHtml += `<button onclick="window.setHookTarget('${r.id}')" style="background: ${color}15; border: 1px solid ${color}66; color: ${color}; padding: 12px 10px; border-radius: 8px; cursor: pointer; font-weight: 800; margin: 5px; flex: 1 1 30%; transition: 0.2s; text-transform: uppercase;" onmouseover="this.style.background='${color}44'" onmouseout="this.style.background='${color}15'">${r.name}</button>`;
+            });
+        }
+
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 550px; background: #0f172a; border: 2px solid #38bdf8; box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); padding: 0; border-radius: 16px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #0369a1, #1e3a8a); padding: 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #38bdf8;">
+                    <h2 style="margin: 0; color: #f8fafc; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">🎯 Sintonizador de Anzol</h2>
+                    <button onclick="document.getElementById('hook-target-modal').classList.add('hidden')" style="background: none; border: none; color: #bae6fd; font-size: 2.5rem; cursor: pointer; line-height: 1;">&times;</button>
+                </div>
+                <div style="padding: 25px; text-align: center; background: url('/img/asset/bg-dark-pattern.png') repeat, #020617;">
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px; font-family: 'Poppins'; line-height: 1.4;">Selecione qual raridade este anzol deve focar em atrair.<br><b>A eficácia depende do Poder base do Anzol equipado.</b></p>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;">
+                        ${buttonsHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    window.setHookTarget = async function(targetId) {
+        if (!window.GAME_STATE) return;
+        window.GAME_STATE.hookCustomTarget = targetId;
+        window.updateUI();
+        await window.saveGame();
+        document.getElementById('hook-target-modal').classList.add('hidden');
+        window.showToast("Anzol Sintonizado!", `O seu anzol agora está focado em atrair a raridade: ${targetId.toUpperCase()}`, "success");
+    };
+
+    // =========================================================
+    // UI DO PAINEL DO MESTRE (GOD MODE)
+    // =========================================================
+    function initAdminPanel() {
+        if (document.getElementById('admin-modal')) return;
+
+        const modal = document.createElement('div');
+        modal.id = 'admin-modal';
+        modal.className = 'modal hidden';
+        modal.style.zIndex = '9999999';
+        
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px; background: #000; border: 2px solid #ef4444; box-shadow: 0 0 50px rgba(239,68,68,0.4); padding: 0;">
+                <div style="background: repeating-linear-gradient(45deg, #1a0505, #1a0505 10px, #2a0808 10px, #2a0808 20px); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ef4444;">
+                    <h2 style="margin: 0; color: #f8fafc; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; text-shadow: 0 2px 4px #000;">👑 PAINEL DO MESTRE</h2>
+                    <button onclick="document.getElementById('admin-modal').classList.add('hidden')" style="background: none; border: none; color: #ef4444; font-size: 2rem; cursor: pointer;">&times;</button>
+                </div>
+                
+                <div style="padding: 30px; display: flex; flex-direction: column; gap: 15px; max-height: 60vh; overflow-y: auto;" class="custom-scrollbar">
+                    
+                    <div style="color: #94a3b8; font-size: 0.85rem; font-family: 'Poppins'; text-align: center; margin-bottom: 10px;">Aviso: Alterações serão cravadas no Firebase instantaneamente.</div>
+
+                    <button class="admin-btn" onclick="window.adminAcoes.injetarGear(this)">
+                        <span class="admin-btn-icon">👑</span> Injetar Vara e Anzol Supremo
+                    </button>
+
+                    <button class="admin-btn" onclick="window.adminAcoes.addOuro(this)">
+                        <span class="admin-btn-icon">🪙</span> Injetar 10 Milhões de Ouro
+                    </button>
+                    
+                    <button class="admin-btn" onclick="window.adminAcoes.addMateriais(this)">
+                        <span class="admin-btn-icon">📦</span> Dar x999 de Todos os Materiais
+                    </button>
+
+                    <button class="admin-btn" onclick="window.adminAcoes.addIscas(this)">
+                        <span class="admin-btn-icon">🪱</span> Dar x99 de Todas as Iscas
+                    </button>
+
+                    <button class="admin-btn" onclick="window.adminAcoes.completarAquario(this)">
+                        <span class="admin-btn-icon">📖</span> Povoar Aquário (+50 cada Peixe)
+                    </button>
+
+                    <button class="admin-btn" onclick="window.adminAcoes.desbloquearTudo(this)">
+                        <span class="admin-btn-icon">⚔️</span> Liberar Todo o Armamento
+                    </button>
+
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    function prepararInventario() {
+        if (!window.GAME_STATE) window.GAME_STATE = {};
+        if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
+        if (!window.GAME_STATE.baitInventory) window.GAME_STATE.baitInventory = {};
+        if (!window.GAME_STATE.collection) window.GAME_STATE.collection = {};
+        if (!window.GAME_STATE.collection67) window.GAME_STATE.collection67 = {};
+        if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
+        if (!window.GAME_STATE.customFusions) window.GAME_STATE.customFusions = {};
+    }
+
+    window.adminAcoes = {
+        _check: function() {
+            if (!window.checkIsAdmin()) {
+                alert("⛔ ALERTA DE SEGURANÇA: Tentativa de injeção bloqueada.");
+                return false;
+            }
+            return true;
+        },
+
+        _commit: async function(msg, btnElement) {
+            if (!this._check()) return;
+
+            if (btnElement) {
+                const textOriginal = btnElement.innerHTML;
+                btnElement.innerHTML = `<span class="admin-btn-icon">⏳</span> Gravando na Nuvem...`;
+                btnElement.disabled = true;
+                
+                if (typeof window.updateUI === 'function') window.updateUI();
+                if (typeof window.saveGame === 'function') await window.saveGame(); 
+                
+                btnElement.innerHTML = textOriginal;
+                btnElement.disabled = false;
+            } else {
+                if (typeof window.updateUI === 'function') window.updateUI();
+                if (typeof window.saveGame === 'function') await window.saveGame();
+            }
+            
+            window.showToast("God Mode", msg, "success");
+        },
+
+        injetarGear: async function(btn) {
+            prepararInventario();
+            window.injectAdminGear();
+            await this._commit("A Vara e o Anzol dos Deuses foram injetados no seu arsenal.", btn);
+        },
+
+        addOuro: async function(btn) {
+            prepararInventario();
+            window.GAME_STATE.coins += 10000000;
+            await this._commit("+ 10 Milhões de Ouro injetados permanentemente.", btn);
+        },
+
+        addMateriais: async function(btn) {
+            prepararInventario();
+            if (window.MATERIALS) {
+                window.MATERIALS.forEach(m => window.GAME_STATE.materials[m.id] = (window.GAME_STATE.materials[m.id] || 0) + 999);
+            }
+            const boostsIds = ['boost_luck', 'boost_value', 'boost_luck_2', 'boost_value_2', 'boost_size', 'boost_speed', 'boost_size_2', 'boost_luck_3'];
+            boostsIds.forEach(id => window.GAME_STATE.materials[id] = (window.GAME_STATE.materials[id] || 0) + 999);
+            if (window.SUCATAS) window.SUCATAS.forEach(s => window.GAME_STATE.scrapCollection[s.id] = (window.GAME_STATE.scrapCollection[s.id] || 0) + 50);
+            await this._commit("Todos os materiais, lixos e catalisadores no máximo.", btn);
+        },
+
+        addIscas: async function(btn) {
+            prepararInventario();
+            if (window.BAITS) {
+                window.BAITS.forEach(b => window.GAME_STATE.baitInventory[b.id] = (window.GAME_STATE.baitInventory[b.id] || 0) + 99);
+            }
+            await this._commit("Estoque de Iscas Genéticas abastecido.", btn);
+        },
+
+        completarAquario: async function(btn) {
+            prepararInventario();
+            if (window.RARITIES) {
+                Object.values(window.RARITIES).forEach(r => {
+                    r.variations.forEach(f => {
+                        window.GAME_STATE.collection[f.name] = (window.GAME_STATE.collection[f.name] || 0) + 50;
+                        window.GAME_STATE.collection67[f.name] = (window.GAME_STATE.collection67[f.name] || 0) + 50;
+                    });
+                });
+            }
+            await this._commit("Aquário Populado! (+50 cópias de todos os peixes).", btn);
+        },
+
+        desbloquearTudo: async function(btn) {
+            prepararInventario();
+            if (window.GAME_STATE.rods) window.GAME_STATE.ownedRods = window.GAME_STATE.rods.map(r => r.id);
+            if (window.SINKERS) window.GAME_STATE.ownedSinkers = window.SINKERS.map(s => s.id);
+            if (window.HOOKS) window.GAME_STATE.ownedHooks = window.HOOKS.map(h => h.id);
+            if (window.KNIVES) window.GAME_STATE.ownedKnives = window.KNIVES.map(k => k.id);
+            window.GAME_STATE.sushiUnlocked = true;
+            await this._commit("Arsenal Completo Liberado (Varas, Facas, Anzóis e Pesos).", btn);
+        }
+    };
+
+    function loadGame() {
+        if (isGuestMode) { if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Modo Convidado"; window.updateUI(); return; }
+
+        if (!currentUser || !db) {
+            let localData = localStorage.getItem('gatoPescadorSave_visitante') || localStorage.getItem('gatoPescadorSave');
+            if (localData) {
+                try {
+                    Object.assign(window.GAME_STATE, JSON.parse(localData));
+                    if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
+                    if (!window.GAME_STATE.orbs) window.GAME_STATE.orbs = {};
+                    if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
+                    if (!window.GAME_STATE.customFusions) window.GAME_STATE.customFusions = {};
+                    if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
+                    if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
+                    if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
+                    if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) { window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha'; }
+                    if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Visitante";
+                } catch (e) { console.error("Save corrompido"); }
+            }
+            window.updateUI(); return;
+        }
+
+        if(safeGet('save-status')) safeGet('save-status').innerText = "🔄 Nuvem...";
+        
+        get(child(ref(db), `users/${currentUser.uid}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                Object.assign(window.GAME_STATE, snapshot.val());
+                window.GAME_STATE.isFishing = false;
+                if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
+                if (!window.GAME_STATE.orbs) window.GAME_STATE.orbs = {};
+                if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
+                if (!window.GAME_STATE.customFusions) window.GAME_STATE.customFusions = {};
+                if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
+                if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
+                if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
+                if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) { window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha'; }
+                
+                if (window.checkIsAdmin()) {
+                    window.injectAdminGear();
+                }
+
+                localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(window.GAME_STATE));
+                if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Conectado";
+            } else {
+                let localBackup = localStorage.getItem('gatoPescadorSave_' + currentUser.uid) || localStorage.getItem('gatoPescadorSave');
+                if (localBackup) { try { Object.assign(window.GAME_STATE, JSON.parse(localBackup)); } catch(e){} }
+                window.saveGame();
+            }
+            if (window.ROD_TEMPLATES) window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
+            window.updateUI();
+        }).catch((e) => {
+            console.error(e);
+            if(safeGet('save-status')) safeGet('save-status').innerText = "❌ Offline";
+            window.updateUI();
+        });
+    }
+
+    if(auth) { 
+        onAuthStateChanged(auth, (user) => { 
+            currentUser = user; 
+            if(!isGuestMode) {
+                loadGame(); 
+            }
+            if (window.checkIsAdmin()) {
+                initAdminPanel(); 
+            }
+        }); 
+    }
+    
+    setInterval(window.saveGame, 30000);
+
     function preloadImages() {
         if (window.RARITIES) {
             Object.values(window.RARITIES).forEach(rarity => {
@@ -172,7 +533,22 @@ function iniciarMotorDoJogo() {
 
         const hookId = window.GAME_STATE.currentHook || 'anzol_padrao';
         const hookData = (window.HOOKS || []).find(h => h.id === hookId) || {name: 'Anzol Padrão', color: '#bdc3c7'};
-        if(safeGet('hook-display-slot')) safeGet('hook-display-slot').innerHTML = `<span style="color:${hookData.color}; font-weight:bold;">🪝 ${hookData.name}</span>`;
+        let activeTarget = window.GAME_STATE.hookCustomTarget || hookData.target || 'padrao';
+        let targetLabel = activeTarget === 'padrao' ? 'Qualquer' : (activeTarget === 'sucata' ? 'Lixo' : activeTarget.toUpperCase());
+
+        if(safeGet('hook-display-slot')) {
+            safeGet('hook-display-slot').innerHTML = `
+                <span style="color:${hookData.color}; font-weight:bold; text-shadow: 0 0 10px ${hookData.color}88; pointer-events: none;">🪝 ${hookData.name}</span>
+                <div style="font-size: 0.65rem; color:#94a3b8; margin-top:2px; pointer-events: none;">🎯 Alvo: <span style="color:#f8fafc;">${targetLabel}</span></div>
+            `;
+            safeGet('hook-display-slot').style.cursor = 'pointer';
+            safeGet('hook-display-slot').onclick = () => {
+                initHookTargetModal(); 
+                const modal = document.getElementById('hook-target-modal');
+                if (modal) modal.classList.remove('hidden');
+            };
+        }
+
         const hookVisual = safeGet('hook');
         if (hookVisual) { hookVisual.style.color = hookData.color; hookVisual.style.textShadow = `0 0 15px ${hookData.color}, 0 2px 4px rgba(0,0,0,0.8)`; }
 
@@ -187,71 +563,6 @@ function iniciarMotorDoJogo() {
         const sushiBtn = safeGet('sushi-btn');
         if (sushiBtn) { if (window.GAME_STATE.sushiUnlocked) { sushiBtn.classList.remove('locked'); } else { sushiBtn.classList.add('locked'); } }
     };
-
-    window.saveGame = function() {
-        if (isGuestMode) { if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Convidado"; return; }
-        const playerSave = { coins: window.GAME_STATE.coins, currentRodIndex: window.GAME_STATE.currentRodIndex, ownedRods: window.GAME_STATE.ownedRods, ownedSinkers: window.GAME_STATE.ownedSinkers, currentSinker: window.GAME_STATE.currentSinker, ownedHooks: window.GAME_STATE.ownedHooks, currentHook: window.GAME_STATE.currentHook, ownedKnives: window.GAME_STATE.ownedKnives, currentKnife: window.GAME_STATE.currentKnife, baitInventory: window.GAME_STATE.baitInventory, currentBait: window.GAME_STATE.currentBait, collection: window.GAME_STATE.collection, collection67: window.GAME_STATE.collection67, scrapCollection: window.GAME_STATE.scrapCollection, materials: window.GAME_STATE.materials, sushiUnlocked: window.GAME_STATE.sushiUnlocked, orbs: window.GAME_STATE.orbs || {} };
-        if (currentUser && db) {
-            localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
-            set(ref(db, 'users/' + currentUser.uid), playerSave).then(() => { if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Salvo"; }).catch((e) => console.error("Erro ao salvar:", e));
-        } else {
-            localStorage.setItem('gatoPescadorSave_visitante', JSON.stringify(playerSave));
-            if(safeGet('save-status')) safeGet('save-status').innerText = "✅ Salvo Local";
-        }
-    };
-
-    function loadGame() {
-        if (isGuestMode) { if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Modo Convidado"; window.updateUI(); return; }
-
-        if (!currentUser || !db) {
-            let localData = localStorage.getItem('gatoPescadorSave_visitante') || localStorage.getItem('gatoPescadorSave');
-            if (localData) {
-                try {
-                    Object.assign(window.GAME_STATE, JSON.parse(localData));
-                    if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
-                    if (!window.GAME_STATE.orbs) window.GAME_STATE.orbs = {};
-                    if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
-                    if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
-                    if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
-                    if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
-                    if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) { window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha'; }
-                    if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Visitante";
-                } catch (e) { console.error("Save corrompido"); }
-            }
-            window.updateUI(); return;
-        }
-
-        if(safeGet('save-status')) safeGet('save-status').innerText = "🔄 Nuvem...";
-        
-        get(child(ref(db), `users/${currentUser.uid}`)).then((snapshot) => {
-            if (snapshot.exists()) {
-                Object.assign(window.GAME_STATE, snapshot.val());
-                window.GAME_STATE.isFishing = false;
-                if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
-                if (!window.GAME_STATE.orbs) window.GAME_STATE.orbs = {};
-                if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
-                if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
-                if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
-                if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
-                if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) { window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha'; }
-                localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(window.GAME_STATE));
-                if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Conectado";
-            } else {
-                let localBackup = localStorage.getItem('gatoPescadorSave_' + currentUser.uid) || localStorage.getItem('gatoPescadorSave');
-                if (localBackup) { try { Object.assign(window.GAME_STATE, JSON.parse(localBackup)); } catch(e){} }
-                window.saveGame();
-            }
-            if (window.ROD_TEMPLATES) window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
-            window.updateUI();
-        }).catch((e) => {
-            console.error(e);
-            if(safeGet('save-status')) safeGet('save-status').innerText = "❌ Offline";
-            window.updateUI();
-        });
-    }
-
-    if(auth) { onAuthStateChanged(auth, (user) => { currentUser = user; if(!isGuestMode) loadGame(); }); }
-    setInterval(window.saveGame, 30000);
 
     window.calculateCatch = function(rod, sinker, activeBaitId) {
         const bait = activeBaitId ? window.BAITS.find(b => b.id === activeBaitId) : null;
@@ -282,13 +593,13 @@ function iniciarMotorDoJogo() {
 
         if (window.eventLuckMult) luckFactor += (window.eventLuckMult * 100); 
 
+        let activeTarget = window.GAME_STATE.hookCustomTarget || (hook ? hook.target : 'padrao');
+
         let sucataChance = 0.15 - (luckFactor / 100000);
-        
         if (window.currentEventID === 'abismo_lixo') sucataChance += 0.60;
-        
         if (sucataChance < 0.05) sucataChance = 0.05; 
 
-        if (hook && hook.target === 'sucata') sucataChance += hook.power;
+        if (activeTarget === 'sucata') sucataChance += (hook ? hook.power : 0);
 
         const rand = Math.random();
         if (rand < sucataChance && window.SUCATAS && window.SUCATAS.length > 0) {
@@ -299,10 +610,10 @@ function iniciarMotorDoJogo() {
         let caughtRarity = window.RARITIES.COMUM;
         let bypassedByHook = false;
 
-        if (hook && hook.target !== 'sucata' && hook.target !== 'padrao') {
+        if (hook && activeTarget !== 'sucata' && activeTarget !== 'padrao') {
             const hookRoll = Math.random();
             if (hookRoll < hook.power) {
-                const targetKey = hook.target.toUpperCase();
+                const targetKey = activeTarget.toUpperCase();
                 if (window.RARITIES[targetKey]) {
                     caughtRarity = window.RARITIES[targetKey];
                     bypassedByHook = true;
@@ -313,12 +624,8 @@ function iniciarMotorDoJogo() {
         if (!bypassedByHook) {
             let fishRoll = Math.random() - (luckFactor / 25000); 
 
-            if (window.currentEventID === 'mar_bestas') {
-                fishRoll -= 0.15; 
-            }
-            if (window.currentEventID === 'abismo_lixo') {
-                fishRoll -= 0.10; 
-            }
+            if (window.currentEventID === 'mar_bestas') fishRoll -= 0.15; 
+            if (window.currentEventID === 'abismo_lixo') fishRoll -= 0.10; 
 
             if (window.currentEventID === 'mar_bestas' && fishRoll < window.RARITIES.BESTIAL.prob) caughtRarity = window.RARITIES.BESTIAL;
             else if (window.currentEventID === 'abismo_lixo' && fishRoll < window.RARITIES.VANDALO.prob) caughtRarity = window.RARITIES.VANDALO;
@@ -331,30 +638,24 @@ function iniciarMotorDoJogo() {
             else if (fishRoll < window.RARITIES.RARO.prob) caughtRarity = window.RARITIES.RARO;
         }
 
-        // =========================================================
-        // SISTEMA RÍGIDO DE PROGRESSÃO DE VARAS
-        // =========================================================
         const rodTier = rod ? rod.id : 0;
-        let maxRarityIndex = 0; // Comum por padrão
+        let maxRarityIndex = 0; 
 
-        // Define o limite máximo que a vara suporta pescar
-        if (rodTier >= 2) maxRarityIndex = 1; // Raro (Bambu Reforçado+)
-        if (rodTier >= 4) maxRarityIndex = 2; // Épico (Vara de Plástico+)
-        if (rodTier >= 7) maxRarityIndex = 3; // Lendário (Polímero Flexível+)
-        if (rodTier >= 10) maxRarityIndex = 4; // Mítico (Liga de Titânio+)
-        if (rodTier >= 13) maxRarityIndex = 5; // Secreto (Vara Eletrônica+)
-        if (rodTier >= 16) maxRarityIndex = 6; // Divino (Vara Oceânica+)
-        if (rodTier >= 19) maxRarityIndex = 7; // Aurudo (Vara Galáctica+)
-        if (rodTier >= 22) maxRarityIndex = 9; // Bestial e Vandalo liberados
+        if (rodTier >= 2) maxRarityIndex = 1; 
+        if (rodTier >= 4) maxRarityIndex = 2; 
+        if (rodTier >= 7) maxRarityIndex = 3; 
+        if (rodTier >= 10) maxRarityIndex = 4; 
+        if (rodTier >= 13) maxRarityIndex = 5; 
+        if (rodTier >= 16) maxRarityIndex = 6; 
+        if (rodTier >= 19) maxRarityIndex = 7; 
+        if (rodTier >= 22 || rodTier === 9999) maxRarityIndex = 9; 
 
         const rarityOrder = ['comum', 'raro', 'epico', 'lendario', 'mitico', 'secreto', 'divino', 'aurudo', 'vandalo', 'bestial'];
         let currentRarityIndex = rarityOrder.indexOf(caughtRarity.id);
 
-        // Se o peixe pescado for forte demais para a vara atual, ele "escapa" e dá o melhor peixe que a vara aguenta
         if (currentRarityIndex > maxRarityIndex) {
             caughtRarity = window.RARITIES[rarityOrder[maxRarityIndex].toUpperCase()];
         }
-        // =========================================================
 
         const getValidFishes = (rarityObj) => {
             return rarityObj.variations.filter(v => {
@@ -372,13 +673,11 @@ function iniciarMotorDoJogo() {
                 } else if (!currentEvt && v.events.includes('none')) {
                     eventMatch = true;
                 }
-                
                 return timeMatch && eventMatch;
             });
         };
 
         let validVariations = getValidFishes(caughtRarity);
-
         if (validVariations.length === 0) {
             caughtRarity = window.RARITIES.COMUM;
             validVariations = getValidFishes(caughtRarity);
@@ -397,16 +696,8 @@ function iniciarMotorDoJogo() {
         } else {
             const sizeBase = 10 + (Object.keys(window.RARITIES).indexOf(caughtRarity.id.toUpperCase()) * 15);
             finalSize = sizeBase + Math.floor(Math.random() * 60);
-            
-            // Impede que o tamanho caia no 67 "na sorte" gerando selos falsos. Se bater 67 naturalmente, cai pra 66.
-            if (finalSize === 67) {
-                finalSize = 66;
-            }
-
-            // O verdadeiro status de chance67 é o ÚNICO que pode cravar o tamanho exato de 67
-            if (Math.random() < chance67) {
-                finalSize = 67;
-            }
+            if (finalSize === 67) finalSize = 66; 
+            if (Math.random() < chance67) finalSize = 67; 
         }
 
         let finalValue = Math.floor(finalSize * caughtRarity.mult * valueMult);
@@ -480,10 +771,8 @@ function iniciarMotorDoJogo() {
                         fishImg.style.filter = 'none';
                         fishImg.style.zIndex = '1';
                     }
-
                     fishImg.style.display = 'block'; 
                 }
-                
                 if(line) { line.style.transition = `height ${reelTime}ms ease-out`; line.style.height = `0px`; }
 
             } catch (errCalc) {
@@ -499,7 +788,6 @@ function iniciarMotorDoJogo() {
             setTimeout(() => {
                 try {
                     const colors = { 'comum': '#94a3b8', 'raro': '#34d399', 'epico': '#c084fc', 'lendario': '#fbbf24', 'mitico': '#ef4444', 'secreto': '#334155', 'divino': '#f59e0b', 'aurudo': '#fef08a', 'vandalo': '#10b981', 'bestial': '#7f1d1d' };
-
                     const div = document.createElement('div');
                     div.className = `modern-loot-popup`;
 
@@ -526,7 +814,6 @@ function iniciarMotorDoJogo() {
                         window.GAME_STATE.coins += (fish.value || 0);
                         let sealImage = null;
 
-                        // GARANTE QUE SÓ RECEBE O SELO QUEM FOR EXATAMENTE 67CM
                         if (fish.size === 67) {
                             if (!window.GAME_STATE.collection67) window.GAME_STATE.collection67 = {};
                             window.GAME_STATE.collection67[fish.variation.name] = (window.GAME_STATE.collection67[fish.variation.name] || 0) + 1;
@@ -578,24 +865,31 @@ function iniciarMotorDoJogo() {
         }, travelTime + 1000);
     }
 
+    // =========================================================
+    // OUVINTE DE ATALHOS GLOBAIS
+    // =========================================================
     document.addEventListener('keydown', (e) => { 
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        if (e.shiftKey && (e.code === 'KeyM' || e.key.toLowerCase() === 'm')) {
+            if (window.checkIsAdmin()) {
+                const painel = document.getElementById('admin-modal');
+                if (painel) {
+                    painel.classList.toggle('hidden'); 
+                }
+            } else {
+                if (window.showToast) window.showToast("Acesso Negado", `Esta conta não possui privilégios ADM para acessar o terminal.`, "error");
+            }
+        }
+
         if (e.code === 'Space') { 
             e.preventDefault(); 
             if (e.repeat) return;
+            const admPanel = document.getElementById('admin-modal');
+            if (admPanel && !admPanel.classList.contains('hidden')) return; 
+
             if (!window.GAME_STATE.isFishing) window.castLine(); 
         } 
-    });
-
-    safeGet('cast-btn')?.addEventListener('click', () => window.castLine());
-    
-    safeGet('exit-game-btn')?.addEventListener('click', () => {
-        const targetUrl = '../index.html'; 
-        if (isGuestMode) { window.location.href = targetUrl; } else { 
-            const btn = safeGet('exit-game-btn');
-            if(btn) { btn.innerText = "Salvando..."; btn.disabled = true; }
-            window.saveGame(); setTimeout(() => window.location.href = targetUrl, 800); 
-        }
     });
 
     safeGet('open-collection-btn')?.addEventListener('click', () => { safeGet('collection-modal')?.classList.remove('hidden'); window.renderCollection(); });
@@ -727,7 +1021,7 @@ function iniciarMotorDoJogo() {
             div.innerHTML = `
                 ${isUnlocked ? `<div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.8); color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);">x${count}</div>` : ''}
                 <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-                    <img src="${scrap.image}" loading="lazy" style="width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px; opacity: ${isUnlocked ? '1' : '0.2'}; filter: grayscale(0.5) sepia(0.5);">
+                    <img src="${scrap.image}" loading="lazy" style="width: 70px; height: 70px; object-fit: contain; margin: 10px opacity: ${isUnlocked ? '1' : '0.2'}; filter: grayscale(0.5) sepia(0.5);">
                     <div style="font-size: 0.8rem; font-weight: 700; color: ${isUnlocked ? '#f8fafc' : '#475569'}; font-family: 'Poppins', sans-serif; line-height: 1.2; margin-bottom: 5px; word-wrap: break-word; width: 100%;">${scrap.name}</div>
                     <div style="font-size: 0.65rem; color: ${isUnlocked ? '#ef4444' : '#334155'}; font-weight: 800; text-transform: uppercase;">Lixo</div>
                 </div>
@@ -781,9 +1075,6 @@ function iniciarMotorDoJogo() {
     function resizeCanvas() { if(canvas){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } }
     window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
-    // ==========================================================================
-    // ANIMAÇÕES DO FUNDO (PEIXES, POEIRA E LIXO)
-    // ==========================================================================
     class SwimmingFish {
         constructor() { this.reset(true); }
         reset(initial = false) {
@@ -897,13 +1188,11 @@ function iniciarMotorDoJogo() {
     }
 
     for (let i = 0; i < 10; i++) { fishes.push(new SwimmingFish()); }
-    
     const dustParticles = Array.from({length: 120}, () => new DustParticle());
     const bgTrash = Array.from({length: 15}, () => new DriftingTrash());
 
     function animateBg() { 
         if(ctx && canvas && !document.hidden) { 
-            
             if (window.currentEventID === 'abismo_lixo') {
                 ctx.fillStyle = '#1c1515';
             } else {
@@ -915,7 +1204,6 @@ function iniciarMotorDoJogo() {
                 bgTrash.forEach(t => { t.update(); t.draw(); });
                 dustParticles.forEach(d => { d.update(); d.draw(); });
             }
-
             fishes.forEach(f => { f.update(); f.draw(); }); 
         } 
         requestAnimationFrame(animateBg); 
@@ -1294,6 +1582,7 @@ function iniciarMotorDoJogo() {
             document.getElementById('sushi-modal').classList.remove('hidden'); 
         }
     };
+    
     window.SushiMode.init();
 }
 carregarBancoDeDadosEIniciar();
