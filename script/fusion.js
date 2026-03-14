@@ -50,7 +50,7 @@ window.FUSIONS = {
         tactical_stats: { HP: 100, AP: 3, MP: 5, ATK: 25, DEF: 15, SPD: 10, RNG: 1 },
         available_skills: ['amor_de_peixe', 'mordida_padrao', 'jato_agua', 'canto_sereia', 'escudo_bolha']
     },
-    // O HÍBRIDO LENDÁRIO E SECRETO (Big Eye Bocaccete + Meu Almoço Delicioso)
+    // NOVO LENDÁRIO CATALOGADO
     "Big Eye Bocaccete+Meu Almoço Delicioso": {
         id: "hibrido_food_eye",
         name: "Bocaccete Delicioso",
