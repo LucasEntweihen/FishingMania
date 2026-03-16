@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FishingMania - Linha de Frente</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script src="/script/database.js"></script>
+    <script src="/script/fusion.js"></script>
+    <script src="/script/enemies.js"></script> <link rel="stylesheet" href="/style/campanha.css">
+</head>
+<body>
+
+    <div class="header">
+        <h1>⚓ Tabela de Guerra</h1>
+        <button class="btn-retreat" onclick="window.location.href='/html/menu.html'">Abortar Missão</button>
+    </div>
+
+    <div class="turn-queue custom-scrollbar" id="turn-queue"></div>
+
+    <div class="battle-container">
+        <div class="board-wrapper">
+            <div class="tactical-grid" id="grid"></div>
+        </div>
+
+        <div class="hud-panel">
+            <div id="hud-content">
+                <div style="text-align:center; color:#64748b; margin-top:50px;">Conectando ao Satélite Abissal...</div>
+            </div>
+            <div class="combat-log custom-scrollbar" id="combat-log">
+                <div class="log-entry system">▶ Interface Inicializada. Localizando o Pelotão...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-screen">
+        <h1 id="v-title">RESOLUÇÃO</h1>
+        <p style="color: #94a3b8; font-size: 1.5rem; margin-top: 10px; font-weight: 500;">Retornando o relatório para o Acampamento...</p>
+        <button class="btn-retreat" style="margin-top: 40px; padding: 15px 40px; font-size: 1.2rem; background:linear-gradient(180deg, #10b981, #047857); border-color:#34d399; color:#fff;" onclick="window.location.href='/html/menu.html'">Extração Imediata</button>
+    </div>
+
+    <script type="module" src="/script/campanha.js"></script>
+</body>
+</html>

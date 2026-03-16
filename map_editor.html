@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FishingMania: Map Forge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #020617; font-family: 'Poppins', sans-serif; color: #f8fafc; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .toolbar { background: #0f172a; padding: 15px 30px; border-bottom: 2px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 20; }
+        .toolbar h1 { margin: 0; font-family: 'Fredoka'; color: #38bdf8; font-size: 1.5rem; }
+        
+        .controls { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .control-group { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 6px 12px; border-radius: 8px; border: 1px solid #334155; font-size: 0.8rem; font-weight: bold; color: #94a3b8; }
+        
+        input[type="number"] { width: 55px; background: #020617; border: 1px solid #475569; color: #fff; padding: 5px; border-radius: 4px; font-weight: bold; text-align: center; }
+        input[type="text"] { width: 200px; background: #020617; border: 1px solid #475569; color: #fff; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; }
+        button { background: #38bdf8; color: #020617; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 900; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.8rem; }
+        button:hover { background: #0ea5e9; transform: scale(1.05); }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .btn-success { background: #10b981; color: #020617; }
+
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; background: radial-gradient(circle, #1e293b 0%, #020617 100%); overflow: hidden; }
+        
+        /* O Wrapper do Board agora tem o background focado no centro */
+        .board-wrapper {
+            perspective: 1200px; display: flex; justify-content: center; align-items: center;
+            background-position: center center; background-repeat: no-repeat;
+            border-radius: 16px; border: 2px solid #1e293b;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.9); width: 900px; height: 900px;
+        }
+
+        .tactical-grid {
+            display: grid; transform: rotateX(55deg) rotateZ(-45deg); transform-style: preserve-3d;
+            padding: 0; width: 600px; height: 600px;
+        }
+
+        .cell {
+            background: rgba(56, 189, 248, 0.4); border: 1px solid rgba(56, 189, 248, 0.8); 
+            cursor: crosshair; display: flex; justify-content: center; align-items: center;
+            color: rgba(255,255,255,0.4); font-weight: bold; font-size: 0.7rem; user-select: none;
+            transition: background 0.1s;
+        }
+        
+        .cell.void { background: rgba(0, 0, 0, 0.7); border: 1px dashed rgba(239, 68, 68, 0.5); color: transparent; }
+
+        #export-panel {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0f172a; padding: 25px;
+            border: 2px solid #10b981; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            width: 500px; display: none; flex-direction: column; gap: 15px; z-index: 30;
+        }
+        textarea { width: 100%; height: 220px; background: #020617; color: #4ade80; border: 1px solid #334155; padding: 10px; font-family: monospace; font-size: 0.8rem; resize: none; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <h1>🛠️ Map Forge</h1>
+        <div class="controls">
+            <div class="control-group" style="border-color: #f59e0b;">
+                📷 Câmera:
+                <label>X:</label><input type="number" id="bg-x" value="0" step="10" onchange="MapEditor.updateBg()">
+                <label>Y:</label><input type="number" id="bg-y" value="0" step="10" onchange="MapEditor.updateBg()">
+                <label>Zoom%:</label><input type="number" id="bg-zoom" value="100" step="5" onchange="MapEditor.updateBg()">
+            </div>
+            
+            <div class="control-group">
+                <input type="text" id="bg-url" placeholder="Ex: /img/map/mapa1.png" value="/img/map/mapa1.png" onchange="MapEditor.updateBg()">
+            </div>
+            <div class="control-group">
+                <label>Grid X:</label><input type="number" id="grid-x" value="8" min="3" max="15" onchange="MapEditor.rebuildGrid()">
+                <label>Grid Y:</label><input type="number" id="grid-y" value="8" min="3" max="15" onchange="MapEditor.rebuildGrid()">
+            </div>
+            <button class="btn-danger" onclick="MapEditor.fillAll(0)">Apagar</button>
+            <button onclick="MapEditor.fillAll(1)">Chão</button>
+            <button class="btn-success" onclick="MapEditor.exportMap()">Exportar</button>
+        </div>
+    </div>
+
+    <div class="workspace">
+        <div class="board-wrapper" id="board-bg" style="background-image: url('/img/map/mapa1.png'); background-size: 100%;">
+            <div class="tactical-grid" id="grid"></div>
+        </div>
+
+        <div id="export-panel">
+            <h3 style="margin:0; color:#10b981; font-family:'Fredoka';">CÓDIGO GERADO!</h3>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">Copie e substitua no seu arquivo <b>campanha.js</b></p>
+            <textarea id="output-code" readonly></textarea>
+            <button class="btn-danger" onclick="document.getElementById('export-panel').style.display='none'">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        const MapEditor = {
+            width: 8, height: 8, matrix: [], isDrawing: false, paintMode: 1,
+
+            init: function() {
+                this.rebuildGrid();
+                this.updateBg();
+                document.body.onmousedown = () => this.isDrawing = true;
+                document.body.onmouseup = () => this.isDrawing = false;
+                document.body.onmouseleave = () => this.isDrawing = false;
+            },
+
+            updateBg: function() {
+                const url = document.getElementById('bg-url').value;
+                const x = document.getElementById('bg-x').value;
+                const y = document.getElementById('bg-y').value;
+                const zoom = document.getElementById('bg-zoom').value;
+                const board = document.getElementById('board-bg');
+
+                if(url) board.style.backgroundImage = `url('${url}')`;
+                board.style.backgroundPosition = `calc(50% + ${x}px) calc(50% + ${y}px)`;
+                board.style.backgroundSize = `${zoom}%`;
+            },
+
+            rebuildGrid: function() {
+                this.width = parseInt(document.getElementById('grid-x').value);
+                this.height = parseInt(document.getElementById('grid-y').value);
+                this.matrix = Array(this.height).fill().map(() => Array(this.width).fill(1));
+                this.drawGrid();
+            },
+
+            fillAll: function(val) {
+                this.matrix = Array(this.height).fill().map(() => Array(this.width).fill(val));
+                this.drawGrid();
+            },
+
+            drawGrid: function() {
+                const gridDOM = document.getElementById('grid');
+                gridDOM.innerHTML = '';
+                gridDOM.style.gridTemplateColumns = `repeat(${this.width}, 1fr)`;
+                gridDOM.style.gridTemplateRows = `repeat(${this.height}, 1fr)`;
+
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = `cell ${this.matrix[y][x] === 1 ? '' : 'void'}`;
+                        cell.innerText = `${x},${y}`;
+                        
+                        cell.onmousedown = (e) => {
+                            this.paintMode = this.matrix[y][x] === 1 ? 0 : 1; 
+                            this.paintCell(x, y, cell);
+                        };
+                        cell.onmouseenter = (e) => { if(this.isDrawing) this.paintCell(x, y, cell); };
+                        
+                        gridDOM.appendChild(cell);
+                    }
+                }
+            },
+
+            paintCell: function(x, y, cellDOM) {
+                this.matrix[y][x] = this.paintMode;
+                cellDOM.className = `cell ${this.paintMode === 1 ? '' : 'void'}`;
+            },
+
+            exportMap: function() {
+                const bgUrl = document.getElementById('bg-url').value || '/img/map/mapa1.png';
+                const x = document.getElementById('bg-x').value;
+                const y = document.getElementById('bg-y').value;
+                const zoom = document.getElementById('bg-zoom').value;
+
+                let jsonStr = "[\n";
+                for (let y = 0; y < this.height; y++) {
+                    jsonStr += `        [${this.matrix[y].join(', ')}]${y < this.height - 1 ? ',' : ''}\n`;
+                }
+                jsonStr += "    ]";
+
+                const finalCode = `window.CURRENT_MAP = {\n    bg: '${bgUrl}',\n    bgOffsetX: ${x},\n    bgOffsetY: ${y},\n    bgZoom: ${zoom},\n    width: ${this.width},\n    height: ${this.height},\n    layout: ${jsonStr}\n};`;
+                
+                document.getElementById('output-code').value = finalCode;
+                document.getElementById('export-panel').style.display = 'flex';
+                document.getElementById('output-code').select();
+            }
+        };
+        window.onload = () => MapEditor.init();
+    </script>
+</body>
+</html>

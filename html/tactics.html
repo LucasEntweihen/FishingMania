@@ -3,55 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FishingMania - Quartel Tático</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@500;600;800&display=swap" rel="stylesheet">
+    <title>FishingMania - Quartel Tático Central</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;500;600;800&display=swap" rel="stylesheet">
     <script src="/script/database.js"></script>
     <script src="/script/fusion.js"></script>
     
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #020617; font-family: 'Poppins', sans-serif; color: #f8fafc; overflow: hidden; }
-        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
-        .header { background: linear-gradient(90deg, #1e1b4b, #0f172a, #1e1b4b); padding: 20px 40px; border-bottom: 2px solid #6366f1; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 10; position: relative; }
-        .header h1 { margin: 0; font-family: 'Fredoka', sans-serif; font-size: 2.2rem; color: #a5b4fc; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
-        .btn-back { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Poppins'; backdrop-filter: blur(5px); }
-        .btn-back:hover { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.5); }
-        .main-container { display: flex; flex-direction: column; height: calc(100vh - 90px); padding: 20px 40px; box-sizing: border-box; gap: 20px; position: relative; z-index: 1; }
-        .squad-bar { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 25px; display: flex; justify-content: center; gap: 25px; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); backdrop-filter: blur(10px); }
-        .squad-slot { width: 130px; height: 150px; background: rgba(0,0,0,0.6); border: 2px dashed #475569; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; position: relative; box-shadow: inset 0 5px 15px rgba(0,0,0,0.5); }
-        .squad-slot:hover { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); transform: translateY(-5px); }
-        .squad-slot.filled { border: 2px solid #10b981; background: rgba(16, 185, 129, 0.1); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.1); }
-        .squad-slot img { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.6)); transition: 0.2s; }
-        .squad-slot.filled:hover img { transform: scale(1.1); }
-        .remove-btn { position: absolute; top: -12px; right: -12px; background: #ef4444; border: 2px solid #b91c1c; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0,0,0,0.8); display: none; transition: 0.2s; z-index: 10; }
-        .remove-btn:hover { background: #f87171; transform: scale(1.1); }
-        .squad-slot.filled:hover .remove-btn { display: flex; }
-        .bottom-area { display: flex; gap: 30px; flex: 1; min-height: 0; }
-        .roster-panel { flex: 1; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 25px; display: flex; flex-direction: column; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-        .roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; overflow-y: auto; padding-right: 15px; align-content: start;}
-        .fish-card { background: linear-gradient(145deg, #1e293b, #020617); border: 1px solid #334155; border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 8px 15px rgba(0,0,0,0.4); position: relative; overflow: hidden; }
-        .fish-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); transition: left 0.4s; }
+        /* TRAVA UNIVERSAL DE ESPAÇAMENTO E FONTES */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        /* FUNDO: MESA DE COMANDO TÁTICO (Grid Holográfico) */
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background-color: #020617; 
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            font-family: 'Poppins', sans-serif; color: #f8fafc; overflow: hidden; 
+        }
+
+        /* Efeito de Scanner de Radar no fundo */
+        body::before { 
+            content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            background: radial-gradient(circle at 50% 50%, rgba(2, 132, 199, 0.15) 0%, transparent 60%);
+            z-index: 0; pointer-events: none; 
+            animation: radarPulse 8s infinite alternate ease-in-out;
+        }
+        @keyframes radarPulse { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(1.2); opacity: 1; } }
+
+        /* CABEÇALHO MILITAR/MAGITECH */
+        .header { 
+            background: linear-gradient(90deg, #0f172a, #1e293b, #0f172a); 
+            border-bottom: 3px solid #0369a1; 
+            padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 -2px 10px rgba(3, 105, 161, 0.5); 
+            z-index: 10; position: relative; height: 80px; 
+        }
+        .header h1 { 
+            margin: 0; font-family: 'Fredoka', sans-serif; font-size: 2rem; color: #e0f2fe; 
+            text-transform: uppercase; letter-spacing: 3px; 
+            text-shadow: 0 0 15px rgba(56, 189, 248, 0.8), 0 4px 6px rgba(0,0,0,0.9); 
+        }
+        .btn-back { 
+            background: linear-gradient(180deg, #334155, #0f172a); 
+            border: 2px solid #475569; color: #e2e8f0; padding: 10px 25px; border-radius: 8px; 
+            font-weight: 800; cursor: pointer; transition: 0.2s; font-family: 'Poppins'; 
+            text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .btn-back:hover { background: linear-gradient(180deg, #dc2626, #991b1b); border-color: #fca5a5; color: white; box-shadow: 0 0 20px rgba(220,38,38,0.6); transform: translateY(-2px); }
+
+        .main-container { display: flex; flex-direction: column; height: calc(100vh - 80px); padding: 25px; gap: 25px; position: relative; z-index: 1; }
+
+        /* ZONA DE IMPLANTAÇÃO (SQUAD BAR) - BASE HOLOGRÁFICA */
+        .deployment-zone {
+            flex-shrink: 0; background: rgba(2, 6, 23, 0.7); backdrop-filter: blur(12px);
+            border: 2px solid #1e293b; border-radius: 20px; padding: 30px 20px; 
+            display: flex; justify-content: center; gap: 40px; 
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.9), 0 15px 30px rgba(0,0,0,0.6);
+            border-top: 2px solid #334155; position: relative;
+        }
+        .deployment-zone::before { content: 'ZONA DE DESDOBRAMENTO TÁTICO'; position: absolute; top: -12px; background: #0f172a; padding: 0 15px; color: #64748b; font-size: 0.75rem; font-weight: 800; letter-spacing: 3px; border: 1px solid #334155; border-radius: 12px; }
+
+        /* PEDESTAIS 3D PARA OS PEIXES DO SQUAD */
+        .squad-slot { 
+            width: 140px; height: 180px; position: relative; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end; 
+            cursor: pointer; transition: 0.3s; perspective: 500px;
+        }
+        
+        .pedestal-base {
+            position: absolute; bottom: 20px; width: 100px; height: 30px;
+            background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+            border: 2px solid rgba(71, 85, 105, 0.5); border-radius: 50%;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 -5px 10px rgba(0,0,0,0.9);
+            transform: rotateX(60deg); transition: 0.3s;
+        }
+
+        .squad-slot.filled .pedestal-base {
+            background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.4) 0%, transparent 70%);
+            border-color: #10b981; box-shadow: 0 10px 20px rgba(0,0,0,0.8), 0 0 25px rgba(16, 185, 129, 0.4), inset 0 0 15px rgba(16, 185, 129, 0.6);
+        }
+
+        .squad-slot:hover .pedestal-base { transform: rotateX(60deg) scale(1.1); }
+
+        .squad-slot img { 
+            width: 110px; height: 110px; object-fit: contain; 
+            filter: drop-shadow(0 20px 15px rgba(0,0,0,0.9)); z-index: 5; 
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            transform-origin: bottom center; animation: floatHolo 4s infinite ease-in-out;
+        }
+        @keyframes floatHolo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .squad-slot.filled:hover img { transform: scale(1.2) translateY(-15px); filter: drop-shadow(0 30px 20px rgba(0,0,0,0.9)) drop-shadow(0 0 15px rgba(16, 185, 129, 0.4)); }
+        
+        .squad-name-tag {
+            background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.9), transparent);
+            color: #f8fafc; font-size: 0.8rem; font-weight: 800; text-align: center; 
+            width: 140%; padding: 4px 0; margin-top: 15px; z-index: 10; text-shadow: 0 2px 4px #000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .squad-empty-holo {
+            position: absolute; top: 40px; font-size: 3rem; color: rgba(56, 189, 248, 0.2); 
+            font-family: 'Fredoka'; filter: drop-shadow(0 0 10px rgba(56,189,248,0.2));
+            animation: pulseEmpty 2s infinite;
+        }
+        @keyframes pulseEmpty { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+        /* BOTÃO DE REMOVER MILITARIZADO */
+        .remove-btn { 
+            position: absolute; top: -5px; right: -5px; background: linear-gradient(135deg, #ef4444, #991b1b); 
+            border: 2px solid #fca5a5; color: white; width: 32px; height: 32px; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; font-weight: 900; font-size: 1rem; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.9), 0 0 15px rgba(239, 68, 68, 0.5); transition: 0.2s; z-index: 20; 
+        }
+        .remove-btn:hover { background: #f87171; transform: scale(1.15) rotate(90deg); }
+        .squad-slot.filled:hover .remove-btn { display: flex !important; }
+
+        /* LAYOUT INFERIOR (LISTA VS INSPEÇÃO) */
+        .bottom-area { display: flex; gap: 25px; flex: 1; min-height: 0; }
+        
+        /* PAINEL DE ROSTER (Os peixes disponíveis) */
+        .roster-panel { 
+            flex: 1; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(10px);
+            border: 1px solid #1e293b; border-radius: 16px; padding: 25px; display: flex; flex-direction: column; 
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.7), 0 10px 25px rgba(0,0,0,0.5); border-top: 2px solid #334155;
+        }
+        .roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 18px; overflow-y: auto; padding-right: 10px; align-content: start;}
+        
+        .fish-card { 
+            background: linear-gradient(160deg, #1e293b, #020617); border: 2px solid #334155; 
+            border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: 0.2s; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.8); position: relative; overflow: hidden; 
+            display: flex; flex-direction: column; align-items: center; min-height: 145px;
+        }
+        .fish-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); transition: left 0.4s; z-index: 1;}
         .fish-card:hover::before { left: 100%; }
-        .fish-card:hover { transform: translateY(-5px); border-color: #6366f1; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4); }
-        .fish-card.selected { border-color: #f59e0b; box-shadow: 0 0 20px rgba(245, 158, 11, 0.5); background: linear-gradient(145deg, #332108, #0f172a); }
-        .fish-card img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
-        .inspector-panel { width: 480px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; display: flex; flex-direction: column; overflow-y: auto; box-shadow: -10px 0 30px rgba(0,0,0,0.6); }
-        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .stat-box { text-align: center; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #94a3b8; border-bottom: 2px solid #334155; }
-        .stat-box b { display: block; color: #f8fafc; font-size: 1.4rem; font-family: 'Fredoka'; margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-        .skill-list { display: flex; flex-direction: column; gap: 12px; }
-        .skill-item { background: rgba(0,0,0,0.5); border: 2px solid #334155; border-radius: 12px; padding: 15px; display: flex; gap: 15px; cursor: pointer; transition: 0.2s; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-        .skill-item:hover { background: rgba(255,255,255,0.05); border-color: #64748b; transform: translateX(5px); }
-        .skill-item.active { border-color: #10b981; background: rgba(16, 185, 129, 0.15); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 15px rgba(16, 185, 129, 0.1); }
-        .skill-item.disabled { opacity: 0.4; filter: grayscale(1); cursor: not-allowed; }
-        .skill-item.disabled:hover { transform: none; border-color: #ef4444; }
-        .skill-icon { font-size: 2.2rem; background: rgba(0,0,0,0.6); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .skill-info { flex: 1; }
-        .skill-name { font-family: 'Fredoka'; font-size: 1.2rem; color: #e2e8f0; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;}
-        .skill-desc { font-size: 0.8rem; color: #94a3b8; line-height: 1.4; }
-        .skill-cost { background: #3b82f6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .fish-card:hover { transform: translateY(-5px); border-color: #38bdf8; box-shadow: 0 15px 30px rgba(0,0,0,0.9), 0 0 15px rgba(56, 189, 248, 0.3); z-index: 5; }
+        .fish-card.selected { border-color: #f59e0b; background: linear-gradient(160deg, #451a03, #0f172a); box-shadow: 0 0 25px rgba(245, 158, 11, 0.4), inset 0 0 20px rgba(245, 158, 11, 0.1); }
+        .fish-card img { width: 75px; height: 75px; object-fit: contain; margin-bottom: 12px; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.8)); z-index: 2; transition: 0.3s;}
+        .fish-card:hover img { transform: scale(1.1); }
+
+        /* DOSSIER DE INSPEÇÃO (O Terminal HUD) */
+        .inspector-panel { 
+            width: 520px; background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.95)); 
+            border: 1px solid #1e293b; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; 
+            box-shadow: -15px 0 40px rgba(0,0,0,0.8), inset 0 0 50px rgba(0,0,0,0.8); border-top: 2px solid #0369a1;
+        }
+        
+        .inspector-header {
+            position: relative; padding: 30px; display: flex; align-items: center; gap: 25px;
+            background: radial-gradient(circle at right top, rgba(3, 105, 161, 0.2), transparent 70%);
+            border-bottom: 2px solid rgba(255,255,255,0.05); overflow: hidden;
+        }
+        
+        /* Círculo Holográfico Atrás do Peixe Inspecionado */
+        .holo-ring {
+            position: absolute; left: 30px; top: 15px; width: 130px; height: 130px;
+            border: 2px dashed rgba(56, 189, 248, 0.3); border-radius: 50%;
+            animation: spinHolo 10s linear infinite; pointer-events: none;
+        }
+        @keyframes spinHolo { 100% { transform: rotate(360deg); } }
+
+        .inspector-header img { width: 130px; height: 130px; object-fit: contain; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.9)); z-index: 2; animation: floatHolo 3s infinite ease-in-out; }
+        
+        .inspector-info { flex: 1; z-index: 2; }
+        .inspector-info h2 { margin: 0 0 5px 0; font-family: 'Fredoka'; font-size: 2.2rem; text-shadow: 0 4px 10px rgba(0,0,0,0.9); line-height: 1.1; }
+        .inspector-info p { margin: 0 0 15px 0; font-size: 0.85rem; color: #94a3b8; line-height: 1.5; font-weight: 500; }
+        
+        /* BOTÃO DE EQUIPAR MILITARIZADO */
+        .equip-btn {
+            background: linear-gradient(135deg, #0ea5e9, #0369a1); color: white; border: 2px solid #7dd3fc; 
+            padding: 10px 20px; border-radius: 8px; font-weight: 900; font-size: 1rem; cursor: pointer; 
+            transition: 0.2s; box-shadow: 0 5px 15px rgba(14, 165, 233, 0.5); text-transform: uppercase; letter-spacing: 1px; width: 100%;
+        }
+        .equip-btn:hover { background: linear-gradient(135deg, #38bdf8, #0ea5e9); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(14, 165, 233, 0.7); }
+        .equip-btn:active { transform: translateY(1px); box-shadow: none; }
+        .equipped-badge { background: #064e3b; color: #34d399; border: 2px solid #10b981; padding: 10px 20px; border-radius: 8px; font-weight: 900; font-size: 1rem; text-align: center; text-transform: uppercase; letter-spacing: 1px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+
+        .inspector-body { padding: 25px; flex: 1; overflow-y: auto; }
+
+        /* HUD DE STATUS (Estilo medidores) */
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 30px; }
+        .stat-box { 
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)); 
+            border-top: 2px solid; padding: 12px 10px; border-radius: 8px; text-align: center; 
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.05); position: relative; overflow: hidden;
+        }
+        .stat-box::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 30%; background: linear-gradient(0deg, currentColor, transparent); opacity: 0.05; }
+        .stat-box span { display: block; font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-box b { display: block; font-family: 'Fredoka'; font-size: 1.6rem; margin-top: 2px; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+
+        /* ARSENAL DE SKILLS (Fichas Tecnológicas) */
+        .section-title { margin: 0 0 20px 0; color: #fcd34d; font-family: 'Fredoka'; font-size: 1.4rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .skill-count-badge { font-size: 0.85rem; color: #94a3b8; font-family: 'Poppins'; background: #000; padding: 4px 12px; border-radius: 20px; border: 1px solid #334155; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+
+        .skill-list { display: flex; flex-direction: column; gap: 15px; }
+        .skill-item { 
+            background: linear-gradient(90deg, #0f172a, #1e293b); border: 1px solid #334155; border-left: 4px solid #475569; 
+            border-radius: 10px; padding: 15px; display: flex; gap: 15px; cursor: pointer; transition: 0.2s; align-items: center; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6); position: relative; overflow: hidden;
+        }
+        .skill-item:hover { background: linear-gradient(90deg, #1e293b, #334155); border-left-color: #94a3b8; transform: translateX(5px); box-shadow: 0 8px 20px rgba(0,0,0,0.8); }
+        .skill-item.active { border-color: #047857; border-left-color: #10b981; background: linear-gradient(90deg, rgba(6, 78, 59, 0.4), rgba(2, 44, 34, 0.6)); box-shadow: 0 5px 20px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.1); }
+        .skill-item.disabled { opacity: 0.5; filter: grayscale(0.8); cursor: not-allowed; }
+        .skill-item.disabled:hover { transform: none; border-color: #ef4444; border-left-color: #ef4444; }
+        
+        .skill-icon { width: 65px; height: 65px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #000; box-shadow: inset 0 0 15px rgba(255,255,255,0.1), 0 5px 10px rgba(0,0,0,0.8); padding: 5px; border: 1px solid #334155; }
+        .skill-info { flex: 1; z-index: 2; }
+        .skill-name { font-family: 'Fredoka'; font-size: 1.25rem; color: #f8fafc; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .skill-desc { font-size: 0.8rem; color: #94a3b8; line-height: 1.5; }
+        .skill-meta { color: #f59e0b; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 0.7rem; display: block; margin-bottom: 4px; }
+        .skill-cost { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 900; box-shadow: 0 2px 5px rgba(0,0,0,0.8); border: 1px solid #60a5fa; }
+
+        .checkbox-holo { font-size: 1.8rem; opacity: 0.1; transition: 0.3s; filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0)); }
+        .skill-item.active .checkbox-holo { opacity: 1; color: #10b981; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8)); }
+
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.6); border-radius: 4px; border-left: 1px solid rgba(255,255,255,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
@@ -59,23 +229,26 @@
 
     <div class="header">
         <h1>⚔️ Quartel Tático Central</h1>
-        <button class="btn-back" onclick="if(window.saveGame) { window.saveGame().then(() => window.location.href='/html/menu.html'); this.innerText = 'Salvando...'; } else { window.location.href='/html/menu.html'; }">⬅ Voltar ao Acampamento</button>
+        <button class="btn-back" onclick="if(window.saveGame) { window.saveGame().then(() => window.location.href='/html/menu.html'); this.innerText = 'Salvando...'; } else { window.location.href='/html/menu.html'; }">⬅ Base Principal</button>
     </div>
 
     <div class="main-container">
         
-        <div class="squad-bar" id="squad-container"></div>
+        <div class="deployment-zone" id="squad-container"></div>
 
         <div class="bottom-area">
             <div class="roster-panel">
-                <h3 style="margin: 0 0 20px 0; color: #38bdf8; font-family: 'Fredoka'; font-size: 1.8rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">🧬 Pelotão de Quimeras Prontas</h3>
+                <h3 style="margin: 0 0 20px 0; color: #38bdf8; font-family: 'Fredoka'; font-size: 1.6rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 2rem;">🧬</span> Forças de Reserva
+                </h3>
                 <div class="roster-grid custom-scrollbar" id="roster-grid"></div>
             </div>
 
             <div class="inspector-panel custom-scrollbar" id="inspector-panel">
-                <div style="text-align: center; color: #64748b; padding: 80px 20px; font-size: 1.2rem; line-height: 1.5;">
-                    <div style="font-size: 5rem; opacity: 0.3; margin-bottom: 20px;">🔍</div>
-                    Selecione um soldado do Pelotão para equipá-lo e configurar a sua Matriz de Habilidades.
+                <div style="text-align: center; color: #475569; padding: 120px 20px; font-size: 1.2rem; line-height: 1.5; font-weight: 600;">
+                    <div style="font-size: 6rem; opacity: 0.2; margin-bottom: 20px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));">📡</div>
+                    SISTEMA DE INSPEÇÃO TÁTICA<br>
+                    <span style="font-size: 0.9rem; font-weight: 400; opacity: 0.7;">Selecione uma unidade no pelotão de reservas para configurar a Matriz de Combate.</span>
                 </div>
             </div>
         </div>
@@ -92,7 +265,6 @@
         window.GAME_STATE = {}; window.inspectingUid = null;
 
         window.saveGame = async function() {
-            // VACINA: Força a Array a continuar sendo Array no banco
             let safeInstances = window.GAME_STATE.hybridInstances || [];
             if (!Array.isArray(safeInstances)) safeInstances = Object.values(safeInstances);
 
@@ -129,10 +301,7 @@
         window.getHybridData = function(speciesId) {
             let fishDataKey = Object.keys(window.FUSIONS || {}).find(k => window.FUSIONS[k].id === speciesId);
             if (fishDataKey) return window.FUSIONS[fishDataKey];
-            
-            if (window.GAME_STATE.customFusions && window.GAME_STATE.customFusions[speciesId]) {
-                return window.GAME_STATE.customFusions[speciesId];
-            }
+            if (window.GAME_STATE.customFusions && window.GAME_STATE.customFusions[speciesId]) return window.GAME_STATE.customFusions[speciesId];
             return null;
         };
 
@@ -141,7 +310,6 @@
             for (let i = 0; i < 5; i++) {
                 const slot = document.createElement('div'); const instUid = window.GAME_STATE.tacticalSquad[i];
                 if (instUid) {
-                    // VACINA: Firebase convertendo Array pra Object
                     let safeInstances = window.GAME_STATE.hybridInstances || [];
                     if (!Array.isArray(safeInstances)) safeInstances = Object.values(safeInstances);
 
@@ -149,11 +317,20 @@
                     const fishData = window.getHybridData(inst.speciesId); if(!fishData) continue;
                     
                     slot.className = 'squad-slot filled';
-                    slot.innerHTML = `<div class="remove-btn" onclick="window.removeFromSquad(${i}, event)">X</div><img src="${fishData.image}" onerror="this.onerror=null; this.src='${fishData.fallbackImage || 'https://placehold.co/80x80?text=?'}'"><div style="font-size:0.8rem; font-weight:bold; margin-top:10px; color:#f8fafc; text-shadow:0 2px 4px rgba(0,0,0,0.8); text-align:center;">${fishData.name}</div>`;
+                    // ADICIONA A BASE DO PEDESTAL E A FOTO
+                    slot.innerHTML = `
+                        <div class="pedestal-base"></div>
+                        <div class="remove-btn" onclick="window.removeFromSquad(${i}, event)" title="Retirar da Vanguarda">✖</div>
+                        <img src="${fishData.image}" onerror="this.onerror=null; this.src='${fishData.fallbackImage || 'https://placehold.co/80x80?text=?'}'">
+                        <div class="squad-name-tag">${fishData.name}</div>
+                    `;
                     slot.onclick = () => window.inspectFish(instUid);
                 } else {
                     slot.className = 'squad-slot';
-                    slot.innerHTML = `<span style="font-size:3rem; opacity:0.2;">+</span><div style="font-size:0.8rem; color:#64748b; margin-top:8px; font-weight:bold;">VAZIO</div>`;
+                    slot.innerHTML = `
+                        <div class="pedestal-base"></div>
+                        <div class="squad-empty-holo">⬡</div>
+                    `;
                 }
                 container.appendChild(slot);
             }
@@ -162,29 +339,28 @@
         window.renderRoster = function() {
             const grid = document.getElementById('roster-grid'); grid.innerHTML = '';
 
-            // VACINA 2: Evita o erro de forEach não é uma função
             let safeInstances = window.GAME_STATE.hybridInstances || [];
             if (!Array.isArray(safeInstances)) safeInstances = Object.values(safeInstances);
 
             if (safeInstances.length === 0) {
-                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 30px;">O Pelotão está vazio. Vá para a Fazenda de Quimeras forjar seus soldados mutantes!</div>`;
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 40px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px dashed #334155;">Nenhuma unidade biológica detectada.<br><br>Vá para a Fazenda de Quimeras para forjar novos soldados.</div>`;
                 return;
             }
 
             safeInstances.forEach(inst => {
-                const fishData = window.getHybridData(inst.speciesId); 
-                if(!fishData) return;
+                const fishData = window.getHybridData(inst.speciesId); if(!fishData) return;
 
                 const card = document.createElement('div'); card.className = `fish-card ${window.inspectingUid === inst.uid ? 'selected' : ''}`;
                 const isInSquad = window.GAME_STATE.tacticalSquad.includes(inst.uid);
+                
                 const customBadge = fishData.isCustom ? `<div style="position:absolute; top:-5px; left:-5px; font-size:1.5rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8)); z-index:5;" title="Mutante Procedural Único">🧬</div>` : '';
 
                 card.innerHTML = `
                     ${customBadge}
-                    ${isInSquad ? '<div style="position:absolute; top:8px; right:8px; background:#10b981; font-size:0.65rem; padding:3px 6px; border-radius:6px; color:white; font-weight:900; box-shadow:0 2px 5px rgba(0,0,0,0.5); z-index:5;">EM USO</div>' : ''}
+                    ${isInSquad ? '<div style="position:absolute; top:8px; right:8px; background:linear-gradient(135deg, #10b981, #047857); font-size:0.6rem; padding:4px 8px; border-radius:4px; color:white; font-weight:900; box-shadow:0 2px 8px rgba(0,0,0,0.8); z-index:5; border: 1px solid #34d399; letter-spacing: 1px;">IMPLANTADO</div>' : ''}
                     <img src="${fishData.image}" onerror="this.onerror=null; this.src='${fishData.fallbackImage || 'https://placehold.co/80x80?text=?'}'">
-                    <div style="font-size:0.9rem; font-weight:bold; font-family:'Poppins'; color:#f8fafc; line-height:1.2;">${fishData.name}</div>
-                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:8px; font-weight:600;"><span style="color:${(inst.equippedSkills || []).length === 3 ? '#4ade80' : '#f8fafc'};">${(inst.equippedSkills || []).length}</span>/3 Skills</div>
+                    <div style="font-size:0.9rem; font-weight:800; font-family:'Poppins'; color:#f8fafc; line-height:1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.8); z-index:2;">${fishData.name}</div>
+                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:10px; font-weight:600; z-index:2; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 6px; border: 1px solid #334155;"><span style="color:${(inst.equippedSkills || []).length === 3 ? '#4ade80' : '#f8fafc'};">${(inst.equippedSkills || []).length}</span>/3 Skills</div>
                 `;
                 card.onclick = () => window.inspectFish(inst.uid);
                 grid.appendChild(card);
@@ -200,27 +376,38 @@
             const inst = safeInstances.find(h => h.uid === uid); if(!inst) return;
             const fishData = window.getHybridData(inst.speciesId); const stats = fishData.tactical_stats;
             const panel = document.getElementById('inspector-panel'); const isInSquad = window.GAME_STATE.tacticalSquad.includes(uid);
-            const customTag = fishData.isCustom ? `<span style="background:#a855f7; color:white; font-size:0.6rem; padding:3px 8px; border-radius:6px; vertical-align:middle; margin-left:10px; text-shadow:none; font-weight:900; letter-spacing:1px; box-shadow:0 2px 4px rgba(0,0,0,0.5);">DNA ÚNICO</span>` : '';
+
+            const isCustom = fishData.isCustom;
+            const titleColor = isCustom ? '#c084fc' : '#38bdf8';
+            const customTag = isCustom ? `<span style="background: linear-gradient(135deg, #a855f7, #6b21a8); color:white; font-size:0.6rem; padding:4px 10px; border-radius:6px; vertical-align:middle; margin-left:12px; text-shadow:none; font-weight:900; letter-spacing:2px; box-shadow:0 4px 10px rgba(0,0,0,0.5); border: 1px solid #d8b4fe;">MUTANTE</span>` : '';
 
             let html = `
-                <div style="display:flex; align-items:center; gap:25px; margin-bottom:25px; padding-bottom:25px; border-bottom:2px solid rgba(255,255,255,0.05);">
-                    <img src="${fishData.image}" onerror="this.onerror=null; this.src='${fishData.fallbackImage || 'https://placehold.co/80x80?text=?'}'" style="width:120px; height:120px; object-fit:contain; filter:drop-shadow(0 10px 15px rgba(0,0,0,0.6));">
-                    <div>
-                        <h2 style="margin:0; font-family:'Fredoka'; color:${fishData.isCustom ? '#c084fc' : '#f8fafc'}; font-size:2.2rem; text-shadow:0 2px 4px rgba(0,0,0,0.8);">${fishData.name}${customTag}</h2>
-                        <p style="margin:8px 0 15px 0; font-size:0.85rem; color:#94a3b8; line-height:1.4;">${fishData.desc}</p>
-                        ${!isInSquad ? `<button onclick="window.addToSquad('${uid}')" style="background:#3b82f6; color:white; border:2px solid #60a5fa; padding:10px 20px; border-radius:8px; font-weight:900; font-size:1rem; cursor:pointer; transition:0.2s; box-shadow:0 4px 10px rgba(59,130,246,0.4);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">✚ Colocar no Esquadrão</button>` : `<button disabled style="background:#064e3b; color:#4ade80; border:2px solid #10b981; padding:10px 20px; border-radius:8px; font-weight:900; font-size:1rem; opacity:0.8;">✔ Em Posição</button>`}
+                <div class="inspector-header">
+                    <div class="holo-ring"></div>
+                    <img src="${fishData.image}" onerror="this.onerror=null; this.src='${fishData.fallbackImage || 'https://placehold.co/80x80?text=?'}'">
+                    <div class="inspector-info">
+                        <h2 style="color:${titleColor};">${fishData.name}${customTag}</h2>
+                        <p>${fishData.desc}</p>
+                        ${!isInSquad ? `<button class="equip-btn" onclick="window.addToSquad('${uid}')">✚ Enviar para a Vanguarda</button>` : `<div class="equipped-badge">✔ Unidade Posicionada</div>`}
                     </div>
                 </div>
-                <div class="stat-grid">
-                    <div class="stat-box" style="border-color:#ef4444;">HP <b style="color:#f87171;">${stats.HP}</b></div>
-                    <div class="stat-box" style="border-color:#3b82f6;">AP (Ação) <b style="color:#60a5fa;">${stats.AP}</b></div>
-                    <div class="stat-box" style="border-color:#10b981;">MP (Mov.) <b style="color:#4ade80;">${stats.MP}</b></div>
-                    <div class="stat-box" style="border-color:#f59e0b;">ATK <b style="color:#fbbf24;">${stats.ATK}</b></div>
-                    <div class="stat-box" style="border-color:#a855f7;">DEF <b style="color:#c084fc;">${stats.DEF}</b></div>
-                    <div class="stat-box" style="border-color:#ec4899;">SPD <b style="color:#f472b6;">${stats.SPD}</b></div>
-                </div>
-                <h3 style="margin:0 0 20px 0; color:#fcd34d; font-family:'Fredoka'; font-size:1.4rem; display:flex; justify-content:space-between; align-items:center;">Matriz de Habilidades<span style="font-size:1rem; color:#94a3b8; font-family:'Poppins'; background:rgba(0,0,0,0.5); padding:4px 12px; border-radius:20px; box-shadow:inset 0 0 10px rgba(0,0,0,0.5);"><span style="color:${(inst.equippedSkills||[]).length === 3 ? '#10b981' : '#f8fafc'}; font-weight:bold;">${(inst.equippedSkills||[]).length}</span>/3 Equipadas</span></h3>
-                <div class="skill-list">
+
+                <div class="inspector-body">
+                    <div class="stat-grid">
+                        <div class="stat-box" style="border-top-color:#ef4444; color:#fca5a5;"><span>Saúde (HP)</span><b style="color:#f87171;">${stats.HP}</b></div>
+                        <div class="stat-box" style="border-top-color:#3b82f6; color:#93c5fd;"><span>Ação (AP)</span><b style="color:#60a5fa;">${stats.AP}</b></div>
+                        <div class="stat-box" style="border-top-color:#10b981; color:#6ee7b7;"><span>Mov. (MP)</span><b style="color:#4ade80;">${stats.MP}</b></div>
+                        <div class="stat-box" style="border-top-color:#f59e0b; color:#fcd34d;"><span>Ataque (ATK)</span><b style="color:#fbbf24;">${stats.ATK}</b></div>
+                        <div class="stat-box" style="border-top-color:#a855f7; color:#d8b4fe;"><span>Defesa (DEF)</span><b style="color:#c084fc;">${stats.DEF}</b></div>
+                        <div class="stat-box" style="border-top-color:#ec4899; color:#f9a8d4;"><span>Veloc. (SPD)</span><b style="color:#f472b6;">${stats.SPD}</b></div>
+                    </div>
+
+                    <h3 class="section-title">
+                        MATRIZ DE COMBATE
+                        <span class="skill-count-badge">Energia: <span style="color:${(inst.equippedSkills||[]).length === 3 ? '#10b981' : '#f8fafc'}; font-weight:900; font-size:1rem;">${(inst.equippedSkills||[]).length}</span> / 3 Slots</span>
+                    </h3>
+
+                    <div class="skill-list">
             `;
 
             (fishData.available_skills || []).forEach(skillId => {
@@ -233,13 +420,14 @@
                         <div class="skill-icon">${skill.icon}</div>
                         <div class="skill-info">
                             <div class="skill-name">${skill.name} <span class="skill-cost">⚡ ${skill.cost} AP</span></div>
-                            <div class="skill-desc"><span style="color:#fbbf24; font-weight:bold; letter-spacing:1px; text-transform:uppercase; font-size:0.7rem;">Alcance: ${skill.rng === 0 ? 'Próprio' : skill.rng} | Tipo: ${skill.type}</span><br><span style="margin-top:3px; display:inline-block;">${skill.desc}</span></div>
+                            <span class="skill-meta">Alcance: ${skill.rng === 0 ? 'Self' : skill.rng} &nbsp;|&nbsp; Elemento: ${skill.type}</span>
+                            <div class="skill-desc">${skill.desc}</div>
                         </div>
-                        <div style="font-size:1.8rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5)); opacity:${isActive ? '1' : '0.1'};">${isActive ? '✅' : '○'}</div>
+                        <div class="checkbox-holo">${isActive ? '▣' : '⬡'}</div>
                     </div>
                 `;
             });
-            panel.innerHTML = html + `</div>`;
+            panel.innerHTML = html + `</div></div>`;
         };
 
         window.toggleSkill = async function(uid, skillId) {
@@ -257,7 +445,7 @@
 
         window.addToSquad = async function(uid) {
             const emptyIndex = window.GAME_STATE.tacticalSquad.indexOf(null);
-            if (emptyIndex === -1) { alert("⚠ O esquadrão tático está cheio! Remova alguém primeiro."); return; }
+            if (emptyIndex === -1) { alert("⚠ O pelotão da Vanguarda está cheio! Retire uma unidade primeiro."); return; }
             window.GAME_STATE.tacticalSquad[emptyIndex] = uid;
             await window.saveGame(); window.renderSquad(); window.inspectFish(uid);
         };

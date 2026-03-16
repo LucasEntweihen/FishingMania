@@ -41,7 +41,7 @@ window.checkIsAdmin = function() {
     return window.isAdminUser === true;
 };
 
-// 🛡️ ROTINA ANTI-CHEAT: Limpa armamento ADM de contas normais caso tentem hackear o Save local
+// 🛡️ ROTINA ANTI-CHEAT: Limpa armamento ADM de contas normais
 window.validateGearSecurity = function() {
     if (!window.checkIsAdmin() && window.GAME_STATE) {
         if (window.GAME_STATE.ownedRods) {
@@ -56,10 +56,12 @@ window.validateGearSecurity = function() {
         if (window.GAME_STATE.currentHook === 'anzol_adm_supremo') {
             window.GAME_STATE.currentHook = 'anzol_padrao';
         }
+        // Limpa também o alvo customizado se o cara não for ADM
+        window.GAME_STATE.hookCustomTarget = null;
     }
 };
 
-// 👑 INJEÇÃO DE EQUIPAMENTO EXCLUSIVO ADM (Furtivo)
+// 👑 INJEÇÃO DE EQUIPAMENTO EXCLUSIVO ADM
 window.injectAdminGear = function() {
     if (!window.checkIsAdmin() || !window.GAME_STATE) return;
 
@@ -205,6 +207,9 @@ function iniciarMotorDoJogo() {
         window.showToast(title, body, isSuccess ? 'success' : 'error');
     };
 
+    // =========================================================
+    // SALVAMENTO GLOBAL DE DADOS SEGURO
+    // =========================================================
     window.saveGame = async function() {
         if (isGuestMode) { 
             if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Convidado"; 
@@ -236,7 +241,11 @@ function iniciarMotorDoJogo() {
         }
     };
 
+    // =========================================================
+    // MODAL DE SINTONIA DO ANZOL (EXCLUSIVO ADM)
+    // =========================================================
     function initHookTargetModal() {
+        if (!window.checkIsAdmin()) return; // Trava a criação
         if (document.getElementById('hook-target-modal')) return;
 
         const modal = document.createElement('div');
@@ -275,7 +284,7 @@ function iniciarMotorDoJogo() {
     }
 
     window.setHookTarget = async function(targetId) {
-        if (!window.GAME_STATE) return;
+        if (!window.checkIsAdmin() || !window.GAME_STATE) return;
         window.GAME_STATE.hookCustomTarget = targetId;
         window.updateUI();
         await window.saveGame();
@@ -287,13 +296,10 @@ function iniciarMotorDoJogo() {
     // UI DO PAINEL DO MESTRE (CRIADO E EXIBIDO SOMENTE PARA ADMs)
     // =========================================================
     function initAdminPanel() {
-        // Se o usuário não for ADM, o código simplesmente interrompe a criação do HTML.
-        // Furtividade total: nenhum jogador normal tem esse HTML no navegador.
         if (!window.checkIsAdmin()) return; 
         
         if (document.getElementById('admin-modal')) return;
 
-        // O MODAL DE ADM
         const modal = document.createElement('div');
         modal.id = 'admin-modal';
         modal.className = 'modal hidden';
@@ -497,7 +503,6 @@ function iniciarMotorDoJogo() {
             currentUser = user; 
             if(!isGuestMode) {
                 try {
-                    // Consulta o Firebase silenciosamente. Se não estiver lá, ignora.
                     const admSnapshot = await get(child(ref(db), `admins/${user.uid}`));
                     window.isAdminUser = (admSnapshot.exists() && admSnapshot.val() === true);
                 } catch(e) {
@@ -505,7 +510,6 @@ function iniciarMotorDoJogo() {
                 }
                 loadGame(); 
             }
-            // Chama a criação visual do painel se ele for ADM (agora que sabemos a resposta do banco)
             if (window.checkIsAdmin()) {
                 initAdminPanel(); 
             }
@@ -538,7 +542,7 @@ function iniciarMotorDoJogo() {
         if(safeGet('cat-coins')) safeGet('cat-coins').innerText = window.GAME_STATE.coins.toLocaleString();
         
         let safeRodId = window.GAME_STATE.currentRodIndex;
-        if (!window.checkIsAdmin() && safeRodId === 9999) safeRodId = 0; // Proteção extra visual
+        if (!window.checkIsAdmin() && safeRodId === 9999) safeRodId = 0; 
         const rod = window.GAME_STATE.rods.find(r => r.id === safeRodId) || window.GAME_STATE.rods[0];
         
         if(safeGet('current-rod-display')) safeGet('current-rod-display').innerText = `Vara: ${rod ? rod.name : 'Nenhuma'}`;
@@ -550,24 +554,34 @@ function iniciarMotorDoJogo() {
         if(safeGet('sinker-slot')) safeGet('sinker-slot').innerText = `🪨 ${sinker.name}`;
         if(safeGet('equipped-sinker-visual')) safeGet('equipped-sinker-visual').style.display = (sinker.id && sinker.id !== 'chumbo') ? 'block' : 'none';
 
+        // LÓGICA DE INTERFACE: ADM vs JOGADOR NORMAL
         let safeHookId = window.GAME_STATE.currentHook || 'anzol_padrao';
-        if (!window.checkIsAdmin() && safeHookId === 'anzol_adm_supremo') safeHookId = 'anzol_padrao'; // Proteção extra visual
+        if (!window.checkIsAdmin() && safeHookId === 'anzol_adm_supremo') safeHookId = 'anzol_padrao'; 
         
         const hookData = (window.HOOKS || []).find(h => h.id === safeHookId) || {name: 'Anzol Padrão', color: '#bdc3c7'};
-        let activeTarget = window.GAME_STATE.hookCustomTarget || hookData.target || 'padrao';
-        let targetLabel = activeTarget === 'padrao' ? 'Qualquer' : (activeTarget === 'sucata' ? 'Lixo' : activeTarget.toUpperCase());
-
+        
         if(safeGet('hook-display-slot')) {
-            safeGet('hook-display-slot').innerHTML = `
-                <span style="color:${hookData.color}; font-weight:bold; text-shadow: 0 0 10px ${hookData.color}88; pointer-events: none;">🪝 ${hookData.name}</span>
-                <div style="font-size: 0.65rem; color:#94a3b8; margin-top:2px; pointer-events: none;">🎯 Alvo: <span style="color:#f8fafc;">${targetLabel}</span></div>
-            `;
-            safeGet('hook-display-slot').style.cursor = 'pointer';
-            safeGet('hook-display-slot').onclick = () => {
-                initHookTargetModal(); 
-                const modal = document.getElementById('hook-target-modal');
-                if (modal) modal.classList.remove('hidden');
-            };
+            if (window.checkIsAdmin()) {
+                // UI do ADM: Exibe o sintonizador de Alvo e permite clicar
+                let activeTarget = window.GAME_STATE.hookCustomTarget || hookData.target || 'padrao';
+                let targetLabel = activeTarget === 'padrao' ? 'Qualquer' : (activeTarget === 'sucata' ? 'Lixo' : activeTarget.toUpperCase());
+
+                safeGet('hook-display-slot').innerHTML = `
+                    <span style="color:${hookData.color}; font-weight:bold; text-shadow: 0 0 10px ${hookData.color}88; pointer-events: none;">🪝 ${hookData.name}</span>
+                    <div style="font-size: 0.65rem; color:#94a3b8; margin-top:2px; pointer-events: none;">🎯 Alvo: <span style="color:#f8fafc;">${targetLabel}</span></div>
+                `;
+                safeGet('hook-display-slot').style.cursor = 'pointer';
+                safeGet('hook-display-slot').onclick = () => {
+                    initHookTargetModal(); 
+                    const modal = document.getElementById('hook-target-modal');
+                    if (modal) modal.classList.remove('hidden');
+                };
+            } else {
+                // UI do Jogador Comum: Apenas o nome do anzol, sem mira, sem clique.
+                safeGet('hook-display-slot').innerHTML = `<span style="color:${hookData.color}; font-weight:bold; text-shadow: 0 0 10px ${hookData.color}88;">🪝 ${hookData.name}</span>`;
+                safeGet('hook-display-slot').style.cursor = 'default';
+                safeGet('hook-display-slot').onclick = null;
+            }
         }
 
         const hookVisual = safeGet('hook');
@@ -589,7 +603,6 @@ function iniciarMotorDoJogo() {
         let safeRodId = window.GAME_STATE.currentRodIndex;
         let safeHookId = window.GAME_STATE.currentHook;
         
-        // Bloqueio do lado da simulação para garantir
         if (!window.checkIsAdmin()) {
             if (safeRodId === 9999) safeRodId = 0;
             if (safeHookId === 'anzol_adm_supremo') safeHookId = 'anzol_padrao';
@@ -624,7 +637,13 @@ function iniciarMotorDoJogo() {
 
         if (window.eventLuckMult) luckFactor += (window.eventLuckMult * 100); 
 
-        let activeTarget = window.GAME_STATE.hookCustomTarget || (hook ? hook.target : 'padrao');
+        // LÓGICA DE ALVO BLINDADA: Se não for ADM, ele ignora o Sintonizador forçadamente e usa o alvo nativo do anzol
+        let activeTarget = 'padrao';
+        if (window.checkIsAdmin() && window.GAME_STATE.hookCustomTarget) {
+            activeTarget = window.GAME_STATE.hookCustomTarget;
+        } else if (hook && hook.target) {
+            activeTarget = hook.target;
+        }
 
         let sucataChance = 0.15 - (luckFactor / 100000);
         if (window.currentEventID === 'abismo_lixo') sucataChance += 0.60;
@@ -897,7 +916,7 @@ function iniciarMotorDoJogo() {
     }
 
     // =========================================================
-    // OUVINTE DE ATALHOS GLOBAIS (MODIFICADO PARA STEALTH)
+    // OUVINTE DE ATALHOS GLOBAIS (FURTIVIDADE ADICIONADA)
     // =========================================================
     document.addEventListener('keydown', (e) => { 
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -910,7 +929,7 @@ function iniciarMotorDoJogo() {
                     painel.classList.toggle('hidden'); 
                 }
             }
-            // Não há mais aviso de "Acesso Negado". Jogadores comuns não sabem que esse atalho existe.
+            // Não exibimos mais mensagens para não alertar jogadores normais
         }
 
         if (e.code === 'Space') { 
