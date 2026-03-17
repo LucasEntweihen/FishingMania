@@ -3,7 +3,7 @@
 // ==========================================================================
 const urlParams = new URLSearchParams(window.location.search);
 const isGuestMode = urlParams.get('guest') === 'true';
-const isOfflineTestAdm = urlParams.get('test') === 'adm'; // TRUQUE DE DEV OFFLINE
+const isOfflineTestAdm = urlParams.get('test') === 'adm'; 
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -23,7 +23,8 @@ const firebaseConfig = {
 let app, auth, db, currentUser = null;
 let offlineMode = false; 
 
-// FLAG DE ADM DINÂMICA (Puxada do Firebase de forma segura)
+// O SEU UID DE DEUS CRAVADO NO MOTOR DO JOGO
+const MEU_UID_DE_DEUS = 'WvffNHmkdCWQ5IPMnbh0SPP9XkY2';
 window.isAdminUser = false;
 
 try {
@@ -35,13 +36,12 @@ try {
     offlineMode = true;
 }
 
-// 🛡️ FUNÇÃO DE SEGURANÇA GLOBAL - O GATEKEEPER
 window.checkIsAdmin = function() {
     if (isOfflineTestAdm) return true; 
+    if (currentUser && currentUser.uid === MEU_UID_DE_DEUS) return true; // Liberação imediata e absoluta
     return window.isAdminUser === true;
 };
 
-// 🛡️ ROTINA ANTI-CHEAT: Limpa armamento ADM de contas normais
 window.validateGearSecurity = function() {
     if (!window.checkIsAdmin() && window.GAME_STATE) {
         if (window.GAME_STATE.ownedRods) {
@@ -56,12 +56,10 @@ window.validateGearSecurity = function() {
         if (window.GAME_STATE.currentHook === 'anzol_adm_supremo') {
             window.GAME_STATE.currentHook = 'anzol_padrao';
         }
-        // Limpa também o alvo customizado se o cara não for ADM
         window.GAME_STATE.hookCustomTarget = null;
     }
 };
 
-// 👑 INJEÇÃO DE EQUIPAMENTO EXCLUSIVO ADM
 window.injectAdminGear = function() {
     if (!window.checkIsAdmin() || !window.GAME_STATE) return;
 
@@ -107,7 +105,7 @@ async function carregarBancoDeDadosEIniciar() {
 
         iniciarMotorDoJogo();
     } catch (erro) {
-        console.error("Falha ao carregar o banco de dados. Tentando prosseguir com JS local.", erro);
+        console.error("Falha ao carregar o banco de dados.", erro);
     }
 }
 
@@ -138,16 +136,6 @@ function injectScriptStyles() {
         }
 
         .rotten-fish { filter: drop-shadow(0 15px 20px rgba(0,0,0,0.8)) hue-rotate(260deg) saturate(3) contrast(1.3) brightness(0.6) sepia(0.5) !important; }
-
-        /* Estilos do Painel ADM */
-        .admin-btn {
-            background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #fca5a5; padding: 12px 20px;
-            border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 700; cursor: pointer; transition: 0.2s;
-            text-transform: uppercase; letter-spacing: 1px; width: 100%; text-align: left; display: flex; align-items: center; gap: 15px;
-        }
-        .admin-btn:hover { background: #ef4444; color: #fff; box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); transform: translateX(5px); }
-        .admin-btn:active { transform: scale(0.98); }
-        .admin-btn-icon { font-size: 1.5rem; }
     `;
     document.head.appendChild(style);
 }
@@ -208,8 +196,22 @@ function iniciarMotorDoJogo() {
     };
 
     // =========================================================
-    // SALVAMENTO GLOBAL DE DADOS SEGURO
+    // SEGURANÇA CONTRA CORRUPÇÃO DO FIREBASE (ENCODE/DECODE)
     // =========================================================
+    function encK(k) { return String(k).replace(/\./g, '‹d›').replace(/#/g, '‹h›').replace(/\$/g, '‹s›').replace(/\[/g, '‹l›').replace(/\]/g, '‹r›').replace(/\//g, '‹sl›'); }
+    function decK(k) { return String(k).replace(/‹d›/g, '.').replace(/‹h›/g, '#').replace(/‹s›/g, '$').replace(/‹l›/g, '[').replace(/‹r›/g, ']').replace(/‹sl›/g, '/'); }
+    
+    function safeDict(dict) {
+        let res = {};
+        if(dict) for(let k in dict) res[encK(k)] = dict[k];
+        return res;
+    }
+    function loadDict(dict) {
+        let res = {};
+        if(dict) for(let k in dict) res[decK(k)] = dict[k];
+        return res;
+    }
+
     window.saveGame = async function() {
         if (isGuestMode) { 
             if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Convidado"; 
@@ -220,10 +222,17 @@ function iniciarMotorDoJogo() {
         if (!Array.isArray(safeInstances)) safeInstances = Object.values(safeInstances);
 
         const playerSave = { 
-            coins: window.GAME_STATE.coins || 0, currentRodIndex: window.GAME_STATE.currentRodIndex || 0, ownedRods: window.GAME_STATE.ownedRods || [0], ownedSinkers: window.GAME_STATE.ownedSinkers || ['chumbo'], currentSinker: window.GAME_STATE.currentSinker || 'chumbo', ownedHooks: window.GAME_STATE.ownedHooks || ['anzol_padrao'], currentHook: window.GAME_STATE.currentHook || 'anzol_padrao', hookCustomTarget: window.GAME_STATE.hookCustomTarget || null, ownedKnives: window.GAME_STATE.ownedKnives || ['faca_cozinha'], currentKnife: window.GAME_STATE.currentKnife || 'faca_cozinha', baitInventory: window.GAME_STATE.baitInventory || {}, currentBait: window.GAME_STATE.currentBait || null, collection: window.GAME_STATE.collection || {}, collection67: window.GAME_STATE.collection67 || {}, scrapCollection: window.GAME_STATE.scrapCollection || {}, materials: window.GAME_STATE.materials || {}, sushiUnlocked: window.GAME_STATE.sushiUnlocked || false, orbs: window.GAME_STATE.orbs || {}, 
+            coins: window.GAME_STATE.coins || 0, currentRodIndex: window.GAME_STATE.currentRodIndex || 0, ownedRods: window.GAME_STATE.ownedRods || [0], ownedSinkers: window.GAME_STATE.ownedSinkers || ['chumbo'], currentSinker: window.GAME_STATE.currentSinker || 'chumbo', ownedHooks: window.GAME_STATE.ownedHooks || ['anzol_padrao'], currentHook: window.GAME_STATE.currentHook || 'anzol_padrao', hookCustomTarget: window.GAME_STATE.hookCustomTarget || null, ownedKnives: window.GAME_STATE.ownedKnives || ['faca_cozinha'], currentKnife: window.GAME_STATE.currentKnife || 'faca_cozinha', currentBait: window.GAME_STATE.currentBait || null, sushiUnlocked: window.GAME_STATE.sushiUnlocked || false,
             tacticalSquad: window.GAME_STATE.tacticalSquad || [null, null, null, null, null],
             hybridInstances: safeInstances,
-            customFusions: window.GAME_STATE.customFusions || {} 
+            
+            collection: safeDict(window.GAME_STATE.collection), 
+            collection67: safeDict(window.GAME_STATE.collection67), 
+            scrapCollection: safeDict(window.GAME_STATE.scrapCollection), 
+            materials: safeDict(window.GAME_STATE.materials), 
+            orbs: safeDict(window.GAME_STATE.orbs),
+            baitInventory: safeDict(window.GAME_STATE.baitInventory),
+            customFusions: safeDict(window.GAME_STATE.customFusions)
         };
         
         if (!offlineMode && currentUser && db) {
@@ -241,11 +250,8 @@ function iniciarMotorDoJogo() {
         }
     };
 
-    // =========================================================
-    // MODAL DE SINTONIA DO ANZOL (EXCLUSIVO ADM)
-    // =========================================================
     function initHookTargetModal() {
-        if (!window.checkIsAdmin()) return; // Trava a criação
+        if (!window.checkIsAdmin()) return;
         if (document.getElementById('hook-target-modal')) return;
 
         const modal = document.createElement('div');
@@ -292,151 +298,26 @@ function iniciarMotorDoJogo() {
         window.showToast("Anzol Sintonizado!", `O seu anzol agora está focado em atrair a raridade: ${targetId.toUpperCase()}`, "success");
     };
 
-    // =========================================================
-    // UI DO PAINEL DO MESTRE (CRIADO E EXIBIDO SOMENTE PARA ADMs)
-    // =========================================================
-    function initAdminPanel() {
-        if (!window.checkIsAdmin()) return; 
+    function processLoadedData(data) {
+        Object.assign(window.GAME_STATE, data);
+        window.GAME_STATE.isFishing = false;
         
-        if (document.getElementById('admin-modal')) return;
+        window.GAME_STATE.collection = loadDict(data.collection);
+        window.GAME_STATE.collection67 = loadDict(data.collection67);
+        window.GAME_STATE.materials = loadDict(data.materials);
+        window.GAME_STATE.scrapCollection = loadDict(data.scrapCollection);
+        window.GAME_STATE.baitInventory = loadDict(data.baitInventory);
+        window.GAME_STATE.orbs = loadDict(data.orbs);
+        window.GAME_STATE.customFusions = loadDict(data.customFusions);
 
-        const modal = document.createElement('div');
-        modal.id = 'admin-modal';
-        modal.className = 'modal hidden';
-        modal.style.zIndex = '9999999';
+        if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
+        if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
+        if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
+        if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) { window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha'; }
         
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 600px; background: #000; border: 2px solid #ef4444; box-shadow: 0 0 50px rgba(239,68,68,0.4); padding: 0;">
-                <div style="background: repeating-linear-gradient(45deg, #1a0505, #1a0505 10px, #2a0808 10px, #2a0808 20px); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ef4444;">
-                    <h2 style="margin: 0; color: #f8fafc; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; text-shadow: 0 2px 4px #000;">👑 PAINEL DO MESTRE</h2>
-                    <button onclick="document.getElementById('admin-modal').classList.add('hidden')" style="background: none; border: none; color: #ef4444; font-size: 2rem; cursor: pointer;">&times;</button>
-                </div>
-                
-                <div style="padding: 30px; display: flex; flex-direction: column; gap: 15px; max-height: 60vh; overflow-y: auto;" class="custom-scrollbar">
-                    <div style="color: #94a3b8; font-size: 0.85rem; font-family: 'Poppins'; text-align: center; margin-bottom: 10px;">Aviso: Alterações serão salvas instantaneamente na Nuvem.</div>
-                    <button class="admin-btn" onclick="window.adminAcoes.injetarGear(this)"><span class="admin-btn-icon">👑</span> Injetar Vara e Anzol Supremo</button>
-                    <button class="admin-btn" onclick="window.adminAcoes.addOuro(this)"><span class="admin-btn-icon">🪙</span> Injetar 10 Milhões de Ouro</button>
-                    <button class="admin-btn" onclick="window.adminAcoes.addMateriais(this)"><span class="admin-btn-icon">📦</span> Dar x999 de Todos os Materiais</button>
-                    <button class="admin-btn" onclick="window.adminAcoes.addIscas(this)"><span class="admin-btn-icon">🪱</span> Dar x99 de Todas as Iscas</button>
-                    <button class="admin-btn" onclick="window.adminAcoes.completarAquario(this)"><span class="admin-btn-icon">📖</span> Povoar Aquário (+50 cada Peixe)</button>
-                    <button class="admin-btn" onclick="window.adminAcoes.desbloquearTudo(this)"><span class="admin-btn-icon">⚔️</span> Liberar Todo o Armamento</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-
-        // BOTÃO FLUTUANTE EXCLUSIVO PARA ADMS
-        const triggerBtn = document.createElement('button');
-        triggerBtn.id = 'open-admin-panel-btn';
-        triggerBtn.innerHTML = '👑 Modo Deus';
-        triggerBtn.style.cssText = `
-            position: fixed; bottom: 20px; right: 20px; z-index: 999999;
-            background: linear-gradient(135deg, #ef4444, #991b1b); color: white;
-            border: 2px solid #fca5a5; padding: 12px 25px; border-radius: 12px;
-            font-family: 'Fredoka', sans-serif; font-size: 1.2rem; text-transform: uppercase;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.8), 0 0 15px rgba(239,68,68,0.5);
-            cursor: pointer; transition: all 0.3s;
-        `;
-        triggerBtn.onmouseover = () => triggerBtn.style.transform = 'scale(1.1) translateY(-5px)';
-        triggerBtn.onmouseout = () => triggerBtn.style.transform = 'scale(1) translateY(0)';
-        triggerBtn.onclick = () => { document.getElementById('admin-modal').classList.toggle('hidden'); };
-        document.body.appendChild(triggerBtn);
+        window.validateGearSecurity(); 
+        if (window.checkIsAdmin()) { window.injectAdminGear(); }
     }
-
-    function prepararInventario() {
-        if (!window.GAME_STATE) window.GAME_STATE = {};
-        if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
-        if (!window.GAME_STATE.baitInventory) window.GAME_STATE.baitInventory = {};
-        if (!window.GAME_STATE.collection) window.GAME_STATE.collection = {};
-        if (!window.GAME_STATE.collection67) window.GAME_STATE.collection67 = {};
-        if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
-        if (!window.GAME_STATE.customFusions) window.GAME_STATE.customFusions = {};
-    }
-
-    window.adminAcoes = {
-        _check: function() {
-            if (!window.checkIsAdmin()) {
-                alert("⛔ ALERTA DE SEGURANÇA: Tentativa de injeção bloqueada.");
-                return false;
-            }
-            return true;
-        },
-
-        _commit: async function(msg, btnElement) {
-            if (!this._check()) return;
-
-            if (btnElement) {
-                const textOriginal = btnElement.innerHTML;
-                btnElement.innerHTML = `<span class="admin-btn-icon">⏳</span> Gravando...`;
-                btnElement.disabled = true;
-                
-                if (typeof window.updateUI === 'function') window.updateUI();
-                if (typeof window.saveGame === 'function') await window.saveGame(); 
-                
-                btnElement.innerHTML = textOriginal;
-                btnElement.disabled = false;
-            } else {
-                if (typeof window.updateUI === 'function') window.updateUI();
-                if (typeof window.saveGame === 'function') await window.saveGame();
-            }
-            
-            window.showToast("God Mode", msg, "success");
-        },
-
-        injetarGear: async function(btn) {
-            prepararInventario();
-            window.injectAdminGear();
-            await this._commit("A Vara e o Anzol dos Deuses foram injetados no seu arsenal.", btn);
-        },
-
-        addOuro: async function(btn) {
-            prepararInventario();
-            window.GAME_STATE.coins += 10000000;
-            await this._commit("+ 10 Milhões de Ouro injetados permanentemente.", btn);
-        },
-
-        addMateriais: async function(btn) {
-            prepararInventario();
-            if (window.MATERIALS) {
-                window.MATERIALS.forEach(m => window.GAME_STATE.materials[m.id] = (window.GAME_STATE.materials[m.id] || 0) + 999);
-            }
-            const boostsIds = ['boost_luck', 'boost_value', 'boost_luck_2', 'boost_value_2', 'boost_size', 'boost_speed', 'boost_size_2', 'boost_luck_3'];
-            boostsIds.forEach(id => window.GAME_STATE.materials[id] = (window.GAME_STATE.materials[id] || 0) + 999);
-            if (window.SUCATAS) window.SUCATAS.forEach(s => window.GAME_STATE.scrapCollection[s.id] = (window.GAME_STATE.scrapCollection[s.id] || 0) + 50);
-            await this._commit("Todos os materiais, lixos e catalisadores no máximo.", btn);
-        },
-
-        addIscas: async function(btn) {
-            prepararInventario();
-            if (window.BAITS) {
-                window.BAITS.forEach(b => window.GAME_STATE.baitInventory[b.id] = (window.GAME_STATE.baitInventory[b.id] || 0) + 99);
-            }
-            await this._commit("Estoque de Iscas Genéticas abastecido.", btn);
-        },
-
-        completarAquario: async function(btn) {
-            prepararInventario();
-            if (window.RARITIES) {
-                Object.values(window.RARITIES).forEach(r => {
-                    r.variations.forEach(f => {
-                        window.GAME_STATE.collection[f.name] = (window.GAME_STATE.collection[f.name] || 0) + 50;
-                        window.GAME_STATE.collection67[f.name] = (window.GAME_STATE.collection67[f.name] || 0) + 50;
-                    });
-                });
-            }
-            await this._commit("Aquário Populado! (+50 cópias de todos os peixes).", btn);
-        },
-
-        desbloquearTudo: async function(btn) {
-            prepararInventario();
-            if (window.GAME_STATE.rods) window.GAME_STATE.ownedRods = window.GAME_STATE.rods.map(r => r.id);
-            if (window.SINKERS) window.GAME_STATE.ownedSinkers = window.SINKERS.map(s => s.id);
-            if (window.HOOKS) window.GAME_STATE.ownedHooks = window.HOOKS.map(h => h.id);
-            if (window.KNIVES) window.GAME_STATE.ownedKnives = window.KNIVES.map(k => k.id);
-            window.GAME_STATE.sushiUnlocked = true;
-            await this._commit("Arsenal Completo Liberado (Varas, Facas, Anzóis e Pesos).", btn);
-        }
-    };
 
     function loadGame() {
         if (isGuestMode) { if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Modo Convidado"; window.updateUI(); return; }
@@ -445,19 +326,7 @@ function iniciarMotorDoJogo() {
             let localData = localStorage.getItem('gatoPescadorSave_visitante') || localStorage.getItem('gatoPescadorSave');
             if (localData) {
                 try {
-                    Object.assign(window.GAME_STATE, JSON.parse(localData));
-                    if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
-                    if (!window.GAME_STATE.orbs) window.GAME_STATE.orbs = {};
-                    if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
-                    if (!window.GAME_STATE.customFusions) window.GAME_STATE.customFusions = {};
-                    if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
-                    if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
-                    if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
-                    if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) { window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha'; }
-                    
-                    window.validateGearSecurity(); // VALIDAÇÃO ANTI-CHEAT NO LOAD LOCAL
-                    if (window.checkIsAdmin()) { window.injectAdminGear(); }
-
+                    processLoadedData(JSON.parse(localData));
                     if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Local / Visitante";
                 } catch (e) { console.error("Save corrompido"); }
             }
@@ -468,25 +337,12 @@ function iniciarMotorDoJogo() {
         
         get(child(ref(db), `users/${currentUser.uid}`)).then((snapshot) => {
             if (snapshot.exists()) {
-                Object.assign(window.GAME_STATE, snapshot.val());
-                window.GAME_STATE.isFishing = false;
-                if (!window.GAME_STATE.materials) window.GAME_STATE.materials = {};
-                if (!window.GAME_STATE.orbs) window.GAME_STATE.orbs = {};
-                if (!window.GAME_STATE.scrapCollection) window.GAME_STATE.scrapCollection = {};
-                if (!window.GAME_STATE.customFusions) window.GAME_STATE.customFusions = {};
-                if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
-                if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
-                if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
-                if (!window.GAME_STATE.ownedKnives || window.GAME_STATE.ownedKnives.length === 0) { window.GAME_STATE.ownedKnives = ['faca_cozinha']; window.GAME_STATE.currentKnife = 'faca_cozinha'; }
-                
-                window.validateGearSecurity(); // VALIDAÇÃO ANTI-CHEAT NA NUVEM
-                if (window.checkIsAdmin()) { window.injectAdminGear(); }
-
+                processLoadedData(snapshot.val());
                 localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(window.GAME_STATE));
                 if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Conectado";
             } else {
                 let localBackup = localStorage.getItem('gatoPescadorSave_' + currentUser.uid) || localStorage.getItem('gatoPescadorSave');
-                if (localBackup) { try { Object.assign(window.GAME_STATE, JSON.parse(localBackup)); } catch(e){} }
+                if (localBackup) { try { processLoadedData(JSON.parse(localBackup)); } catch(e){} }
                 window.saveGame();
             }
             if (window.ROD_TEMPLATES) window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
@@ -502,23 +358,17 @@ function iniciarMotorDoJogo() {
         onAuthStateChanged(auth, async (user) => { 
             currentUser = user; 
             if(!isGuestMode) {
-                try {
-                    const admSnapshot = await get(child(ref(db), `admins/${user.uid}`));
-                    window.isAdminUser = (admSnapshot.exists() && admSnapshot.val() === true);
-                } catch(e) {
+                // IGNORANDO O BANCO DE DADOS: VALIDAÇÃO DIRETA PELO SEU UID
+                if (user && user.uid === MEU_UID_DE_DEUS) {
+                    window.isAdminUser = true;
+                } else {
                     window.isAdminUser = false;
                 }
                 loadGame(); 
             }
-            if (window.checkIsAdmin()) {
-                initAdminPanel(); 
-            }
         }); 
     } else {
         if(!isGuestMode) loadGame();
-        if (window.checkIsAdmin()) {
-            initAdminPanel(); 
-        }
     }
     
     setInterval(window.saveGame, 30000);
@@ -554,7 +404,6 @@ function iniciarMotorDoJogo() {
         if(safeGet('sinker-slot')) safeGet('sinker-slot').innerText = `🪨 ${sinker.name}`;
         if(safeGet('equipped-sinker-visual')) safeGet('equipped-sinker-visual').style.display = (sinker.id && sinker.id !== 'chumbo') ? 'block' : 'none';
 
-        // LÓGICA DE INTERFACE: ADM vs JOGADOR NORMAL
         let safeHookId = window.GAME_STATE.currentHook || 'anzol_padrao';
         if (!window.checkIsAdmin() && safeHookId === 'anzol_adm_supremo') safeHookId = 'anzol_padrao'; 
         
@@ -562,7 +411,6 @@ function iniciarMotorDoJogo() {
         
         if(safeGet('hook-display-slot')) {
             if (window.checkIsAdmin()) {
-                // UI do ADM: Exibe o sintonizador de Alvo e permite clicar
                 let activeTarget = window.GAME_STATE.hookCustomTarget || hookData.target || 'padrao';
                 let targetLabel = activeTarget === 'padrao' ? 'Qualquer' : (activeTarget === 'sucata' ? 'Lixo' : activeTarget.toUpperCase());
 
@@ -577,7 +425,6 @@ function iniciarMotorDoJogo() {
                     if (modal) modal.classList.remove('hidden');
                 };
             } else {
-                // UI do Jogador Comum: Apenas o nome do anzol, sem mira, sem clique.
                 safeGet('hook-display-slot').innerHTML = `<span style="color:${hookData.color}; font-weight:bold; text-shadow: 0 0 10px ${hookData.color}88;">🪝 ${hookData.name}</span>`;
                 safeGet('hook-display-slot').style.cursor = 'default';
                 safeGet('hook-display-slot').onclick = null;
@@ -637,7 +484,6 @@ function iniciarMotorDoJogo() {
 
         if (window.eventLuckMult) luckFactor += (window.eventLuckMult * 100); 
 
-        // LÓGICA DE ALVO BLINDADA: Se não for ADM, ele ignora o Sintonizador forçadamente e usa o alvo nativo do anzol
         let activeTarget = 'padrao';
         if (window.checkIsAdmin() && window.GAME_STATE.hookCustomTarget) {
             activeTarget = window.GAME_STATE.hookCustomTarget;
@@ -915,23 +761,8 @@ function iniciarMotorDoJogo() {
         }, travelTime + 1000);
     }
 
-    // =========================================================
-    // OUVINTE DE ATALHOS GLOBAIS (FURTIVIDADE ADICIONADA)
-    // =========================================================
     document.addEventListener('keydown', (e) => { 
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        
-        if (e.shiftKey && (e.code === 'KeyM' || e.key.toLowerCase() === 'm')) {
-            // SILÊNCIO TOTAL: Só faz algo se for de fato um administrador
-            if (window.checkIsAdmin()) {
-                const painel = document.getElementById('admin-modal');
-                if (painel) {
-                    painel.classList.toggle('hidden'); 
-                }
-            }
-            // Não exibimos mais mensagens para não alertar jogadores normais
-        }
-
         if (e.code === 'Space') { 
             e.preventDefault(); 
             if (e.repeat) return;
@@ -953,7 +784,7 @@ function iniciarMotorDoJogo() {
 
     safeGet('sushi-btn')?.addEventListener('click', () => {
         if (!window.GAME_STATE.sushiUnlocked) {
-            window.showToast("Restaurante Fechado!", "Você precisa irritar o Peixe Tutor clicando nele várias vezes para obter a chave!", "warning");
+            window.showToast("Restaurante Fechado!", "A porta está trancada. A chave deve estar escondida em algum lugar...", "warning");
             return;
         }
         if (window.SushiMode) window.SushiMode.open();
@@ -1266,9 +1097,6 @@ function iniciarMotorDoJogo() {
     }, 45000);
     setTimeout(() => { window.updateUI(); if(canvas) animateBg(); }, 500);
 
-    // ==========================================================================
-    // SISTEMA DE SUSHI E CORTES
-    // ==========================================================================
     window.SushiMode = {
         pendingSushi: null, 
         targets: [],

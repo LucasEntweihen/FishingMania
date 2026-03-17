@@ -1,4 +1,3 @@
-/* TRAVA UNIVERSAL DE ESPAÇAMENTO */
 *, *::before, *::after { box-sizing: border-box; }
 
 body, html { 
@@ -6,7 +5,6 @@ body, html {
     background: #020617; font-family: 'Poppins', sans-serif; color: #f8fafc; overflow: hidden; 
 }
 
-/* HEADER TÁTICO */
 .header { 
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.9));
     padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; 
@@ -14,190 +12,161 @@ body, html {
     box-shadow: 0 10px 30px rgba(0,0,0,0.8);
 }
 .header h1 { margin: 0; font-family: 'Fredoka'; font-size: 2rem; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(56,189,248,0.5); }
-.btn-retreat { background: linear-gradient(180deg, #dc2626, #991b1b); border: 2px solid #fca5a5; color: white; padding: 10px 25px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+.btn-retreat { background: linear-gradient(180deg, #dc2626, #991b1b); border: 2px solid #fca5a5; color: white; padding: 8px 20px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
 .btn-retreat:hover { background: #ef4444; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.6); }
 
-.battle-container { display: flex; height: calc(100vh - 80px); width: 100%; position: relative; z-index: 1; padding: 25px; gap: 30px; }
+.battle-container { 
+    display: flex; height: calc(100vh - 80px); width: 100%; 
+    position: relative; z-index: 1; padding: 20px; gap: 20px; 
+    align-items: center; overflow: hidden;
+}
 
-/* O TABULEIRO ISOMÉTRICO (MAPA) */
 .board-wrapper {
-    flex: 1; display: flex; justify-content: center; align-items: center;
-    background: url('/img/map/mapa1.png') center center no-repeat;
+    flex: 1 1 auto; display: flex; justify-content: center; align-items: center;
     background-size: cover; border-radius: 16px; border: 2px solid #1e293b;
     box-shadow: inset 0 0 100px rgba(0,0,0,0.9); perspective: 1200px; position: relative; overflow: hidden;
+    height: 100%; min-width: 50%;
 }
-.board-wrapper::after { content: ''; position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.8) 100%); pointer-events: none; }
+.board-wrapper::after { content: ''; position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.8) 100%); pointer-events: none; z-index: 5; }
+
+/* Wrapper para escalar o Grid mantendo a matemática de 600px intacta */
+.grid-scaler {
+    display: flex; justify-content: center; align-items: center;
+    transform: scale(1); transition: transform 0.3s ease;
+}
 
 .tactical-grid {
     position: relative; 
-    display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);
-    gap: 2px; width: 600px; height: 600px;
+    display: grid; gap: 2px; width: 600px; height: 600px;
     transform: rotateX(55deg) rotateZ(-45deg);
     transform-style: preserve-3d;
-    background: rgba(0,0,0,0.2); padding: 0; border-radius: 12px;
-    border: 2px solid rgba(56, 189, 248, 0.2);
+    padding: 0; border-radius: 12px; z-index: 1;
 }
 
 .cell {
-    background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(56, 189, 248, 0.2); 
-    position: relative; transition: 0.2s; display: flex; justify-content: center; align-items: center;
+    background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.3); 
+    position: relative; transition: 0.3s; display: flex; justify-content: center; align-items: center;
     transform-style: preserve-3d;
+    transform: translateZ(calc((var(--h, 1) - 1) * 25px));
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5), -3px 3px 0px rgba(0,0,0,calc((var(--h, 1) - 1) * 0.4));
 }
 
-.cell.walkable { background: rgba(56, 189, 248, 0.4); border-color: #38bdf8; cursor: pointer; box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.5); }
-.cell.walkable:hover { background: rgba(56, 189, 248, 0.6); transform: translateZ(10px); }
-.cell.targetable { background: rgba(239, 68, 68, 0.4); border-color: #ef4444; cursor: crosshair; box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.5); animation: pulseTarget 1.5s infinite; }
+.cell.walkable { background: rgba(56, 189, 248, 0.4); border-color: #38bdf8; cursor: pointer; box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.5), -3px 3px 0px rgba(0,0,0,calc((var(--h, 1) - 1) * 0.4)); }
+.cell.walkable:hover { background: rgba(56, 189, 248, 0.6); filter: brightness(1.2); }
+.cell.targetable { background: rgba(239, 68, 68, 0.4); border-color: #ef4444; cursor: crosshair; box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.5), -3px 3px 0px rgba(0,0,0,calc((var(--h, 1) - 1) * 0.4)); animation: pulseTarget 1.5s infinite; }
 @keyframes pulseTarget { 0%, 100% { background: rgba(239, 68, 68, 0.3); } 50% { background: rgba(239, 68, 68, 0.6); } }
-.cell.active-turn { border: 2px solid #10b981; background: rgba(16, 185, 129, 0.3); box-shadow: inset 0 0 30px rgba(16, 185, 129, 0.5); }
+.cell.active-turn { border: 2px solid #10b981; background: rgba(16, 185, 129, 0.3); box-shadow: inset 0 0 30px rgba(16, 185, 129, 0.5), -3px 3px 0px rgba(0,0,0,calc((var(--h, 1) - 1) * 0.4)); }
 
+.cell.void-cell { visibility: hidden; pointer-events: none; }
 
-/* ==========================================================
-   FÍSICA DE SPRITES (CRAVADOS NO CENTRO DA TILE)
-   ========================================================== */
 .unit {
     position: absolute;
-    width: calc(100% / 6); height: calc(100% / 6);
-    left: calc(var(--x) * (100% / 6));
-    top: calc(var(--y) * (100% / 6));
-    /* Sem flexbox aqui para não puxar o sprite para a borda! */
     pointer-events: none; z-index: 10;
     transform-style: preserve-3d;
-    transition: left 0.5s cubic-bezier(0.33, 1, 0.68, 1), top 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+    transition: left 0.4s cubic-bezier(0.33, 1, 0.68, 1), top 0.4s cubic-bezier(0.33, 1, 0.68, 1), transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+    transform: translateZ(calc((var(--h, 1) - 1) * 25px));
 }
 
 .unit-content {
-    position: absolute;
-    width: 140px; 
-    height: 140px; 
-    transform-style: preserve-3d;
-    
-    /* A MÁGICA DO ALINHAMENTO: Tranca o centro inferior da imagem no centro exato da célula de 100x100 */
-    left: 50%;
-    bottom: 50%;
-    transform-origin: bottom center;
-    
-    /* 1. Arrasta metade da própria largura (70px) para trás (centra no eixo X) 
-       2. Desfaz a rotação do Grid Isométrico para ficar de pé (Billboard)
-       3. Ajuste fininho (translateY) para colar o pé no chão perfeitamente */
-    transform: translateX(-50%) rotateZ(45deg) rotateX(-55deg) translateY(10px);
-    
+    position: absolute; width: 85px; height: 85px; 
+    transform-style: preserve-3d; left: 50%; bottom: 50%; transform-origin: bottom center;
+    /* Ajuste de Y baseado na última iteração */
+    transform: translateX(-50%) rotateZ(45deg) rotateX(-55deg) translateY(20px);
     display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
 }
 
-.unit img { 
-    width: 100%; height: 100%; 
-    object-fit: contain; 
-    filter: drop-shadow(0 15px 10px rgba(0,0,0,0.8)); 
-}
+.unit img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 5px rgba(0,0,0,0.8)); }
+.unit.enemy img { filter: drop-shadow(0 10px 5px rgba(0,0,0,0.8)) drop-shadow(0 0 10px rgba(239,68,68,0.7)); }
 
-.unit.enemy img { 
-    /* Brilho vermelho hostil. O scaleX(-1) foi banido daqui para não causar distorção */
-    filter: drop-shadow(0 15px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 15px rgba(239,68,68,0.7)); 
-}
-
-/* --- ANIMAÇÃO DE MOVIMENTO (O Pulo Suave) --- */
-.unit.is-moving .unit-content {
-    animation: walkHop 0.5s ease-in-out;
-}
+.unit.is-moving .unit-content { animation: walkHop 0.4s ease-in-out; }
 @keyframes walkHop {
-    0%, 100% { transform: translateX(-50%) rotateZ(45deg) rotateX(-55deg) translateY(10px); }
-    /* No meio do pulo, ele sobe 25 pixels do chão (translateY) */
-    50% { transform: translateX(-50%) rotateZ(45deg) rotateX(-55deg) translateY(-15px); } 
+    0%, 100% { transform: translateX(-50%) rotateZ(45deg) rotateX(-55deg) translateY(20px); }
+    50% { transform: translateX(-50%) rotateZ(45deg) rotateX(-55deg) translateY(-5px); } 
 }
 
-/* VFX DE DANO (Brilho limpo sem mexer no transform) */
-.vfx-hit .unit-content { animation: flashRed 0.5s ease-in-out; }
-@keyframes flashRed { 
-    0%, 100% { filter: brightness(1); } 
-    50% { filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); } 
-}
-/* ========================================================== */
+.vfx-hit .unit-content { animation: flashRed 0.4s ease-in-out; }
+@keyframes flashRed { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); } }
 
-/* BARRAS E POPUPS */
-.hp-bar-container { width: 80px; height: 8px; background: #000; border: 2px solid #1e293b; border-radius: 4px; position: absolute; top: -15px; overflow: hidden; box-shadow: 0 5px 10px rgba(0,0,0,0.8); z-index: 20;}
+.hp-bar-container { width: 60px; height: 6px; background: #000; border: 1px solid #1e293b; border-radius: 3px; position: absolute; top: -10px; overflow: hidden; box-shadow: 0 5px 10px rgba(0,0,0,0.8); z-index: 20;}
 .hp-bar-fill { height: 100%; background: #10b981; width: 100%; transition: 0.3s; }
 .unit.enemy .hp-bar-fill { background: #ef4444; }
 
 .dmg-popup {
-    position: absolute; color: #fff; font-family: 'Fredoka'; font-size: 3.5rem; font-weight: bold;
+    position: absolute; color: #fff; font-family: 'Fredoka'; font-size: 2.5rem; font-weight: bold;
     text-shadow: 0 4px 10px #000, 0 0 20px #ef4444; pointer-events: none; z-index: 100;
-    /* Centraliza o número perfeitamente na tile alvejada e desfaz o isométrico */
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%) rotateZ(45deg) rotateX(-55deg);
-    animation: floatUpDmg 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    left: 50%; top: 50%; transform: translate(-50%, -50%) rotateZ(45deg) rotateX(-55deg);
+    animation: floatUpDmg 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 @keyframes floatUpDmg { 
-    0% { opacity: 1; transform: translate(-50%, -50%) rotateZ(45deg) rotateX(-55deg) translateY(-40px) scale(0.5); } 
-    100% { opacity: 0; transform: translate(-50%, -50%) rotateZ(45deg) rotateX(-55deg) translateY(-140px) scale(1.2); } 
+    0% { opacity: 1; transform: translate(-50%, -50%) rotateZ(45deg) rotateX(-55deg) translateY(-20px) scale(0.5); } 
+    100% { opacity: 0; transform: translate(-50%, -50%) rotateZ(45deg) rotateX(-55deg) translateY(-100px) scale(1.2); } 
 }
 
-/* HUD E PAINEL */
-.hud-panel {
-    width: 400px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px);
-    border: 1px solid #1e293b; border-radius: 16px; padding: 25px;
-    display: flex; flex-direction: column; box-shadow: inset 0 0 40px rgba(0,0,0,0.8), -15px 0 40px rgba(0,0,0,0.9);
+/* ==========================================================
+   HUD RESPONSIVO (FLEX FLUIDO COM MIN-HEIGHT ZERO)
+   ========================================================== */
+.hud-panel { 
+    width: 380px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px); 
+    border: 1px solid #1e293b; border-radius: 16px; padding: 20px; 
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.8), -15px 0 40px rgba(0,0,0,0.9); z-index: 20; 
+    display: flex; flex-direction: column; 
+    height: 100%; max-height: 100%; overflow: hidden;
 }
 
-.hud-portrait { display: flex; align-items: center; gap: 20px; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 20px; margin-bottom: 20px; }
-.hud-portrait img { width: 90px; height: 90px; object-fit: contain; background: rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #334155; box-shadow: inset 0 0 15px rgba(255,255,255,0.1); }
-.hud-name { font-family: 'Fredoka'; font-size: 1.6rem; color: #38bdf8; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+#hud-content {
+    display: flex; flex-direction: column; height: 100%; overflow: hidden;
+}
 
-.hud-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.hud-portrait { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px; flex-shrink: 0; }
+.hud-portrait img { width: 80px; height: 80px; object-fit: contain; background: rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #334155; box-shadow: inset 0 0 15px rgba(255,255,255,0.1); }
+.hud-name { font-family: 'Fredoka'; font-size: 1.4rem; color: #38bdf8; margin: 0; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+.hud-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; flex-shrink: 0; }
 .hud-stat { background: linear-gradient(180deg, #1e293b, #0f172a); padding: 8px; border-radius: 8px; border: 1px solid #334155; font-size: 0.9rem; font-weight: 900; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
 .hud-stat span { display: block; color: #94a3b8; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; }
 
-.status-flags { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
-.status-flag { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; background: #334155; color: #cbd5e1; border: 1px solid #475569; }
+.status-flags { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
+.status-flag { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; background: #334155; color: #cbd5e1; border: 1px solid #475569; }
 .status-flag.used { background: rgba(153, 27, 27, 0.4); color: #fca5a5; text-decoration: line-through; border-color: #7f1d1d;}
 
-.action-bar { display: flex; flex-direction: column; gap: 12px; flex: 1; }
-.skill-btn {
-    background: linear-gradient(90deg, #1e293b, #0f172a); border: 1px solid #475569; border-left: 4px solid #38bdf8;
-    border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;
-    color: #f8fafc; font-family: 'Poppins'; text-align: left; box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+.action-bar { 
+    display: flex; flex-direction: column; gap: 10px; 
+    flex: 1 1 auto; overflow-y: auto; min-height: 0; padding-right: 5px; 
 }
+.skill-btn { background: linear-gradient(90deg, #1e293b, #0f172a); border: 1px solid #475569; border-left: 4px solid #38bdf8; border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; color: #f8fafc; font-family: 'Poppins'; text-align: left; box-shadow: 0 5px 10px rgba(0,0,0,0.5); }
 .skill-btn:hover:not(:disabled) { background: linear-gradient(90deg, #334155, #1e293b); border-left-color: #60a5fa; transform: translateX(5px); }
 .skill-btn:disabled { opacity: 0.4; filter: grayscale(1); cursor: not-allowed; border-left-color: #475569; }
-.skill-btn .s-icon { width: 45px; height: 45px; flex-shrink: 0; border-radius: 8px; background: #000; box-shadow: inset 0 0 10px rgba(255,255,255,0.1); padding: 2px; }
+.skill-btn .s-icon { width: 40px; height: 40px; flex-shrink: 0; border-radius: 8px; background: #000; box-shadow: inset 0 0 10px rgba(255,255,255,0.1); padding: 2px; }
 
-.combat-log {
-    margin-top: 20px; height: 160px; background: #000; border-radius: 12px; border: 1px solid #1e293b;
-    padding: 15px; font-size: 0.8rem; color: #94a3b8; overflow-y: auto; font-family: monospace; line-height: 1.5; box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+.combat-log { 
+    margin-top: 15px; height: 120px; flex-shrink: 0; background: #000; border-radius: 12px; border: 1px solid #1e293b; 
+    padding: 10px 15px; font-size: 0.75rem; color: #94a3b8; overflow-y: auto; font-family: monospace; line-height: 1.4; box-shadow: inset 0 0 20px rgba(0,0,0,0.9); 
 }
-.log-entry { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
-.log-entry.player { color: #38bdf8; }
-.log-entry.enemy { color: #ef4444; }
-.log-entry.system { color: #f59e0b; font-weight: bold; }
+.log-entry { margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+.log-entry.player { color: #38bdf8; } .log-entry.enemy { color: #ef4444; } .log-entry.system { color: #f59e0b; font-weight: bold; }
 
-/* FILA DE TURNOS */
-.turn-queue {
-    position: absolute; top: 25px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 12px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); padding: 12px 25px;
-    border-radius: 50px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.9); z-index: 20;
-}
-.queue-portrait {
-    width: 50px; height: 50px; border-radius: 50%; background: #000; border: 2px solid #475569;
-    object-fit: contain; padding: 2px; transition: 0.3s;
-}
-.queue-portrait.active { border-color: #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); transform: scale(1.3); z-index: 5; }
+/* QUEUE */
+.turn-queue { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 50px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.9); z-index: 20; }
+.queue-portrait { width: 40px; height: 40px; border-radius: 50%; background: #000; border: 2px solid #475569; object-fit: contain; padding: 2px; transition: 0.3s; }
+.queue-portrait.active { border-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.8); transform: scale(1.3); z-index: 5; }
 .queue-portrait.dead { display: none; }
 
-#end-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 9999; opacity: 0; pointer-events: none; transition: 0.5s; backdrop-filter: blur(15px);
-}
+#end-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: 0.5s; backdrop-filter: blur(15px); }
 #end-screen h1 { font-family: 'Fredoka'; font-size: 6rem; margin: 0; text-shadow: 0 0 30px; letter-spacing: 5px; }
 
-/* SCROLLBAR */
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+/* CUSTOM SCROLLBARS */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-
-/* MÁSCARA ORGÂNICA - Oculta as células Void exportadas pelo Map Forge */
-.cell.void-cell {
-    visibility: hidden; 
-    pointer-events: none; 
+/* ==========================================================
+   ESCALONAMENTO DE TELA (MEDIA QUERIES)
+   ========================================================== */
+@media (max-width: 1200px), (max-height: 800px) {
+    .grid-scaler { transform: scale(0.85); }
+    .hud-panel { width: 340px; }
+}
+@media (max-height: 650px) {
+    .grid-scaler { transform: scale(0.7); }
+    .hud-panel { width: 300px; }
+    .hud-portrait img { width: 60px; height: 60px; }
+    .combat-log { height: 90px; }
 }
