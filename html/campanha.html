@@ -10,6 +10,213 @@
     <script src="/script/database.js"></script>
     <script src="/script/fusion.js"></script>
     <script src="/script/enemies.js"></script> <link rel="stylesheet" href="/style/campanha.css">
+    <style>
+        /* ================================================================
+           CAMPANHA OVERRIDE — Bug Fix + SVG System Enhancement
+           Carregado APÓS campanha.css para override cirúrgico.
+        ================================================================ */
+
+        /* ── BUG 2 FIX: Grid estava pequeno porque .hud-panel roubava largura
+           A proporção correta é 70% grid / 30% HUD.
+           Garante que .board-wrapper expanda corretamente. ── */
+        .battle-container {
+            display: flex !important;
+            flex: 1 !important;
+            gap: 0 !important;
+            overflow: hidden !important;
+            min-height: 0 !important;
+        }
+
+        .board-wrapper {
+            flex: 1 1 0% !important;          /* cresce tanto quanto possível */
+            min-width: 0 !important;           /* evita overflow quebrar o flex */
+            position: relative !important;
+            overflow: hidden !important;
+            /* Decoração: borda SVG via CSS */
+            border: 2px solid rgba(56, 189, 248, 0.2) !important;
+            border-right: none !important;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8) !important;
+        }
+
+        /* Cantos SVG decorativos no board via pseudo-elementos */
+        .board-wrapper::before,
+        .board-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 32px; height: 32px;
+            z-index: 100; pointer-events: none;
+        }
+        .board-wrapper::before {
+            top: 0; left: 0;
+            background: 
+                linear-gradient(to right, #38bdf8 2px, transparent 2px),
+                linear-gradient(to bottom, #38bdf8 2px, transparent 2px);
+            opacity: 0.7;
+        }
+        .board-wrapper::after {
+            bottom: 0; right: 0;
+            background: 
+                linear-gradient(to left, #38bdf8 2px, transparent 2px),
+                linear-gradient(to top, #38bdf8 2px, transparent 2px);
+            opacity: 0.7;
+        }
+
+        .grid-scaler {
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .tactical-grid {
+            /* Garante que o grid preencha o espaço disponível de forma quadrada */
+            width: min(100%, 100vh - 160px) !important;
+            height: min(100%, 100vh - 160px) !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            aspect-ratio: 1 / 1 !important;
+        }
+
+        /* ── HUD PANEL: largura fixa, não rouba espaço do grid ── */
+        .hud-panel {
+            flex: 0 0 320px !important;        /* largura fixa, não cresce */
+            width: 320px !important;
+            max-width: 320px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            background: linear-gradient(180deg, rgba(2,6,23,0.98), rgba(15,23,42,0.95)) !important;
+            border: 1px solid rgba(56, 189, 248, 0.15) !important;
+            border-left: 2px solid rgba(56, 189, 248, 0.3) !important;
+            position: relative !important;
+        }
+
+        /* Linha de scan animada no HUD — efeito holográfico */
+        .hud-panel::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(56,189,248,0.5), transparent);
+            animation: hudScan 6s linear infinite;
+            pointer-events: none;
+            z-index: 100;
+        }
+        @keyframes hudScan {
+            0%   { top: -2px; opacity: 1; }
+            80%  { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* ── SVG CORNERS: cantos de fichamento nos portaits do HUD ── */
+        .hud-portrait {
+            position: relative !important;
+        }
+        .hud-portrait::before {
+            content: '';
+            position: absolute;
+            top: 8px; left: 8px;
+            width: 20px; height: 20px;
+            border-top: 2px solid #38bdf8;
+            border-left: 2px solid #38bdf8;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .hud-portrait::after {
+            content: '';
+            position: absolute;
+            bottom: 8px; right: 8px;
+            width: 20px; height: 20px;
+            border-bottom: 2px solid #38bdf8;
+            border-right: 2px solid #38bdf8;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* ── SKILL BUTTONS: indicador SVG de estado ── */
+        .skill-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .skill-btn::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 0;
+            width: 3px; height: 100%;
+            background: linear-gradient(180deg, #38bdf8, #0369a1);
+            border-radius: 0 2px 2px 0;
+        }
+        .skill-btn:disabled::after {
+            background: #334155;
+        }
+        .skill-btn:not(:disabled):hover::after {
+            background: linear-gradient(180deg, #7dd3fc, #38bdf8);
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+        }
+
+        /* ── TURN QUEUE: retratos com SVG hexagonal ── */
+        .queue-portrait {
+            position: relative;
+        }
+        .queue-portrait.active {
+            filter: drop-shadow(0 0 8px #38bdf8) brightness(1.15) !important;
+        }
+        .queue-portrait.dead {
+            filter: grayscale(1) brightness(0.4) !important;
+        }
+
+        /* ── DAMAGE POPUP: tipografia épica ── */
+        .dmg-popup {
+            font-family: 'Fredoka', sans-serif !important;
+            font-size: 1.6rem !important;
+            font-weight: 700 !important;
+            color: #fbbf24 !important;
+            text-shadow: 0 0 10px rgba(251,191,36,0.8), 0 2px 4px rgba(0,0,0,1) !important;
+            animation: dmgFloat 1.2s ease-out forwards !important;
+            pointer-events: none !important;
+            position: absolute !important;
+            z-index: 999 !important;
+            white-space: nowrap !important;
+        }
+        @keyframes dmgFloat {
+            0%   { transform: translateY(0) scale(0.8); opacity: 1; }
+            30%  { transform: translateY(-20px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-50px) scale(0.9); opacity: 0; }
+        }
+
+        /* ── CELLS: grid tático com visual SVG melhorado ── */
+        .cell {
+            transition: background 0.15s, box-shadow 0.15s !important;
+        }
+        .cell.walkable {
+            background: rgba(56, 189, 248, 0.18) !important;
+            box-shadow: inset 0 0 0 2px rgba(56, 189, 248, 0.5) !important;
+        }
+        .cell.walkable::after {
+            content: '' !important;
+            position: absolute !important;
+            inset: 0 !important;
+            background: 
+                radial-gradient(circle at center, rgba(56,189,248,0.15), transparent 70%) !important;
+            pointer-events: none !important;
+        }
+        .cell.targetable {
+            background: rgba(239, 68, 68, 0.22) !important;
+            box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.6) !important;
+            animation: targetPulse 0.8s ease-in-out infinite alternate !important;
+        }
+        @keyframes targetPulse {
+            from { background: rgba(239, 68, 68, 0.15); }
+            to   { background: rgba(239, 68, 68, 0.32); }
+        }
+        .cell.active-turn {
+            box-shadow: inset 0 0 0 3px #fbbf24, 0 0 15px rgba(251,191,36,0.4) !important;
+        }
+    </style>
+
 </head>
 <body>
 

@@ -311,7 +311,7 @@ window.FUSIONS = {
     "Peixes Fófos Juntos <3+Peixes Fófos Juntos <3": {
         id: "hibrido_fofos_filhote",
         name: "Cardume Herdeiro",
-        image: "/img/peixe/fusion/fofos_filhote.png",
+        image: "/img/peixe/fusion/fofos_filhotes.png",
         desc: "O fruto do amor marítimo. Luta com o poder da amizade (e dentes muito afiados).",
         tactical_stats: { HP: 100, AP: 3, MP: 5, ATK: 25, DEF: 15, SPD: 10, RNG: 1 },
         available_skills: ['amor_de_peixe', 'mordida_padrao', 'jato_agua', 'canto_sereia', 'escudo_bolha']
