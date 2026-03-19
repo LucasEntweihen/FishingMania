@@ -68,1045 +68,244 @@
         /* ============================================================
            RESET & BASE
            ============================================================ */
-        *, *::before, *::after {
-            margin: 0; padding: 0;
-            box-sizing: border-box;
-        }
-
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            color: var(--text-primary);
-            background-color: var(--abyss-void);
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        h1, h2, h3, h4 {
-            font-family: 'Cinzel', serif;
-            line-height: 1.2;
-        }
+        body { font-family: 'Inter', sans-serif; color: var(--text-primary); background-color: var(--abyss-void); line-height: 1.7; overflow-x: hidden; }
+        h1, h2, h3, h4 { font-family: 'Cinzel', serif; line-height: 1.2; }
 
         /* ============================================================
            ANIMAÇÕES GLOBAIS
            ============================================================ */
-        @keyframes dropDown {
-            from { opacity: 0; transform: translateY(-40px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; } to { opacity: 1; }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50%       { transform: translateY(-18px); }
-        }
-        @keyframes floatB {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50%       { transform: translateY(-12px) rotate(3deg); }
-        }
-        @keyframes rise {
-            0%   { bottom: -80px; opacity: 0; transform: translateX(0) scale(1); }
-            20%  { opacity: 0.7; }
-            80%  { opacity: 0.3; }
-            100% { bottom: 110%; opacity: 0; transform: translateX(var(--drift, -30px)) scale(0.6); }
-        }
-        @keyframes pulseGold {
-            0%, 100% { box-shadow: 0 0 20px rgba(240,192,64,0.3), inset 0 0 10px rgba(240,192,64,0.1); }
-            50%       { box-shadow: 0 0 50px rgba(240,192,64,0.6), inset 0 0 20px rgba(240,192,64,0.2); }
-        }
-        @keyframes shimmer {
-            0%   { background-position: -200% center; }
-            100% { background-position: 200% center; }
-        }
-        @keyframes scanline {
-            0%   { transform: translateY(-100%); }
-            100% { transform: translateY(100vh); }
-        }
-        @keyframes depthPulse {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50%       { opacity: 0.8; transform: scale(1.05); }
-        }
-        @keyframes runeRotate {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
-        }
-        @keyframes borderGlow {
-            0%, 100% { border-color: rgba(240,192,64,0.3); }
-            50%       { border-color: rgba(240,192,64,0.8); }
-        }
-        @keyframes ctaPulse {
-            0%, 100% { 
-                box-shadow: 0 0 20px rgba(240,192,64,0.4), 0 8px 32px rgba(0,0,0,0.6);
-            }
-            50% { 
-                box-shadow: 0 0 60px rgba(240,192,64,0.7), 0 0 100px rgba(240,192,64,0.2), 0 8px 32px rgba(0,0,0,0.6);
-            }
-        }
+        @keyframes dropDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+        @keyframes floatB { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+        @keyframes rise { 0% { bottom: -80px; opacity: 0; transform: translateX(0) scale(1); } 20% { opacity: 0.7; } 80% { opacity: 0.3; } 100% { bottom: 110%; opacity: 0; transform: translateX(var(--drift, -30px)) scale(0.6); } }
+        @keyframes pulseGold { 0%, 100% { box-shadow: 0 0 20px rgba(240,192,64,0.3), inset 0 0 10px rgba(240,192,64,0.1); } 50% { box-shadow: 0 0 50px rgba(240,192,64,0.6), inset 0 0 20px rgba(240,192,64,0.2); } }
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+        @keyframes depthPulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
+        @keyframes runeRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes ctaPulse { 0%, 100% { box-shadow: 0 0 20px rgba(240,192,64,0.4), 0 8px 32px rgba(0,0,0,0.6); } 50% { box-shadow: 0 0 60px rgba(240,192,64,0.7), 0 0 100px rgba(240,192,64,0.2), 0 8px 32px rgba(0,0,0,0.6); } }
 
         /* ============================================================
            HERO — A SUPERFÍCIE
            ============================================================ */
-        .hero {
-            position: relative;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            background: linear-gradient(
-                180deg,
-                #0a1a40 0%,
-                #072050 25%,
-                #052a6e 55%,
-                #061d50 75%,
-                var(--abyss-deep) 100%
-            );
-            padding: 8rem 2rem 14rem;
-        }
+        .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; background: linear-gradient(180deg, #0a1a40 0%, #072050 25%, #052a6e 55%, #061d50 75%, var(--abyss-deep) 100%); padding: 8rem 2rem 14rem; }
+        .hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+        .hero-bg-glow { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 900px; height: 600px; background: radial-gradient(ellipse at center, rgba(19, 97, 181, 0.22) 0%, rgba(10, 30, 100, 0.12) 40%, transparent 70%); filter: blur(40px); }
+        .hero-rays { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: repeating-linear-gradient(-15deg, transparent 0px, transparent 80px, rgba(30, 120, 220, 0.025) 80px, rgba(30, 120, 220, 0.025) 160px); animation: float 20s ease-in-out infinite; }
+        .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(30, 80, 180, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(30, 80, 180, 0.06) 1px, transparent 1px); background-size: 80px 80px; mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%); }
+        .hero-water-surface { position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(90deg, transparent 0%, rgba(56, 180, 255, 0.5) 20%, rgba(100, 210, 255, 0.8) 50%, rgba(56, 180, 255, 0.5) 80%, transparent 100%); filter: blur(2px); }
+        .biolum-particle { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(80,200,255,0.9) 0%, transparent 70%); animation: depthPulse ease-in-out infinite; pointer-events: none; }
 
-        /* Camadas de fundo atmosférico */
-        .hero-bg {
-            position: absolute; inset: 0; z-index: 0;
-            pointer-events: none;
-        }
+        .hero-content { position: relative; z-index: 10; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(240, 192, 64, 0.1); border: 1px solid rgba(240, 192, 64, 0.3); border-radius: var(--radius-pill); padding: 6px 18px; font-size: 0.78rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-bright); margin-bottom: 2rem; animation: fadeIn 1s ease; }
+        .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gold-bright); box-shadow: 0 0 8px var(--gold-bright); animation: depthPulse 2s ease-in-out infinite; }
 
-        /* Gradiente de brilho central */
-        .hero-bg-glow {
-            position: absolute;
-            top: 10%; left: 50%;
-            transform: translateX(-50%);
-            width: 900px; height: 600px;
-            background: radial-gradient(ellipse at center,
-                rgba(19, 97, 181, 0.22) 0%,
-                rgba(10, 30, 100, 0.12) 40%,
-                transparent 70%
-            );
-            filter: blur(40px);
-        }
+        .hero h1 { font-family: 'Cinzel Decorative', serif; font-size: clamp(2.8rem, 8vw, 6.5rem); font-weight: 900; background: linear-gradient(135deg, #e8c860 0%, var(--gold-bright) 30%, #fffae0 55%, var(--gold-bright) 70%, #c99b2a 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: dropDown 1s cubic-bezier(0.175, 0.885, 0.32, 1.275), shimmer 4s linear 1.2s infinite; text-shadow: none; letter-spacing: 3px; margin-bottom: 0.6rem; }
+        .hero-subtitle-line { font-family: 'Cinzel', serif; font-size: clamp(0.7rem, 1.5vw, 0.95rem); letter-spacing: 6px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 2.5rem; animation: fadeIn 1.5s ease 0.3s both; }
+        .hero p.hero-desc { font-size: clamp(1rem, 2vw, 1.2rem); font-weight: 300; color: #90b8e0; margin-bottom: 3.5rem; max-width: 720px; animation: fadeUp 1.2s ease 0.5s both; line-height: 1.9; }
 
-        /* Raios de luz subaquáticos */
-        .hero-rays {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: repeating-linear-gradient(
-                -15deg,
-                transparent 0px,
-                transparent 80px,
-                rgba(30, 120, 220, 0.025) 80px,
-                rgba(30, 120, 220, 0.025) 160px
-            );
-            animation: float 20s ease-in-out infinite;
-        }
+        .ornament { display: flex; align-items: center; gap: 16px; margin-bottom: 3rem; width: 100%; max-width: 400px; animation: fadeIn 1.5s ease 0.8s both; }
+        .ornament-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(240,192,64,0.4), transparent); }
+        .ornament-symbol { font-size: 1.2rem; color: var(--gold-mid); filter: drop-shadow(0 0 6px rgba(240,192,64,0.5)); }
 
-        /* Grade de profundidade */
-        .hero-grid {
-            position: absolute; inset: 0;
-            background-image:
-                linear-gradient(rgba(30, 80, 180, 0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(30, 80, 180, 0.06) 1px, transparent 1px);
-            background-size: 80px 80px;
-            mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
-        }
-
-        /* Superfície da água (topo) */
-        .hero-water-surface {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 6px;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                rgba(56, 180, 255, 0.5) 20%,
-                rgba(100, 210, 255, 0.8) 50%,
-                rgba(56, 180, 255, 0.5) 80%,
-                transparent 100%
-            );
-            filter: blur(2px);
-        }
-
-        /* Partículas de bioluminescência */
-        .biolum-particle {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(80,200,255,0.9) 0%, transparent 70%);
-            animation: depthPulse ease-in-out infinite;
-            pointer-events: none;
-        }
-
-        /* Conteúdo hero */
-        .hero-content {
-            position: relative; z-index: 10;
-            max-width: 860px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        /* Badge de versão */
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(240, 192, 64, 0.1);
-            border: 1px solid rgba(240, 192, 64, 0.3);
-            border-radius: var(--radius-pill);
-            padding: 6px 18px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--gold-bright);
-            margin-bottom: 2rem;
-            animation: fadeIn 1s ease;
-        }
-        .hero-badge::before {
-            content: '';
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: var(--gold-bright);
-            box-shadow: 0 0 8px var(--gold-bright);
-            animation: depthPulse 2s ease-in-out infinite;
-        }
-
-        /* Título principal */
-        .hero h1 {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: clamp(3rem, 8vw, 6.5rem);
-            font-weight: 900;
-            background: linear-gradient(
-                135deg,
-                #e8c860 0%,
-                var(--gold-bright) 30%,
-                #fffae0 55%,
-                var(--gold-bright) 70%,
-                #c99b2a 100%
-            );
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation:
-                dropDown 1s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                shimmer 4s linear 1.2s infinite;
-            text-shadow: none;
-            letter-spacing: 3px;
-            margin-bottom: 0.6rem;
-        }
-
-        .hero-subtitle-line {
-            font-family: 'Cinzel', serif;
-            font-size: clamp(0.7rem, 1.5vw, 0.95rem);
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            margin-bottom: 2.5rem;
-            animation: fadeIn 1.5s ease 0.3s both;
-        }
-
-        .hero p.hero-desc {
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            font-weight: 300;
-            color: #90b8e0;
-            margin-bottom: 3.5rem;
-            max-width: 680px;
-            animation: fadeUp 1.2s ease 0.5s both;
-            line-height: 1.9;
-        }
-
-        /* Divisor ornamental */
-        .ornament {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 3rem;
-            width: 100%;
-            max-width: 400px;
-            animation: fadeIn 1.5s ease 0.8s both;
-        }
-        .ornament-line {
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(240,192,64,0.4), transparent);
-        }
-        .ornament-symbol {
-            font-size: 1.2rem;
-            color: var(--gold-mid);
-            filter: drop-shadow(0 0 6px rgba(240,192,64,0.5));
-        }
-
-        /* CTA principal */
-        .cta-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            background: linear-gradient(135deg, #b8820a 0%, #d4a017 30%, #f0c040 60%, #e8b830 100%);
-            color: #1a0e00;
-            padding: 1.1rem 3.2rem;
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-weight: 700;
-            font-size: 1rem;
-            border-radius: var(--radius-pill);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            border: 1px solid rgba(255, 230, 100, 0.5);
-            cursor: pointer;
-            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            animation: dropDown 1s ease 0.6s both, ctaPulse 3s ease-in-out 1.6s infinite;
-            position: relative;
-            overflow: hidden;
-        }
-        .cta-button::before {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .cta-button:hover {
-            transform: translateY(-4px) scale(1.03);
-            background: linear-gradient(135deg, #c89010 0%, #e0b020 30%, #ffe060 60%, #f0c840 100%);
-            animation-play-state: paused;
-            box-shadow: 0 0 60px rgba(240,192,64,0.6), 0 12px 40px rgba(0,0,0,0.5);
-        }
+        .cta-button { display: inline-flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #b8820a 0%, #d4a017 30%, #f0c040 60%, #e8b830 100%); color: #1a0e00; padding: 1.1rem 3.2rem; text-decoration: none; font-family: 'Cinzel', serif; font-weight: 700; font-size: 1rem; border-radius: var(--radius-pill); text-transform: uppercase; letter-spacing: 3px; border: 1px solid rgba(255, 230, 100, 0.5); cursor: pointer; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: dropDown 1s ease 0.6s both, ctaPulse 3s ease-in-out 1.6s infinite; position: relative; overflow: hidden; }
+        .cta-button::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%); opacity: 0; transition: opacity 0.3s; }
+        .cta-button:hover { transform: translateY(-4px) scale(1.03); background: linear-gradient(135deg, #c89010 0%, #e0b020 30%, #ffe060 60%, #f0c840 100%); animation-play-state: paused; box-shadow: 0 0 60px rgba(240,192,64,0.6), 0 12px 40px rgba(0,0,0,0.5); }
         .cta-button:hover::before { opacity: 1; }
         .cta-button:active { transform: translateY(1px) scale(0.99); }
         .cta-btn-icon { font-size: 1.2rem; }
 
-        /* Botão visitante */
-        .btn-guest-top {
-            background: rgba(239, 68, 68, 0.08);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 10px 28px;
-            border-radius: var(--radius-pill);
-            margin-top: 14px;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            transition: all 0.3s;
-        }
-        .btn-guest-top:hover {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.6);
-            color: #fca5a5;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
-        }
+        .btn-guest-top { background: rgba(239, 68, 68, 0.08); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 10px 28px; border-radius: var(--radius-pill); margin-top: 14px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 1px; transition: all 0.3s; }
+        .btn-guest-top:hover { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.6); color: #fca5a5; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); }
 
-        /* User badge (logado) */
-        .user-badge {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            background: var(--glass-bg);
-            padding: 10px 22px;
-            border-radius: var(--radius-pill);
-            margin-top: 20px;
-            font-size: 0.95rem;
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            animation: fadeIn 0.5s ease;
-            color: var(--text-secondary);
-        }
-        .logout-btn {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 6px 16px;
-            border-radius: var(--radius-pill);
-            cursor: pointer;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .logout-btn:hover {
-            background: rgba(239, 68, 68, 0.3);
-            border-color: rgba(239, 68, 68, 0.6);
-            color: #fca5a5;
-        }
+        .user-badge { display: flex; align-items: center; gap: 14px; background: var(--glass-bg); padding: 10px 22px; border-radius: var(--radius-pill); margin-top: 20px; font-size: 0.95rem; backdrop-filter: blur(16px); border: 1px solid var(--glass-border); animation: fadeIn 0.5s ease; color: var(--text-secondary); }
+        .logout-btn { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 16px; border-radius: var(--radius-pill); cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; font-size: 0.85rem; transition: all 0.2s; }
+        .logout-btn:hover { background: rgba(239, 68, 68, 0.3); border-color: rgba(239, 68, 68, 0.6); color: #fca5a5; }
 
-        /* Bolhas */
-        .bubbles {
-            position: absolute; inset: 0;
-            z-index: 1;
-            pointer-events: none;
-        }
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            border: 1px solid rgba(100, 180, 255, 0.25);
-            background: radial-gradient(circle at 35% 35%,
-                rgba(150, 210, 255, 0.15),
-                rgba(30, 100, 200, 0.05)
-            );
-            bottom: -80px;
-            animation: rise linear infinite;
-        }
+        .bubbles { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+        .bubble { position: absolute; border-radius: 50%; border: 1px solid rgba(100, 180, 255, 0.25); background: radial-gradient(circle at 35% 35%, rgba(150, 210, 255, 0.15), rgba(30, 100, 200, 0.05)); bottom: -80px; animation: rise linear infinite; }
 
-        /* Stats rápidos (abaixo do hero) */
-        .hero-stats {
-            position: relative; z-index: 10;
-            display: flex;
-            gap: 2px;
-            margin-top: 4rem;
-            animation: fadeUp 1.2s ease 1s both;
-        }
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 14px 28px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-        }
+        .hero-stats { position: relative; z-index: 10; display: flex; gap: 2px; margin-top: 4rem; animation: fadeUp 1.2s ease 1s both; }
+        .stat-item { display: flex; flex-direction: column; align-items: center; padding: 14px 28px; background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); }
         .stat-item:first-child { border-radius: var(--radius-md) 0 0 var(--radius-md); }
-        .stat-item:last-child  { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
-        .stat-value {
-            font-family: 'Cinzel', serif;
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--gold-bright);
-        }
-        .stat-label {
-            font-size: 0.68rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
+        .stat-item:last-child { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+        .stat-value { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 700; color: var(--gold-bright); }
+        .stat-label { font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
 
-        /* Onda de transição */
-        .wave-divider {
-            position: absolute; bottom: -1px; left: 0;
-            width: 100%;
-            overflow: hidden;
-            line-height: 0;
-            transform: rotate(180deg);
-            z-index: 5;
-        }
-        .wave-divider svg {
-            display: block;
-            width: calc(100% + 1.3px);
-            height: 140px;
-        }
+        .wave-divider { position: absolute; bottom: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; transform: rotate(180deg); z-index: 5; }
+        .wave-divider svg { display: block; width: calc(100% + 1.3px); height: 140px; }
         .wave-divider .shape-fill { fill: var(--abyss-deep); }
 
         /* ============================================================
            SEÇÃO: BARRA DE MECÂNICAS (HIGHLIGHTS)
            ============================================================ */
-        .mechanics-bar {
-            background: var(--abyss-deep);
-            padding: 5rem 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .mechanics-bar::before {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(180deg, rgba(10,30,80,0.3) 0%, transparent 100%);
-        }
+        .mechanics-bar { background: var(--abyss-deep); padding: 5rem 2rem; position: relative; overflow: hidden; }
+        .mechanics-bar::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,30,80,0.3) 0%, transparent 100%); }
 
-        .mechanics-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1px;
-            background: var(--glass-border);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-        }
-
-        .mechanic-pill {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            padding: 2.5rem 1.5rem;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            transition: background 0.3s;
-            text-align: center;
-        }
+        .mechanics-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--glass-border); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); overflow: hidden; }
+        .mechanic-pill { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 2.5rem 1.5rem; background: var(--glass-bg); backdrop-filter: blur(12px); transition: background 0.3s; text-align: center; }
         .mechanic-pill:hover { background: rgba(20, 50, 120, 0.5); }
-        .mechanic-pill-icon {
-            font-size: 2.2rem;
-            filter: drop-shadow(0 0 8px rgba(100, 180, 255, 0.3));
-        }
-        .mechanic-pill-title {
-            font-family: 'Cinzel', serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: var(--text-primary);
-        }
-        .mechanic-pill-desc {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
+        .mechanic-pill-icon { font-size: 2.2rem; filter: drop-shadow(0 0 8px rgba(100, 180, 255, 0.3)); }
+        .mechanic-pill-title { font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; color: var(--text-primary); }
+        .mechanic-pill-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
 
         /* ============================================================
-           CONTEÚDO — SEÇÕES DE LORE
+           CONTEÚDO — GERAL & LORE
            ============================================================ */
-        .content-section {
-            padding: 8rem 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .bg-twilight {
-            background: linear-gradient(180deg, var(--abyss-deep) 0%, var(--abyss-mid) 100%);
-        }
-        .bg-midnight {
-            background: linear-gradient(180deg, var(--abyss-mid) 0%, var(--abyss-void) 50%, var(--abyss-deep) 100%);
-        }
-        .bg-abyss {
-            background: radial-gradient(ellipse at 50% 30%, #1a0040 0%, var(--abyss-void) 70%);
-            border-top: 1px solid rgba(124, 58, 237, 0.2);
-        }
-
+        .content-section { padding: 8rem 2rem; position: relative; overflow: hidden; }
+        .bg-twilight { background: linear-gradient(180deg, var(--abyss-deep) 0%, var(--abyss-mid) 100%); }
+        .bg-midnight { background: linear-gradient(180deg, var(--abyss-mid) 0%, var(--abyss-void) 50%, var(--abyss-deep) 100%); }
+        .bg-abyss { background: radial-gradient(ellipse at 50% 30%, #1a0040 0%, var(--abyss-void) 70%); border-top: 1px solid rgba(124, 58, 237, 0.2); }
         .container { max-width: 1200px; margin: 0 auto; }
 
-        /* Título de seção */
-        .section-header {
-            text-align: center;
-            margin-bottom: 5rem;
-        }
-        .section-tag {
-            display: inline-block;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            padding: 5px 16px;
-            border-radius: var(--radius-pill);
-            margin-bottom: 1.2rem;
-        }
+        .section-header { text-align: center; margin-bottom: 5rem; }
+        .section-tag { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; padding: 5px 16px; border-radius: var(--radius-pill); margin-bottom: 1.2rem; }
         .tag-gold  { color: var(--gold-bright);    background: rgba(240,192,64,0.08);  border: 1px solid rgba(240,192,64,0.2);  }
         .tag-blue  { color: #60b4f8;               background: rgba(96,180,248,0.08);  border: 1px solid rgba(96,180,248,0.2);  }
         .tag-green { color: var(--jade-bright);    background: rgba(16,185,129,0.08);  border: 1px solid rgba(16,185,129,0.2);  }
         .tag-red   { color: #f87171;               background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); }
         .tag-purple{ color: var(--purple-glow);    background: rgba(192,132,252,0.08); border: 1px solid rgba(192,132,252,0.2); }
 
-        .section-title {
-            font-family: 'Cinzel', serif;
-            font-size: clamp(1.8rem, 4vw, 3rem);
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+        .section-title { font-family: 'Cinzel', serif; font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
         .title-gold   { color: var(--gold-bright);  text-shadow: 0 0 30px rgba(240,192,64,0.25); }
         .title-blue   { color: #60b4f8;              text-shadow: 0 0 30px rgba(96,180,248,0.25); }
         .title-red    { color: #f87171;              text-shadow: 0 0 30px rgba(239,68,68,0.3);   }
         .title-purple { color: var(--purple-glow);   text-shadow: 0 0 30px rgba(192,132,252,0.3); }
 
-        .section-divider {
-            width: 80px; height: 2px;
-            background: linear-gradient(90deg, transparent, currentColor, transparent);
-            margin: 1.5rem auto 0;
-            opacity: 0.5;
-        }
+        .section-divider { width: 80px; height: 2px; background: linear-gradient(90deg, transparent, currentColor, transparent); margin: 1.5rem auto 0; opacity: 0.5; }
 
-        /* Layout de feature */
-        .feature-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5rem;
-            align-items: center;
-            margin-bottom: 7rem;
-        }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; margin-bottom: 7rem; }
         .feature-grid:last-child { margin-bottom: 0; }
         .feature-grid.reverse { direction: rtl; }
         .feature-grid.reverse > * { direction: ltr; }
 
-        /* Texto da feature */
-        .feature-text h3 {
-            font-family: 'Cinzel', serif;
-            font-size: clamp(1.4rem, 2.5vw, 1.9rem);
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        .feature-text p {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.2rem;
-            line-height: 1.9;
-        }
-        .feature-text strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
+        .feature-text h3 { font-family: 'Cinzel', serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 14px; font-weight: 700; letter-spacing: 1px; }
+        .feature-text p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1.2rem; line-height: 1.9; }
+        .feature-text strong { color: var(--text-primary); font-weight: 600; }
 
-        /* Mechanic list */
-        .mechanic-list {
-            list-style: none;
-            margin-top: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .mechanic-list li {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            font-size: 0.95rem;
-            color: #7fa0cc;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.04);
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            transition: border-color 0.3s;
-        }
-        .mechanic-list li:hover {
-            border-color: rgba(100,160,255,0.12);
-            color: var(--text-secondary);
-        }
+        .mechanic-list { list-style: none; margin-top: 1.5rem; display: flex; flex-direction: column; gap: 12px; }
+        .mechanic-list li { display: flex; align-items: flex-start; gap: 14px; font-size: 0.95rem; color: #7fa0cc; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-sm); padding: 12px 16px; transition: border-color 0.3s; }
+        .mechanic-list li:hover { border-color: rgba(100,160,255,0.12); color: var(--text-secondary); }
         .mechanic-list li .li-icon { font-size: 1.3rem; flex-shrink: 0; line-height: 1.4; }
         .mechanic-list li strong { color: var(--text-primary); }
 
-        /* Card de feature */
-        .feature-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 3rem 2.5rem;
-            box-shadow: var(--shadow-card);
-            backdrop-filter: blur(16px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-        .feature-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-        }
-        .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(100,160,255,0.25);
-        }
+        .feature-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 3rem 2.5rem; box-shadow: var(--shadow-card); backdrop-filter: blur(16px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden; }
+        .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); }
+        .feature-card:hover { transform: translateY(-10px); border-color: rgba(100,160,255,0.25); }
 
         .card-anim-float    { animation: float  7s ease-in-out infinite; }
         .card-anim-floatB   { animation: floatB 8s ease-in-out infinite 1s; }
         .card-anim-floatC   { animation: float  9s ease-in-out infinite 2s; }
 
-        .card-icon-large {
-            font-size: 4.5rem;
-            margin-bottom: 1.5rem;
-            display: block;
-            filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5));
-        }
-        .card-title {
-            font-family: 'Cinzel', serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.8rem;
-            letter-spacing: 1px;
-        }
-        .card-desc {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.7;
-        }
+        .card-icon-large { font-size: 4.5rem; margin-bottom: 1.5rem; display: block; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5)); }
+        .card-title { font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.8rem; letter-spacing: 1px; }
+        .card-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+
+        /* ============================================================
+           NOVAS ESTRUTURAS: TIMELINE, BENTO GRID E RARIDADES
+           ============================================================ */
+        .timeline { position: relative; max-width: 800px; margin: 4rem auto; padding-left: 2.5rem; border-left: 2px dashed rgba(240,192,64,0.2); }
+        .timeline-step { position: relative; margin-bottom: 3.5rem; }
+        .timeline-step:last-child { margin-bottom: 0; }
+        .timeline-step::before { content: ''; position: absolute; left: -3rem; top: 0.2rem; width: 16px; height: 16px; border-radius: 50%; background: var(--gold-bright); box-shadow: 0 0 15px var(--gold-glow); }
+        .timeline-step h4 { font-family: 'Cinzel', serif; color: var(--gold-bright); font-size: 1.3rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px; }
+        .timeline-step p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; }
+
+        .bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 4rem; }
+        .bento-item { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 2rem; backdrop-filter: blur(10px); transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .bento-item::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%); pointer-events: none; }
+        .bento-item.large { grid-column: span 2; }
+        .bento-item:hover { transform: translateY(-5px); border-color: rgba(96,180,248,0.4); box-shadow: var(--shadow-blue); }
+        .bento-icon { font-size: 2.5rem; margin-bottom: 1rem; display: inline-block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+        .bento-item h4 { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.5rem; }
+        .bento-item p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+        /* Tabela de Raridades */
+        .rarity-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 3rem; }
+        .rarity-card { background: rgba(0,0,0,0.4); border-left: 4px solid var(--r-color); padding: 15px 20px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; display: flex; flex-direction: column; }
+        .rarity-card h4 { color: var(--r-color); font-size: 1rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .rarity-card p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0; }
+        .r-comum { --r-color: #94a3b8; } .r-raro { --r-color: #34d399; } .r-epico { --r-color: #c084fc; } .r-lendario { --r-color: #fbbf24; } .r-mitico { --r-color: #ef4444; } .r-secreto { --r-color: #334155; } .r-divino { --r-color: #f59e0b; } .r-aurudo { --r-color: #fef08a; } .r-vandalo { --r-color: #10b981; } .r-bestial { --r-color: #7f1d1d; }
+
+        /* FAQ */
+        .faq-grid { display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 4rem auto 0; }
+        .faq-item { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 20px; border-radius: var(--radius-md); }
+        .faq-item h4 { color: var(--gold-bright); font-size: 1.1rem; margin-bottom: 10px; font-family: 'Inter', sans-serif; font-weight: 600;}
+        .faq-item p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
 
         /* ============================================================
            SEÇÃO DO ABISMO — FINAL BOSS LORE
            ============================================================ */
-        .abyss-centerpiece {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-            position: relative;
-        }
-
-        .abyss-rune-ring {
-            width: 200px; height: 200px;
-            margin: 0 auto 3rem;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .rune-ring-outer {
-            position: absolute; inset: 0;
-            border: 2px solid rgba(192,132,252,0.3);
-            border-radius: 50%;
-            animation: runeRotate 20s linear infinite;
-            border-top-color: rgba(192,132,252,0.8);
-        }
-        .rune-ring-inner {
-            position: absolute;
-            inset: 20px;
-            border: 1px solid rgba(192,132,252,0.15);
-            border-radius: 50%;
-            animation: runeRotate 12s linear reverse infinite;
-            border-bottom-color: rgba(192,132,252,0.5);
-        }
-        .rune-center-icon {
-            font-size: 4rem;
-            filter: drop-shadow(0 0 20px rgba(192,132,252,0.6));
-            animation: depthPulse 3s ease-in-out infinite;
-        }
-
-        .abyss-warning {
-            background: linear-gradient(135deg,
-                rgba(74, 10, 10, 0.4) 0%,
-                rgba(30, 4, 60, 0.4) 100%
-            );
-            border: 1px solid rgba(239, 68, 68, 0.25);
-            border-radius: var(--radius-md);
-            padding: 2rem 2.5rem;
-            margin-top: 2.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .abyss-warning::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #ef4444, #7c3aed, transparent);
-            opacity: 0.6;
-        }
-        .abyss-warning p {
-            color: #fca5a5;
-            font-size: 1rem;
-            line-height: 1.8;
-            font-style: italic;
-        }
-        .abyss-warning strong {
-            color: #f87171;
-            font-style: normal;
-            font-weight: 700;
-        }
+        .abyss-centerpiece { max-width: 800px; margin: 0 auto; text-align: center; position: relative; }
+        .abyss-rune-ring { width: 200px; height: 200px; margin: 0 auto 3rem; position: relative; display: flex; align-items: center; justify-content: center; }
+        .rune-ring-outer { position: absolute; inset: 0; border: 2px solid rgba(192,132,252,0.3); border-radius: 50%; animation: runeRotate 20s linear infinite; border-top-color: rgba(192,132,252,0.8); }
+        .rune-ring-inner { position: absolute; inset: 20px; border: 1px solid rgba(192,132,252,0.15); border-radius: 50%; animation: runeRotate 12s linear reverse infinite; border-bottom-color: rgba(192,132,252,0.5); }
+        .rune-center-icon { font-size: 4rem; filter: drop-shadow(0 0 20px rgba(192,132,252,0.6)); animation: depthPulse 3s ease-in-out infinite; }
+        .abyss-warning { background: linear-gradient(135deg, rgba(74, 10, 10, 0.4) 0%, rgba(30, 4, 60, 0.4) 100%); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 2rem 2.5rem; margin-top: 2.5rem; position: relative; overflow: hidden; }
+        .abyss-warning::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #ef4444, #7c3aed, transparent); opacity: 0.6; }
+        .abyss-warning p { color: #fca5a5; font-size: 1rem; line-height: 1.8; font-style: italic; }
+        .abyss-warning strong { color: #f87171; font-style: normal; font-weight: 700; }
 
         /* ============================================================
            FOOTER
            ============================================================ */
-        .modern-footer {
-            background: var(--abyss-void);
-            color: var(--text-muted);
-            border-top: 1px solid rgba(100, 130, 200, 0.1);
-            padding: 6rem 2rem 2.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .modern-footer::before {
-            content: '';
-            position: absolute; top: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 60%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(124,58,237,0.6), transparent);
-        }
-        .footer-bg-grid {
-            position: absolute; inset: 0;
-            background-image:
-                linear-gradient(rgba(30,50,120,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(30,50,120,0.04) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-        }
-
-        .footer-content {
-            max-width: 1100px;
-            margin: 0 auto 5rem;
-            display: grid;
-            grid-template-columns: 1.8fr 1fr;
-            gap: 5rem;
-            position: relative;
-        }
-
-        .footer-brand h2 {
-            font-family: 'Cinzel Decorative', serif;
-            color: var(--text-primary);
-            font-size: 2rem;
-            margin-bottom: 1.2rem;
-            background: linear-gradient(135deg, var(--gold-bright), var(--gold-mid));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .footer-brand p {
-            font-size: 0.95rem;
-            line-height: 1.8;
-            max-width: 500px;
-            color: var(--text-muted);
-        }
-
-        .footer-dev {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .footer-dev h3 {
-            font-family: 'Cinzel', serif;
-            color: #60b4f8;
-            font-size: 0.8rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-        }
-        .footer-dev p {
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            line-height: 1.7;
-        }
-
-        .github-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255,255,255,0.03);
-            padding: 14px 24px;
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            text-decoration: none;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            font-size: 0.95rem;
-            border: 1px solid rgba(255,255,255,0.06);
-            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .github-link:hover {
-            background: rgba(124, 58, 237, 0.1);
-            border-color: rgba(124, 58, 237, 0.4);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.25);
-            color: #ddd6fe;
-        }
+        .modern-footer { background: var(--abyss-void); color: var(--text-muted); border-top: 1px solid rgba(100, 130, 200, 0.1); padding: 6rem 2rem 2.5rem; position: relative; overflow: hidden; }
+        .modern-footer::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 1px; background: linear-gradient(90deg, transparent, rgba(124,58,237,0.6), transparent); }
+        .footer-bg-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(30,50,120,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(30,50,120,0.04) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; }
+        .footer-content { max-width: 1100px; margin: 0 auto 5rem; display: grid; grid-template-columns: 1.8fr 1fr; gap: 5rem; position: relative; }
+        .footer-brand h2 { font-family: 'Cinzel Decorative', serif; color: var(--text-primary); font-size: 2rem; margin-bottom: 1.2rem; background: linear-gradient(135deg, var(--gold-bright), var(--gold-mid)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .footer-brand p { font-size: 0.95rem; line-height: 1.8; max-width: 500px; color: var(--text-muted); }
+        .footer-dev { display: flex; flex-direction: column; align-items: flex-start; }
+        .footer-dev h3 { font-family: 'Cinzel', serif; color: #60b4f8; font-size: 0.8rem; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 1rem; }
+        .footer-dev p { margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.7; }
+        .github-link { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 14px 24px; border-radius: var(--radius-md); color: var(--text-primary); text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.06); transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .github-link:hover { background: rgba(124, 58, 237, 0.1); border-color: rgba(124, 58, 237, 0.4); transform: translateY(-4px); box-shadow: 0 10px 30px rgba(124, 58, 237, 0.25); color: #ddd6fe; }
         .github-link svg { transition: transform 0.3s; fill: currentColor; }
         .github-link:hover svg { transform: scale(1.15) rotate(-5deg); }
-
-        .footer-bottom {
-            max-width: 1100px;
-            margin: 0 auto;
-            text-align: center;
-            padding-top: 2.5rem;
-            border-top: 1px solid rgba(255,255,255,0.04);
-            font-size: 0.82rem;
-            font-weight: 300;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            color: var(--text-muted);
-        }
+        .footer-bottom { max-width: 1100px; margin: 0 auto; text-align: center; padding-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.04); font-size: 0.82rem; font-weight: 300; display: flex; flex-direction: column; gap: 6px; color: var(--text-muted); }
 
         /* ============================================================
            MODAL DE LOGIN
            ============================================================ */
-        .modal {
-            position: fixed; inset: 0;
-            background: rgba(4, 6, 15, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            backdrop-filter: blur(12px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
+        .modal { position: fixed; inset: 0; background: rgba(4, 6, 15, 0.9); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(12px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .modal.active { opacity: 1; pointer-events: all; }
-
-        .modal-content {
-            background: linear-gradient(135deg, #0a1428 0%, #0f1e3a 100%);
-            width: 90%;
-            max-width: 440px;
-            border-radius: var(--radius-lg);
-            padding: 3rem;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 60px rgba(30,80,200,0.1);
-            position: relative;
-            text-align: center;
-            transform: translateY(50px) scale(0.97);
-            transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(60,100,200,0.15);
-            overflow: hidden;
-        }
-        .modal-content::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(96,180,248,0.5), transparent);
-        }
-        .modal.active .modal-content {
-            transform: translateY(0) scale(1);
-        }
-
-        .close-modal {
-            position: absolute; top: 18px; right: 22px;
-            font-size: 2rem;
-            background: none; border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            line-height: 1;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-        }
+        .modal-content { background: linear-gradient(135deg, #0a1428 0%, #0f1e3a 100%); width: 90%; max-width: 440px; border-radius: var(--radius-lg); padding: 3rem; box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 60px rgba(30,80,200,0.1); position: relative; text-align: center; transform: translateY(50px) scale(0.97); transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(60,100,200,0.15); overflow: hidden; }
+        .modal-content::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(96,180,248,0.5), transparent); }
+        .modal.active .modal-content { transform: translateY(0) scale(1); }
+        .close-modal { position: absolute; top: 18px; right: 22px; font-size: 2rem; background: none; border: none; cursor: pointer; color: var(--text-muted); line-height: 1; transition: all 0.2s; font-family: 'Inter', sans-serif; }
         .close-modal:hover { color: var(--text-primary); transform: scale(1.15) rotate(90deg); }
-
-        .modal h2 {
-            font-family: 'Cinzel', serif;
-            color: var(--text-primary);
-            margin-bottom: 0.4rem;
-            font-size: 1.6rem;
-            letter-spacing: 2px;
-        }
-        .modal-subtitle {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 2.2rem;
-        }
-
-        .auth-btn {
-            width: 100%;
-            padding: 13px;
-            margin-bottom: 10px;
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: none;
-            letter-spacing: 0.5px;
-        }
-        .btn-google {
-            background: #f8fafc;
-            color: #1e293b;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .btn-google:hover {
-            background: #e8eef8;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-        }
-        .btn-email {
-            background: linear-gradient(135deg, #0a4a9a, #1361b5);
-            color: white;
-            box-shadow: 0 4px 15px rgba(19,97,181,0.3);
-        }
-        .btn-email:hover {
-            background: linear-gradient(135deg, #1050aa, #1a78d4);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(19,97,181,0.5);
-        }
-        .btn-register {
-            background: transparent;
-            color: #60b4f8;
-            border: 1px solid rgba(96,180,248,0.3);
-        }
-        .btn-register:hover {
-            background: rgba(96,180,248,0.08);
-            border-color: rgba(96,180,248,0.6);
-            transform: translateY(-2px);
-        }
-
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        .auth-input {
-            width: 100%;
-            padding: 13px 16px;
-            background: rgba(10, 20, 50, 0.8);
-            border: 1px solid rgba(60,100,200,0.2);
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            color: var(--text-primary);
-            transition: all 0.3s;
-        }
+        .modal h2 { font-family: 'Cinzel', serif; color: var(--text-primary); margin-bottom: 0.4rem; font-size: 1.6rem; letter-spacing: 2px; }
+        .modal-subtitle { font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2.2rem; }
+        .auth-btn { width: 100%; padding: 13px; margin-bottom: 10px; border-radius: var(--radius-md); font-size: 0.95rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: none; letter-spacing: 0.5px; }
+        .btn-google { background: #f8fafc; color: #1e293b; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .btn-google:hover { background: #e8eef8; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .btn-email { background: linear-gradient(135deg, #0a4a9a, #1361b5); color: white; box-shadow: 0 4px 15px rgba(19,97,181,0.3); }
+        .btn-email:hover { background: linear-gradient(135deg, #1050aa, #1a78d4); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(19,97,181,0.5); }
+        .btn-register { background: transparent; color: #60b4f8; border: 1px solid rgba(96,180,248,0.3); }
+        .btn-register:hover { background: rgba(96,180,248,0.08); border-color: rgba(96,180,248,0.6); transform: translateY(-2px); }
+        .auth-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+        .auth-input { width: 100%; padding: 13px 16px; background: rgba(10, 20, 50, 0.8); border: 1px solid rgba(60,100,200,0.2); border-radius: var(--radius-md); font-size: 0.95rem; font-family: 'Inter', sans-serif; color: var(--text-primary); transition: all 0.3s; }
         .auth-input::placeholder { color: var(--text-muted); }
-        .auth-input:focus {
-            outline: none;
-            border-color: rgba(96,180,248,0.5);
-            box-shadow: 0 0 0 3px rgba(96,180,248,0.1);
-            background: rgba(5, 12, 35, 0.9);
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            color: var(--text-muted);
-            margin: 18px 0;
-            font-size: 0.78rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: rgba(60,100,200,0.15);
-            margin: 0 14px;
-        }
-
-        .error-msg {
-            color: #f87171;
-            font-size: 0.85rem;
-            margin-bottom: 12px;
-            font-weight: 600;
-            background: rgba(239,68,68,0.08);
-            border: 1px solid rgba(239,68,68,0.2);
-            border-radius: var(--radius-sm);
-            padding: 8px 12px;
-            display: none;
-        }
-
-        /* ============================================================
-           SCROLL REVEAL (CSS nativo com intersection fallback)
-           ============================================================ */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.7s ease, transform 0.7s ease;
-        }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .auth-input:focus { outline: none; border-color: rgba(96,180,248,0.5); box-shadow: 0 0 0 3px rgba(96,180,248,0.1); background: rgba(5, 12, 35, 0.9); }
+        .divider { display: flex; align-items: center; color: var(--text-muted); margin: 18px 0; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(60,100,200,0.15); margin: 0 14px; }
+        .error-msg { color: #f87171; font-size: 0.85rem; margin-bottom: 12px; font-weight: 600; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-sm); padding: 8px 12px; display: none; }
 
         /* ============================================================
            RESPONSIVE
            ============================================================ */
         @media (max-width: 1024px) {
             .mechanics-grid { grid-template-columns: repeat(2, 1fr); }
+            .bento-grid { grid-template-columns: repeat(2, 1fr); }
+            .bento-item.large { grid-column: span 1; }
         }
-
         @media (max-width: 768px) {
             .hero { padding: 7rem 1.5rem 13rem; }
-            .feature-grid, .feature-grid.reverse {
-                grid-template-columns: 1fr;
-                gap: 2.5rem;
-                text-align: center;
-                direction: ltr;
-            }
+            .feature-grid, .feature-grid.reverse { grid-template-columns: 1fr; gap: 2.5rem; text-align: center; direction: ltr; }
             .feature-text h3 { justify-content: center; }
             .footer-content { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
             .footer-dev { align-items: center; }
@@ -1115,8 +314,8 @@
             .hero-stats { gap: 1px; }
             .stat-item { padding: 12px 16px; }
             .stat-value { font-size: 1.1rem; }
+            .bento-grid { grid-template-columns: 1fr; }
         }
-
         @media (max-width: 480px) {
             .mechanics-grid { grid-template-columns: 1fr; }
             .hero-stats { flex-wrap: wrap; justify-content: center; }
@@ -1126,11 +325,7 @@
 </head>
 <body>
 
-    <!-- ============================================================
-         HERO — A SUPERFÍCIE
-         ============================================================ -->
     <header class="hero">
-        <!-- Camadas de fundo -->
         <div class="hero-bg" aria-hidden="true">
             <div class="hero-water-surface"></div>
             <div class="hero-bg-glow"></div>
@@ -1138,10 +333,8 @@
             <div class="hero-grid"></div>
         </div>
 
-        <!-- Bolhas -->
         <div class="bubbles" id="bubbles-container" aria-hidden="true"></div>
 
-        <!-- Conteúdo principal -->
         <div class="hero-content">
             <div class="hero-badge">Early Access — v0.9 Abyssal</div>
 
@@ -1156,8 +349,8 @@
 
             <p class="hero-desc">
                 Não é apenas um jogo de pescar. É uma jornada incremental de
-                <strong>engenharia genética</strong>, magia negra, comércio no
-                mercado negro e dominação oceânica absoluta.
+                <strong>engenharia genética</strong>, forja de equipamentos bélicos,
+                comércio clandestino e combates táticos contra Leviatãs.
             </p>
 
             <button id="main-cta-btn" class="cta-button">
@@ -1174,24 +367,22 @@
                 <button id="btn-logout" class="logout-btn">Desconectar</button>
             </div>
 
-            <!-- Stats rápidos -->
             <div class="hero-stats">
                 <div class="stat-item">
-                    <span class="stat-value">49+</span>
+                    <span class="stat-value">60+</span>
                     <span class="stat-label">Espécies</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-value">6+</span>
-                    <span class="stat-label">Biomas</span>
+                    <span class="stat-value">Tática</span>
+                    <span class="stat-label">Batalhas de Turno</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-value">∞</span>
-                    <span class="stat-label">Fusões</span>
+                    <span class="stat-label">Mutações</span>
                 </div>
             </div>
         </div>
 
-        <!-- Onda de transição -->
         <div class="wave-divider" aria-hidden="true">
             <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"
                  viewBox="0 0 1200 120" preserveAspectRatio="none">
@@ -1202,39 +393,33 @@
 
     <main>
 
-        <!-- ============================================================
-             BARRA DE MECÂNICAS
-             ============================================================ -->
         <section class="mechanics-bar">
             <div class="container">
                 <div class="mechanics-grid">
                     <div class="mechanic-pill">
                         <div class="mechanic-pill-icon">🌊</div>
                         <div class="mechanic-pill-title">Clima Dinâmico</div>
-                        <div class="mechanic-pill-desc">Dia/noite, tempestades e Maré Dourada alteram a fauna e os lucros</div>
+                        <div class="mechanic-pill-desc">Dia/noite, tempestades e Maré Dourada alteram a fauna e os lucros de forma procedural.</div>
                     </div>
                     <div class="mechanic-pill">
                         <div class="mechanic-pill-icon">⚔️</div>
                         <div class="mechanic-pill-title">Combate Tático</div>
-                        <div class="mechanic-pill-desc">Grade isométrica com BFS, turnos e IA greedy nos Leviatãs</div>
+                        <div class="mechanic-pill-desc">Envie seu Pelotão para uma grade isométrica com sistema de turnos e IA avançada.</div>
                     </div>
                     <div class="mechanic-pill">
                         <div class="mechanic-pill-icon">🧬</div>
                         <div class="mechanic-pill-title">Fusão Genética</div>
-                        <div class="mechanic-pill-desc">Cruze biomassas, injete catalisadores e mute lotes inteiros</div>
+                        <div class="mechanic-pill-desc">Cruze biomassas, injete catalisadores e crie híbridos mutantes no laboratório.</div>
                     </div>
                     <div class="mechanic-pill">
                         <div class="mechanic-pill-icon">🔮</div>
                         <div class="mechanic-pill-title">Rituais Ocultos</div>
-                        <div class="mechanic-pill-desc">Sacrifique o sagrado, arrisque tudo para invocar o fim</div>
+                        <div class="mechanic-pill-desc">Sacrifique o sagrado, arrisque tudo e invoque os temidos eventos catastróficos.</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ============================================================
-             SEÇÃO 1 — ECOSSISTEMA DINÂMICO
-             ============================================================ -->
         <section class="content-section bg-twilight">
             <div class="container">
 
@@ -1244,117 +429,131 @@
                     <div class="section-divider" style="color: var(--gold-bright);"></div>
                 </div>
 
-                <!-- Feature 1 -->
                 <div class="feature-grid reveal">
                     <div class="feature-text">
                         <h3 style="color: #60b4f8;">
-                            <span>🌊</span> O Clima Dita as Regras
+                            <span>⏱️</span> O Tempo Dita as Regras
                         </h3>
                         <p>O tempo não para no Cais. O ciclo imersivo de <strong>Dia e Noite</strong> altera completamente a fauna marinha disponível. Mas fique atento ao horizonte...</p>
                         <p>Eventos climáticos massivos ocorrem espontaneamente. Uma <strong>Tempestade Noturna</strong> traz monstros das profundezas que dificultam a puxada da linha, enquanto a <strong>Maré Dourada</strong> faz os lucros de cada fisgada multiplicarem absurdamente!</p>
                     </div>
-                    <div class="feature-card card-anim-float"
-                         style="border-color: rgba(96,180,248,0.2); box-shadow: var(--shadow-card), 0 0 40px rgba(96,180,248,0.07);">
+                    <div class="feature-card card-anim-float" style="border-color: rgba(96,180,248,0.2); box-shadow: var(--shadow-card), 0 0 40px rgba(96,180,248,0.07);">
                         <span class="card-icon-large">⛈️</span>
-                        <div class="card-title" style="color: #bae6fd;">Mundo Vivo</div>
+                        <div class="card-title" style="color: #bae6fd;">Sobrevivência Marinha</div>
                         <p class="card-desc">Adapte o seu equipamento às condições adversas se quiser sobreviver às marés intensas e maximizar a sua economia de Cat Coins.</p>
                     </div>
                 </div>
 
-                <!-- Feature 2 -->
+                <div class="reveal" style="margin-top: 6rem;">
+                    <h3 style="text-align: center; font-family: 'Cinzel', serif; font-size: 2rem; color: var(--gold-bright);">O Ciclo de Progresso</h3>
+                    <div class="timeline">
+                        <div class="timeline-step">
+                            <h4><span>🎣</span> 1. Pesca & Coleta</h4>
+                            <p>Arremesse sua linha nas águas dinâmicas. Capture desde peixes comuns até lixo industrial e criaturas míticas dependendo do seu equipamento e clima atual.</p>
+                        </div>
+                        <div class="timeline-step">
+                            <h4><span>🔪</span> 2. Extração & Laboratório</h4>
+                            <p>Use a Faca de Chef para filetar peixes no minigame de precisão. Extraia materiais biológicos do lixo no Museu. Sintetize tudo em novas Iscas Mutantes ou Catalisadores.</p>
+                        </div>
+                        <div class="timeline-step">
+                            <h4><span>⚙️</span> 3. A Grande Forja</h4>
+                            <p>Gaste seus materiais raros e <em>Cat Coins</em> no Mercado Negro para fundir Varas de Titânio, Pesos Gravitacionais e Anzóis Divinos capazes de descer às partes mais escuras do oceano.</p>
+                        </div>
+                        <div class="timeline-step">
+                            <h4><span>⚔️</span> 4. Dominação Tática</h4>
+                            <p>Use os peixes que você "criou" no laboratório de fusão para montar um Pelotão. Desça às trincheiras do mapa isométrico e enfrente inimigos em batalhas de turno mortais.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="content-section bg-midnight">
+            <div class="container">
+
+                <div class="section-header reveal">
+                    <span class="section-tag tag-blue">Sistemas Profundos</span>
+                    <h2 class="section-title title-blue">Equipamentos & Recursos</h2>
+                    <div class="section-divider" style="color: #60b4f8;"></div>
+                </div>
+
                 <div class="feature-grid reverse reveal">
                     <div class="feature-text">
                         <h3 style="color: var(--gold-bright);">
                             <span>⚙️</span> O Hub da Grande Forja
                         </h3>
-                        <p>Pescar com galhos não o levará longe. Aceda ao <strong>Mercado Negro</strong> e gaste a sua fortuna em Titânio, Matéria Escura ou Núcleos Estelares.</p>
-                        <p>Leve esses materiais à <strong>Fornalha</strong> para forjar Varas de Fibra de Carbono, Chumbadas de Buraco Negro e Anzóis Divinos. Depois, arraste-os taticamente na <strong>Mesa de Montagem</strong> para criar o loadout perfeito e inquebrável.</p>
+                        <p>Pescar com um graveto não o levará longe. Aceda ao <strong>Mercado Negro</strong> e gaste a sua fortuna em Titânio, Matéria Escura ou Núcleos Estelares.</p>
+                        <p>Leve esses materiais à <strong>Fornalha</strong> para forjar Varas de Fibra de Carbono, Chumbadas de Buraco Negro e Anzóis Divinos. Depois, arraste-os taticamente na <strong>Mesa de Montagem</strong> para criar o loadout perfeito.</p>
                     </div>
-                    <div class="feature-card card-anim-floatB"
-                         style="border-color: rgba(240,192,64,0.15); box-shadow: var(--shadow-card), 0 0 40px rgba(240,192,64,0.06);">
+                    <div class="feature-card card-anim-floatB" style="border-color: rgba(240,192,64,0.15); box-shadow: var(--shadow-card), 0 0 40px rgba(240,192,64,0.06);">
                         <ul class="mechanic-list" style="text-align: left;">
                             <li>
                                 <span class="li-icon">🎣</span>
-                                <span><strong>Varas:</strong> Determinam a profundidade e velocidade da descida.</span>
+                                <span><strong>Varas (Profundidade):</strong> Determinam o quão fundo a sua linha consegue descer, revelando fauna exclusiva das zonas abissais.</span>
                             </li>
                             <li>
                                 <span class="li-icon">🪨</span>
-                                <span><strong>Pesos:</strong> Quebram a tensão da água e fornecem sinergias críticas.</span>
+                                <span><strong>Pesos (Velocidade):</strong> Quebram a tensão da água, permitindo que o anzol desça mais rápido e fornecem sinergias críticas de Sorte.</span>
                             </li>
                             <li>
                                 <span class="li-icon">🪝</span>
-                                <span><strong>Anzóis:</strong> Focam a sua pesca em raridades de Elite (Lendários, Míticos).</span>
+                                <span><strong>Anzóis (Foco):</strong> Seletividade pura. Focam a sua pesca ignorando lixo e puxando especificamente raridades de Elite.</span>
                             </li>
                         </ul>
+                    </div>
+                </div>
+
+                <div class="bento-grid reveal" style="margin-bottom: 7rem;">
+                    <div class="bento-item">
+                        <span class="bento-icon">🪙</span>
+                        <h4>Cat Coins</h4>
+                        <p>A espinha dorsal do mercado negro. Venda suas pescarias de elite para acumular fortunas incalculáveis.</p>
+                    </div>
+                    <div class="bento-item">
+                        <span class="bento-icon">🗑️</span>
+                        <span style="position: absolute; top: 1rem; right: 1.5rem; font-size: 0.7rem; background: var(--crimson); padding: 2px 8px; border-radius: 4px; color: white; font-weight: bold;">CRÍTICO</span>
+                        <h4>Sucata Industrial</h4>
+                        <p>Placas-mãe oxidadas e urânio vazado são vitais. Recicle no museu para obter polímeros de alto nível para a forja.</p>
+                    </div>
+                    <div class="bento-item">
+                        <span class="bento-icon">🔪</span>
+                        <h4>Lâminas Críticas</h4>
+                        <p>O equipamento essencial para o minijogo de cortes de sushi. Lâminas melhores perdoam seus erros e multiplicam saques em 100x.</p>
+                    </div>
+                    <div class="bento-item large" style="background: linear-gradient(135deg, rgba(30,10,60,0.5), rgba(15,25,60,0.6)); border-color: rgba(124,58,237,0.3);">
+                        <span class="bento-icon">🧬</span>
+                        <h4 style="color: var(--purple-glow);">Catálogo Híbrido (Procedural)</h4>
+                        <p>No Laboratório da Fazenda, nenhuma criação é igual. Ao misturar peixes raros com biomassa alienígena ou iscas experimentais, você gera híbridos com atributos (HP, Dano, Velocidade) e habilidades únicas para usar no Modo Campanha (Combate Tático).</p>
+                    </div>
+                    <div class="bento-item" style="border-color: rgba(240,192,64,0.3);">
+                        <span class="bento-icon">🔮</span>
+                        <h4 style="color: var(--gold-bright);">Orbes Elementais</h4>
+                        <p>Criados via sacrifício extremo de peixes lenda, eles concedem o poder absoluto de alterar as condições climáticas e ativar eventos massivos à sua vontade.</p>
+                    </div>
+                </div>
+
+                <div class="reveal">
+                    <h3 style="text-align: center; font-family: 'Cinzel', serif; font-size: 1.8rem; color: #e8eef8; margin-bottom: 1rem;">O Bestiário do Oceano</h3>
+                    <p style="text-align: center; color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem;">Das poças rasas aos fossos sem luz, a fauna é categorizada em 10 níveis de raridade. Somente Varas Divinas alcançam os últimos níveis.</p>
+                    
+                    <div class="rarity-grid">
+                        <div class="rarity-card r-comum"><h4>Comum</h4><p>Abundantes nas águas rasas. Baixo valor de mercado, mas ótimos para virar Sushi.</p></div>
+                        <div class="rarity-card r-raro"><h4>Raro</h4><p>Diferenciados por mutações leves. Começam a exigir iscas um pouco melhores.</p></div>
+                        <div class="rarity-card r-epico"><h4>Épico</h4><p>Criaturas exóticas de águas profundas. Só aparecem com uma boa sinergia de Vara e Peso.</p></div>
+                        <div class="rarity-card r-lendario"><h4>Lendário</h4><p>Verdadeiros mitos locais. Suas escamas valem fortunas no mercado clandestino.</p></div>
+                        <div class="rarity-card r-mitico"><h4>Mítico</h4><p>Não deveriam existir na biologia moderna. Requerem anzóis especiais para serem fisgados.</p></div>
+                        <div class="rarity-card r-secreto"><h4>Secreto</h4><p>Escondidos atrás de eventos climáticos bizarros e anomalias da matriz do jogo.</p></div>
+                        <div class="rarity-card r-divino"><h4>Divino</h4><p>Seres transcendentais banhados em energia pura. Seu tamanho assusta pescadores veteranos.</p></div>
+                        <div class="rarity-card r-aurudo"><h4>Aurudo</h4><p>Feitos literalmente de ouro maciço. Fisgá-los garante a compra imediata de qualquer item.</p></div>
+                        <div class="rarity-card r-vandalo"><h4>Vândalo</h4><p>Mutantes agressivos e letais, gerados a partir do lixo tóxico despejado no oceano.</p></div>
+                        <div class="rarity-card r-bestial"><h4>Bestial</h4><p>O pesadelo cósmico. Só podem ser encontrados invocando o temido Mar das Bestas através de sacrifício.</p></div>
                     </div>
                 </div>
 
             </div>
         </section>
 
-        <!-- ============================================================
-             SEÇÃO 2 — ENGENHARIA E PRECISÃO
-             ============================================================ -->
-        <section class="content-section bg-midnight">
-            <div class="container">
-
-                <div class="section-header reveal">
-                    <span class="section-tag tag-blue">Laboratório</span>
-                    <h2 class="section-title title-blue">Engenharia e Precisão</h2>
-                    <div class="section-divider" style="color: #60b4f8;"></div>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="feature-grid reveal">
-                    <div class="feature-text">
-                        <h3 style="color: var(--jade-bright);">
-                            <span>🧪</span> Laboratório Genético
-                        </h3>
-                        <p>Pescar Lixo não é inútil. Leve garrafas, urânio vazado e placas-mãe oxidadas ao <strong>Museu do Lixo</strong> para extrair biomassas.</p>
-                        <p>No Laboratório, cruze esses extratos para sintetizar iscas biológicas impossíveis (como o Néctar Divino ou o Pó de Cometa). Injete <strong>Catalisadores Puros</strong> (Sorte +1000, 67cm Garantido) nos tubos de ensaio para mutar o lote inteiro e garantir troféus!</p>
-                    </div>
-                    <div class="feature-card card-anim-floatC"
-                         style="border-color: rgba(16,185,129,0.15); box-shadow: var(--shadow-card), 0 0 40px rgba(16,185,129,0.07);">
-                        <span class="card-icon-large">🧬</span>
-                        <div class="card-title" style="color: var(--jade-glow);">Ciência Imoral</div>
-                        <p class="card-desc">Controle o RNG (Sorte) do jogo manipulando a genética das suas iscas. Peixes maiores rendem lucros astronômicos no mercado.</p>
-                    </div>
-                </div>
-
-                <!-- Feature 4 -->
-                <div class="feature-grid reverse reveal">
-                    <div class="feature-text">
-                        <h3 style="color: #f87171;">
-                            <span>🔪</span> A Cozinha do Mestre
-                        </h3>
-                        <p>Peixes repetidos ocupam espaço vital no <strong>Aquário Principal</strong>. Equipe uma faca de caça letal (como a Lâmina do Infinito) e abra o tenso minijogo de <strong>Fazer Sushi</strong>.</p>
-                        <p>O peixe irá revelar 3 Pontos Vitais vermelhos na tábua de corte. Terá exatos 4 golpes precisos com o rato/dedo para os cruzar. Se a carne for cortada com perfeição, o saque é multiplicado! Mas cuidado com a cor: se o peixe estiver esverdeado, a carne está podre!</p>
-                    </div>
-                    <div class="feature-card card-anim-float"
-                         style="border-color: rgba(239,68,68,0.15); box-shadow: var(--shadow-card), 0 0 40px rgba(239,68,68,0.07);">
-                        <ul class="mechanic-list" style="text-align: left;">
-                            <li>
-                                <span class="li-icon">🎯</span>
-                                <span><strong>Tática Mortal:</strong> Falhe os pontos vitais e a carne vira lixo puro.</span>
-                            </li>
-                            <li>
-                                <span class="li-icon">🦠</span>
-                                <span><strong>Podridão Oculta:</strong> Peixes doentes rendem valiosa "Geleia Estranha".</span>
-                            </li>
-                            <li>
-                                <span class="li-icon">⚔️</span>
-                                <span><strong>A Lâmina Certa:</strong> Facas de Rank Divino multiplicam as moedas em até x1000.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- ============================================================
-             SEÇÃO 3 — O ABISMO FINAL
-             ============================================================ -->
         <section class="content-section bg-abyss">
             <div class="container">
 
@@ -1366,7 +565,6 @@
 
                 <div class="abyss-centerpiece reveal">
 
-                    <!-- Anel de runas animado -->
                     <div class="abyss-rune-ring" aria-hidden="true">
                         <div class="rune-ring-outer"></div>
                         <div class="rune-ring-inner"></div>
@@ -1383,17 +581,39 @@
                     </p>
 
                     <p style="color: #ddd6fe; font-size: 0.95rem; line-height: 1.9; margin-bottom: 2rem;">
-                        Ofereça <strong>Peixes Divinos, Secretos e Áureos</strong> trancafiados numa Caixa de Vidro, juntamente com milhares de Matérias-Primas raras que demorou horas a farmar. Com uma chance implacável de <strong>Falhar e vaporizar tudo</strong>, um ritual bem-sucedido concede-lhe um <strong>Orbe de Poder</strong> absoluto.
+                        Ofereça <strong>Peixes Divinos, Secretos e Áureos</strong> trancafiados numa Caixa de Vidro, juntamente com milhares de Matérias-Primas raras que demorou horas a farmar. Com uma chance implacável de <strong>Falhar e vaporizar tudo</strong>, um ritual bem-sucedido concede-lhe um poder inigualável.
                     </p>
 
                     <div class="abyss-warning">
                         <p>
                             Consuma o <strong>"Orbe do Fim"</strong> na tela principal para forçar a chegada do cataclísmico
                             <strong>MAR DAS BESTAS</strong>, silenciando os peixes comuns e permitindo a invocação dos terríveis
-                            Leviatãs de raridade <strong>"BESTIAL"</strong> — Probabilidade de base: <strong>0.000001%</strong>.
+                            Leviatãs de raridade <strong>"BESTIAL"</strong> — Probabilidade de base de spawn: <strong>0.000001%</strong>.
                         </p>
                     </div>
 
+                </div>
+
+                <div class="reveal" style="margin-top: 8rem;">
+                    <h3 style="text-align: center; font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--text-primary); margin-bottom: 3rem;">Manual do Pescador (FAQ)</h3>
+                    <div class="faq-grid">
+                        <div class="faq-item">
+                            <h4>O jogo é gratuito?</h4>
+                            <p>Sim! O Gato Pescador é 100% gratuito e focado no seu progresso mecânico (Idle/Incremental). Não há pay-to-win. Tudo depende do seu equipamento e da sua estratégia na hora de fundir biomassa ou escolher as iscas corretas.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>Como funciona o Salvamento (Cloud Save)?</h4>
+                            <p>Se você se conectar através do botão de Login (Google ou E-mail), o seu jogo será salvo automaticamente na Nuvem via <strong>Firebase</strong> a cada 30 segundos. Você pode fechar a janela, abrir no celular ou em outro PC, e a sua Fazenda, Inventário e Moedas estarão sempre lá e sincronizados perfeitamente.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>E se eu usar o Modo Convidado?</h4>
+                            <p>O <strong>Modo Convidado</strong> (Sessão Volátil) é estritamente para testes rápidos. O jogo forçará o estado do zero absoluto e <strong>nenhum progresso será salvo</strong> (nem no seu computador local, nem na nuvem). Ao fechar a aba do navegador, o seu gato pescador convidado deixará de existir para sempre. Jogue logado se quiser evoluir!</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>O que são os Peixes de 67cm?</h4>
+                            <p>É uma anomalia matemática do jogo. Todo peixe tem um tamanho gerado por algoritmo baseado na sua raridade, mas qualquer peixe (mesmo os comuns) tem uma ínfima chance de nascer com cravados 67cm. Estes recebem um selo de troféu dourado e são registrados num catálogo especial à parte, rendendo recompensas triplicadas e materiais extras no filete.</p>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -1401,16 +621,13 @@
 
     </main>
 
-    <!-- ============================================================
-         FOOTER
-         ============================================================ -->
     <footer class="modern-footer">
         <div class="footer-bg-grid" aria-hidden="true"></div>
 
         <div class="footer-content">
             <div class="footer-brand">
                 <h2>Gato Pescador</h2>
-                <p>A aventura que redefine o estilo de jogos Idle na web. Desvende mistérios profundos, crie equipamentos complexos na forja e controle as probabilidades do oceano até reinar sobre os colossos da Fossa das Marianas.</p>
+                <p>A aventura que redefine o estilo de jogos Idle na web. Desvende mistérios profundos, crie equipamentos complexos na forja, combine DNA mutante, extraia sucata, e controle as probabilidades do oceano até reinar sobre os colossos da Fossa das Marianas.</p>
             </div>
 
             <div class="footer-dev">
@@ -1428,13 +645,10 @@
 
         <div class="footer-bottom">
             <span>&copy; 2026 Gato Pescador Studios.</span>
-            <span>Todos os direitos reservados. Não jogue lixo no mar real.</span>
+            <span>Todos os direitos reservados. Jogo desenvolvido como portfólio de engenharia web.</span>
         </div>
     </footer>
 
-    <!-- ============================================================
-         MODAL DE LOGIN
-         ============================================================ -->
     <div id="login-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-content">
             <button class="close-modal" id="close-modal-btn" aria-label="Fechar">&times;</button>
@@ -1460,9 +674,6 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         SCRIPTS
-         ============================================================ -->
     <script type="module">
         /* ── BOLHAS PROCEDURAIS ── */
         const bubbleContainer = document.getElementById('bubbles-container');
@@ -1472,10 +683,8 @@
             const size = Math.random() * 60 + 10;
             const drift = (Math.random() - 0.5) * 80;
             b.style.cssText = `
-                width: ${size}px;
-                height: ${size}px;
-                left: ${Math.random() * 100}%;
-                --drift: ${drift}px;
+                width: ${size}px; height: ${size}px;
+                left: ${Math.random() * 100}%; --drift: ${drift}px;
                 animation-duration: ${Math.random() * 10 + 7}s;
                 animation-delay: ${Math.random() * 8}s;
                 opacity: ${Math.random() * 0.5 + 0.1};
@@ -1490,12 +699,8 @@
             p.classList.add('biolum-particle');
             const s = Math.random() * 4 + 2;
             p.style.cssText = `
-                width: ${s}px; height: ${s}px;
-                left: ${Math.random() * 100}%;
-                top: ${Math.random() * 100}%;
-                animation-duration: ${Math.random() * 4 + 3}s;
-                animation-delay: ${Math.random() * 5}s;
-                opacity: ${Math.random() * 0.6 + 0.2};
+                width: ${s}px; height: ${s}px; left: ${Math.random() * 100}%; top: ${Math.random() * 100}%;
+                animation-duration: ${Math.random() * 4 + 3}s; animation-delay: ${Math.random() * 5}s; opacity: ${Math.random() * 0.6 + 0.2};
             `;
             heroBg.appendChild(p);
         }
@@ -1512,15 +717,8 @@
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
         /* ── FIREBASE AUTH ── */
-        import { initializeApp }
-            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import {
-            getAuth, onAuthStateChanged,
-            signInWithPopup, GoogleAuthProvider,
-            signInWithEmailAndPassword,
-            createUserWithEmailAndPassword,
-            signOut
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDHz1W47O5kTiEPw7OjEjSXD0eH_ICtfDA",
@@ -1549,8 +747,7 @@
 
         let isUserLoggedIn = false;
 
-        /* Timeout de fallback — garante que o botão fica disponível mesmo se
-           o handshake do Firebase demorar (Architectural Pillar #2) */
+        /* Timeout de fallback */
         const authFallback = setTimeout(() => {
             if (mainCtaBtn.innerText.includes('Conectando')) {
                 mainCtaBtn.innerText = '🔑 ACESSAR OS SERVIDORES';
@@ -1578,36 +775,16 @@
 
         /* Event listeners */
         mainCtaBtn.addEventListener('click', () => {
-            if (isUserLoggedIn) {
-                window.location.href = 'html/menu.html';
-            } else {
-                loginModal.classList.add('active');
-                errorMsg.style.display = 'none';
-            }
+            if (isUserLoggedIn) { window.location.href = 'html/menu.html'; } 
+            else { loginModal.classList.add('active'); errorMsg.style.display = 'none'; }
         });
 
-        mainGuestBtn.addEventListener('click', () => {
-            window.location.href = 'html/menu.html?guest=true';
-        });
+        mainGuestBtn.addEventListener('click', () => { window.location.href = 'html/menu.html?guest=true'; });
+        btnLogout.addEventListener('click', () => { signOut(auth).catch(console.error); });
+        closeModalBtn.addEventListener('click', () => { loginModal.classList.remove('active'); });
+        loginModal.addEventListener('click', (e) => { if (e.target === loginModal) loginModal.classList.remove('active'); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') loginModal.classList.remove('active'); });
 
-        btnLogout.addEventListener('click', () => {
-            signOut(auth).catch(console.error);
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            loginModal.classList.remove('active');
-        });
-
-        loginModal.addEventListener('click', (e) => {
-            if (e.target === loginModal) loginModal.classList.remove('active');
-        });
-
-        /* Fechar com ESC */
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') loginModal.classList.remove('active');
-        });
-
-        /* Mapeamento de erros Firebase */
         function showError(code) {
             const map = {
                 'invalid-credential': 'Credenciais inválidas ou corrompidas.',
@@ -1630,11 +807,7 @@
         document.getElementById('btn-login-email').addEventListener('click', () => {
             const e = document.getElementById('email-input').value.trim();
             const p = document.getElementById('password-input').value;
-            if (!e || !p) {
-                errorMsg.style.display = 'block';
-                errorMsg.innerText = 'Forneça e-mail e senha.';
-                return;
-            }
+            if (!e || !p) { errorMsg.style.display = 'block'; errorMsg.innerText = 'Forneça e-mail e senha.'; return; }
             signInWithEmailAndPassword(auth, e, p)
                 .then(() => { window.location.href = 'html/menu.html'; })
                 .catch(err => showError(err.code));
@@ -1643,16 +816,11 @@
         document.getElementById('btn-register-email').addEventListener('click', () => {
             const e = document.getElementById('email-input').value.trim();
             const p = document.getElementById('password-input').value;
-            if (!e || !p) {
-                errorMsg.style.display = 'block';
-                errorMsg.innerText = 'Forneça e-mail e senha para o registro.';
-                return;
-            }
+            if (!e || !p) { errorMsg.style.display = 'block'; errorMsg.innerText = 'Forneça e-mail e senha para o registro.'; return; }
             createUserWithEmailAndPassword(auth, e, p)
                 .then(() => { window.location.href = 'html/menu.html'; })
                 .catch(err => showError(err.code));
         });
     </script>
-
 </body>
 </html>
