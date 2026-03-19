@@ -135,6 +135,7 @@ async function carregarBancoDeDadosEIniciar() {
         iniciarMotorDoJogo();
     } catch (erro) {
         console.error("Falha ao carregar o banco de dados. Tentando prosseguir com JS local.", erro);
+        iniciarMotorDoJogo();
     }
 }
 
@@ -378,9 +379,6 @@ function iniciarMotorDoJogo() {
         window.GAME_STATE.customFusions = loadDict(data.customFusions);
 
         // ── RECONSTRUÇÃO DAS VARAS PÓS-LOAD ────────────────────────────────────
-        // Garante que window.GAME_STATE.rods reflita os templates atuais,
-        // e que o currentRodIndex salvo seja válido. Sem isso, a vara equipada
-        // não é encontrada e o castLine usa o rod[0] incorretamente.
         if (window.ROD_TEMPLATES) {
             window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
         }
@@ -400,20 +398,63 @@ function iniciarMotorDoJogo() {
         window.validateGearSecurity(); 
         if (window.checkIsAdmin()) { window.injectAdminGear(); }
 
-        // Dispara o preload das imagens agora que o GAME_STATE está pronto.
-        // Isso garante que os peixes no canvas começam a aparecer assim que
-        // as imagens chegam do servidor, sem depender do setTimeout inicial.
         preloadImages();
     }
 
     function loadGame() {
-        if (isGuestMode) { 
+        // ══════════════════════════════════════════════════════════════════════
+        // MODO CONVIDADO — ISOLAMENTO TOTAL DE DADOS
+        // ══════════════════════════════════════════════════════════════════════
+        // CORREÇÃO DO BUG: Sessões guest em máquinas com dados locais prévios
+        // (de sessões não-autenticadas) herdavam esses dados silenciosamente.
+        //
+        // A causa raiz: iniciarMotorDoJogo() é chamado ANTES de loadGame() via
+        // carregarBancoDeDadosEIniciar(). Se window.GAME_STATE não for null
+        // nesse momento, o bloco de _defaults usa Object.assign parcial e
+        // preserva dados residuais do localStorage carregados por outra rota.
+        //
+        // A correção aplica três camadas de proteção:
+        //   1. window.GAME_STATE = null  → força o bloco de _defaults a criar
+        //      um estado completamente limpo na próxima chamada ao motor.
+        //   2. Limpeza cirúrgica do localStorage → remove APENAS as chaves de
+        //      saves "visitante/genérico" que poderiam ser lidas por um futuro
+        //      loadGame() offline. Não toca em saves vinculados a UIDs reais.
+        //   3. O guard `if (isGuestMode) return` em saveGame() já bloqueia
+        //      qualquer escrita subsequente, garantindo que o estado zero
+        //      nunca é persistido.
+        // ══════════════════════════════════════════════════════════════════════
+        if (isGuestMode) {
             const guestUID = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            currentUser = { uid: guestUID, isGuest: true }; 
+            currentUser = { uid: guestUID, isGuest: true };
 
-            // ── GUEST: ESTADO ZERO ABSOLUTO ──────────────────────────────────────────
-            // Nunca herdar dados de sessões anteriores. O GAME_STATE do convidado
-            // começa do zero — sem moedas, sem peixes, sem materiais.
+            // Camada 1: Zera o GAME_STATE para que iniciarMotorDoJogo() (se
+            // chamado novamente) sempre parta dos _defaults limpos.
+            window.GAME_STATE = null;
+
+            // Camada 2: Remove saves locais genéricos que contaminariam o
+            // estado caso offlineMode seja detectado em alguma rota futura.
+            try {
+                const keysToWipe = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    // Apaga apenas saves "sem dono" — nunca toca em saves de UIDs reais
+                    if (k && (
+                        k === 'gatoPescadorSave_visitante' ||
+                        k === 'gatoPescadorSave'
+                    )) {
+                        keysToWipe.push(k);
+                    }
+                }
+                if (keysToWipe.length > 0) {
+                    keysToWipe.forEach(k => localStorage.removeItem(k));
+                    console.log(`🧹 [Guest Mode] ${keysToWipe.length} save(s) local(is) genérico(s) removido(s) para garantir estado zero.`);
+                }
+            } catch (e) {
+                console.warn('[Guest Mode] Não foi possível limpar localStorage:', e);
+            }
+
+            // Re-aplica os _defaults agora que GAME_STATE é null, garantindo
+            // que o motor tenha um estado limpo imediatamente disponível.
             window.GAME_STATE = {
                 coins: 0,
                 currentRodIndex: 0,
@@ -443,8 +484,7 @@ function iniciarMotorDoJogo() {
                 sushiUnlocked: false,
                 _loadComplete: true
             };
-            // ─────────────────────────────────────────────────────────────────────────
-            
+
             if(safeGet('save-status')) {
                 const statusEl = safeGet('save-status');
                 statusEl.innerText = "🚫 CONVIDADO";
@@ -468,6 +508,7 @@ function iniciarMotorDoJogo() {
             _startAutoSave(); 
             return; 
         }
+        // ══════════════════════════════════════════════════════════════════════
 
         if (!currentUser || !db || offlineMode) {
             let localData = localStorage.getItem('gatoPescadorSave_visitante') || localStorage.getItem('gatoPescadorSave');
@@ -492,7 +533,6 @@ function iniciarMotorDoJogo() {
                 if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Novo";
                 window.GAME_STATE._loadComplete = true;
                 
-                // Reconstrói rods para novo usuário também
                 if (window.ROD_TEMPLATES) {
                     window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
                 }
@@ -554,11 +594,6 @@ function iniciarMotorDoJogo() {
     }
     
     function preloadImages() {
-        // ── PRELOAD COM PROMISE DE ONLOAD ────────────────────────────────────────
-        // A versão anterior colocava o objeto Image no dicionário imediatamente após
-        // criá-lo, antes de estar carregado. O SwimmingFish.draw() checa naturalWidth
-        // e retorna sem desenhar se ainda for 0 — peixes ficavam invisíveis para sempre.
-        // Agora só inserimos no dicionário após o onload confirmar que a imagem é válida.
         function loadImg(src) {
             if (!src || window.GAME_STATE.loadedImages[src]) return;
             const img = new Image();
@@ -576,7 +611,6 @@ function iniciarMotorDoJogo() {
             window.SUCATAS.forEach(scrap => loadImg(scrap.image));
         }
         ['/img/asset/67comum.jpeg', '/img/asset/67raro.png', '/img/asset/67muitoraro.webp'].forEach(loadImg);
-        // ────────────────────────────────────────────────────────────────────────
     }
     preloadImages();
 
@@ -799,7 +833,6 @@ function iniciarMotorDoJogo() {
     window.castLine = function() {
         if (window.GAME_STATE.isFishing) return;
 
-        // Guard: sem rods no GAME_STATE não dá para pescar
         if (!window.GAME_STATE.rods || window.GAME_STATE.rods.length === 0) {
             if (window.ROD_TEMPLATES) {
                 window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
@@ -835,12 +868,11 @@ function iniciarMotorDoJogo() {
         const fishImg = safeGet('hooked-fish-img');
         if(fishImg) fishImg.style.display = 'none';
 
-        // ⚠️ CORREÇÃO DE PROFUNDIDADE (TRAVA DE SEGURANÇA PARA A VARA ADM)
         let rodTierLevel = rod.id || 0;
-        if (rodTierLevel === 9999) rodTierLevel = 20; // AdmRod = Tier 20 para visual
+        if (rodTierLevel === 9999) rodTierLevel = 20;
         
         let depthFactor = 0.3 + ((rodTierLevel + 1) / 20 * 0.7);
-        if (depthFactor > 0.95) depthFactor = 0.95; // Nunca ultrapassa 95% da altura da tela!
+        if (depthFactor > 0.95) depthFactor = 0.95;
         
         let targetDepth = Math.max(150, Math.floor((window.innerHeight - 150) * depthFactor));
 
@@ -853,7 +885,7 @@ function iniciarMotorDoJogo() {
         }
 
         let baseTravelTime = 2000 - ((rod.id || 0) * 80);
-        if (baseTravelTime < 400) baseTravelTime = 400; // Impede travel time negativo da vara ADM
+        if (baseTravelTime < 400) baseTravelTime = 400;
         
         const travelTime = (baseTravelTime / (speedMult || 1)) * (window.eventCastTimeMult || 1);
         
@@ -1125,7 +1157,7 @@ function iniciarMotorDoJogo() {
             div.innerHTML = `
                 ${isUnlocked ? `<div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.8); color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);">x${count}</div>` : ''}
                 <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-                    <img src="${scrap.image}" loading="lazy" style="width: 70px; height: 70px; object-fit: contain; margin: 10px opacity: ${isUnlocked ? '1' : '0.2'}; filter: grayscale(0.5) sepia(0.5);">
+                    <img src="${scrap.image}" loading="lazy" style="width: 70px; height: 70px; object-fit: contain; margin: 10px; opacity: ${isUnlocked ? '1' : '0.2'}; filter: grayscale(0.5) sepia(0.5);">
                     <div style="font-size: 0.8rem; font-weight: 700; color: ${isUnlocked ? '#f8fafc' : '#475569'}; font-family: 'Poppins', sans-serif; line-height: 1.2; margin-bottom: 5px; word-wrap: break-word; width: 100%;">${scrap.name}</div>
                     <div style="font-size: 0.65rem; color: ${isUnlocked ? '#ef4444' : '#334155'}; font-weight: 800; text-transform: uppercase;">Lixo</div>
                 </div>
@@ -1326,8 +1358,6 @@ function iniciarMotorDoJogo() {
         const ti = safeGet('time-indicator'); if(ti) ti.innerText = window.GAME_STATE.isDay ? "☀️ Dia" : "🌙 Noite"; 
     }, 45000);
 
-    // Inicia a animação do fundo após um tick para garantir que o canvas
-    // foi dimensionado e as imagens começaram a carregar.
     setTimeout(() => { window.updateUI(); if(canvas) startAnimateBg(); }, 500);
 
     window.SushiMode = {
@@ -1696,6 +1726,6 @@ function iniciarMotorDoJogo() {
     
     window.SushiMode.init();
 
-} // <- O fechamento da função iniciarMotorDoJogo AGORA ESTÁ NO LUGAR CERTO!
+} // <- Fechamento de iniciarMotorDoJogo
 
 carregarBancoDeDadosEIniciar();
