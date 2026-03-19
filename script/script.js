@@ -37,6 +37,9 @@ try {
 }
 
 window.checkIsAdmin = function() {
+    // ⚠️ BLINDAGEM: Convidados NUNCA são admin
+    if (currentUser && currentUser.isGuest) return false;
+    
     if (isOfflineTestAdm) return true;
     if (currentUser && currentUser.uid === MEU_UID_DE_DEUS) return true;
     return window.isAdminUser === true;
@@ -81,6 +84,30 @@ window.injectAdminGear = function() {
         window.HOOKS.push({ id: admHookId, name: '👑 Anzol do Administrador', color: '#ef4444', target: 'bestial', power: 0.99, lore: "⚙️ Função: Impor as regras. ✨ Diferencial: Bypassa o RNG do jogo." });
     }
     if (!window.GAME_STATE.ownedHooks.includes(admHookId)) window.GAME_STATE.ownedHooks.push(admHookId);
+};
+
+// 🧹 ROTINA DE LIMPEZA DE DADOS LOCAIS (SEGURANÇA)
+window.cleanupLocalStorageIfAuthenticated = function() {
+    if (!offlineMode && currentUser && !currentUser.isGuest && db) {
+        try {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('gatoPescadorSave_')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+                console.log(`🧹 Backup local removido: ${key}`);
+            });
+            if (keysToRemove.length > 0) {
+                console.log(`✅ Limpeza concluída: ${keysToRemove.length} chave(s) removida(s)`);
+            }
+        } catch (error) {
+            console.error("⚠️ Erro na limpeza de localStorage:", error);
+        }
+    }
 };
 
 async function carregarBancoDeDadosEIniciar() {
@@ -146,11 +173,6 @@ function iniciarMotorDoJogo() {
     injectScriptStyles();
 
     // ── BLINDAGEM ANTI-RESET ─────────────────────────────────────────────────
-    // NUNCA sobrescrever o GAME_STATE com zeros incondicionalmente.
-    // Se já existir um estado em memória (ex: outra página passou dados via
-    // window), preservá-lo. Caso contrário, criar apenas o esqueleto mínimo.
-    // O carregamento real dos dados vem de loadGame() logo abaixo.
-    // Usar Object.assign para preencher APENAS campos ausentes, nunca apagar.
     const _defaults = {
         coins: 0, currentRodIndex: 0, isFishing: false, rods: [],
         ownedRods: [0], ownedSinkers: ['chumbo'], currentSinker: 'chumbo',
@@ -160,7 +182,6 @@ function iniciarMotorDoJogo() {
         loadedImages: {}, collection: {}, collection67: {}, scrapCollection: {},
         isDay: true, materials: {}, sushiUnlocked: false
     };
-    // Preserva qualquer GAME_STATE já existente; preenche só o que falta
     if (!window.GAME_STATE || Object.keys(window.GAME_STATE).length === 0) {
         window.GAME_STATE = { ..._defaults };
     } else {
@@ -240,8 +261,6 @@ function iniciarMotorDoJogo() {
             return; 
         }
 
-        // Race-condition guard: Firebase Auth pode ainda não ter resolvido o user.
-        // Aguarda até 3s (30 tentativas × 100ms) antes de desistir e salvar local.
         if (!offlineMode && !currentUser && db) {
             await new Promise(resolve => {
                 let attempts = 0;
@@ -269,8 +288,7 @@ function iniciarMotorDoJogo() {
             customFusions: safeDict(window.GAME_STATE.customFusions)
         };
         
-        if (!offlineMode && currentUser && db) {
-            localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(playerSave));
+        if (!offlineMode && currentUser && db && !currentUser.isGuest) {
             try {
                 await set(ref(db, 'users/' + currentUser.uid), playerSave);
                 if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Salvo"; 
@@ -278,7 +296,21 @@ function iniciarMotorDoJogo() {
                 console.error("Erro Crítico ao salvar no Firebase:", e);
                 if(safeGet('save-status')) safeGet('save-status').innerText = "❌ Erro Nuvem";
             }
-        } else {
+            
+            try {
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('gatoPescadorSave_')) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+            } catch (cleanupError) {
+                console.warn('Erro na limpeza de localStorage:', cleanupError);
+            }
+            
+        } else if (!isGuestMode && (offlineMode || !currentUser || !db)) {
             localStorage.setItem('gatoPescadorSave_visitante', JSON.stringify(playerSave));
             if(safeGet('save-status')) safeGet('save-status').innerText = "✅ Salvo Local";
         }
@@ -335,7 +367,7 @@ function iniciarMotorDoJogo() {
     function processLoadedData(data) {
         Object.assign(window.GAME_STATE, data);
         window.GAME_STATE.isFishing = false;
-        window.GAME_STATE._loadComplete = true; // flag de segurança para o auto-save
+        window.GAME_STATE._loadComplete = true;
         
         window.GAME_STATE.collection = loadDict(data.collection);
         window.GAME_STATE.collection67 = loadDict(data.collection67);
@@ -345,6 +377,21 @@ function iniciarMotorDoJogo() {
         window.GAME_STATE.orbs = loadDict(data.orbs);
         window.GAME_STATE.customFusions = loadDict(data.customFusions);
 
+        // ── RECONSTRUÇÃO DAS VARAS PÓS-LOAD ────────────────────────────────────
+        // Garante que window.GAME_STATE.rods reflita os templates atuais,
+        // e que o currentRodIndex salvo seja válido. Sem isso, a vara equipada
+        // não é encontrada e o castLine usa o rod[0] incorretamente.
+        if (window.ROD_TEMPLATES) {
+            window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
+        }
+        if (window.GAME_STATE.rods && window.GAME_STATE.rods.length > 0) {
+            const rodExists = window.GAME_STATE.rods.some(r => r.id === window.GAME_STATE.currentRodIndex);
+            if (!rodExists && window.GAME_STATE.currentRodIndex !== 9999) {
+                window.GAME_STATE.currentRodIndex = 0;
+            }
+        }
+        // ────────────────────────────────────────────────────────────────────────
+
         if (window.GAME_STATE.sushiUnlocked === undefined) window.GAME_STATE.sushiUnlocked = false;
         if (!window.GAME_STATE.ownedRods || window.GAME_STATE.ownedRods.length === 0) window.GAME_STATE.ownedRods = [0];
         if (!window.GAME_STATE.ownedHooks) { window.GAME_STATE.ownedHooks = ['anzol_padrao']; window.GAME_STATE.currentHook = 'anzol_padrao'; }
@@ -352,10 +399,75 @@ function iniciarMotorDoJogo() {
         
         window.validateGearSecurity(); 
         if (window.checkIsAdmin()) { window.injectAdminGear(); }
+
+        // Dispara o preload das imagens agora que o GAME_STATE está pronto.
+        // Isso garante que os peixes no canvas começam a aparecer assim que
+        // as imagens chegam do servidor, sem depender do setTimeout inicial.
+        preloadImages();
     }
 
     function loadGame() {
-        if (isGuestMode) { if(safeGet('save-status')) safeGet('save-status').innerText = "🚫 Modo Convidado"; window.updateUI(); _startAutoSave(); return; }
+        if (isGuestMode) { 
+            const guestUID = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            currentUser = { uid: guestUID, isGuest: true }; 
+
+            // ── GUEST: ESTADO ZERO ABSOLUTO ──────────────────────────────────────────
+            // Nunca herdar dados de sessões anteriores. O GAME_STATE do convidado
+            // começa do zero — sem moedas, sem peixes, sem materiais.
+            window.GAME_STATE = {
+                coins: 0,
+                currentRodIndex: 0,
+                isFishing: false,
+                rods: window.ROD_TEMPLATES ? window.ROD_TEMPLATES.map((tpl, i) => ({ id: i, ...tpl })) : [],
+                ownedRods: [0],
+                ownedSinkers: ['chumbo'],
+                currentSinker: 'chumbo',
+                ownedHooks: ['anzol_padrao'],
+                currentHook: 'anzol_padrao',
+                hookCustomTarget: null,
+                ownedKnives: ['faca_cozinha'],
+                currentKnife: 'faca_cozinha',
+                baitInventory: {},
+                currentBait: null,
+                loadedImages: {},
+                collection: {},
+                collection67: {},
+                scrapCollection: {},
+                materials: {},
+                orbs: {},
+                baitBoosts: {},
+                customFusions: {},
+                hybridInstances: [],
+                tacticalSquad: [null, null, null, null, null],
+                isDay: true,
+                sushiUnlocked: false,
+                _loadComplete: true
+            };
+            // ─────────────────────────────────────────────────────────────────────────
+            
+            if(safeGet('save-status')) {
+                const statusEl = safeGet('save-status');
+                statusEl.innerText = "🚫 CONVIDADO";
+                statusEl.style.background = "rgba(239, 68, 68, 0.15)";
+                statusEl.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+                statusEl.style.color = "#f87171";
+            }
+            
+            setTimeout(() => {
+                if (window.showToast) {
+                    window.showToast(
+                        "⚠️ Modo Convidado Ativo", 
+                        "Você está jogando sem conta. Nenhum progresso será salvo. Quando fechar o navegador, tudo é perdido.", 
+                        "warning"
+                    );
+                }
+            }, 1200); 
+            
+            preloadImages();
+            window.updateUI(); 
+            _startAutoSave(); 
+            return; 
+        }
 
         if (!currentUser || !db || offlineMode) {
             let localData = localStorage.getItem('gatoPescadorSave_visitante') || localStorage.getItem('gatoPescadorSave');
@@ -365,97 +477,106 @@ function iniciarMotorDoJogo() {
                     if(safeGet('save-status')) safeGet('save-status').innerText = "👤 Local / Visitante";
                 } catch (e) { console.error("Save corrompido"); }
             }
-            window.updateUI(); _startAutoSave(); return;
+            window.updateUI(); window.GAME_STATE._loadComplete = true; _startAutoSave(); return;
         }
 
         if(safeGet('save-status')) safeGet('save-status').innerText = "🔄 Nuvem...";
         
         get(child(ref(db), `users/${currentUser.uid}`)).then((snapshot) => {
             if (snapshot.exists()) {
-                // Dado real encontrado na nuvem — carrega normalmente
                 processLoadedData(snapshot.val());
-                localStorage.setItem('gatoPescadorSave_' + currentUser.uid, JSON.stringify(snapshot.val()));
                 if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Conectado";
+                
             } else {
-                // Nó da nuvem não existe: tenta localStorage como fonte de verdade.
-                // ── BLINDAGEM VETOR 2: NUNCA chamar saveGame() aqui. ──────────────
-                // Se salvarmos agora com GAME_STATE vazio/zerado, apagaremos dados
-                // reais que possam existir de sessões anteriores ou outras páginas.
-                // Apenas carregamos o backup local sem persistir na nuvem ainda.
-                let localBackup = localStorage.getItem('gatoPescadorSave_' + currentUser.uid) 
-                               || localStorage.getItem('gatoPescadorSave');
-                if (localBackup) {
-                    try { processLoadedData(JSON.parse(localBackup)); } catch(e) { console.error("Backup local corrompido", e); }
+                console.log("Novo usuário detectado. Iniciando com GAME_STATE limpo.");
+                if(safeGet('save-status')) safeGet('save-status').innerText = "☁️ Novo";
+                window.GAME_STATE._loadComplete = true;
+                
+                // Reconstrói rods para novo usuário também
+                if (window.ROD_TEMPLATES) {
+                    window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
                 }
-                // Salvar na nuvem SOMENTE se tiver dados reais para salvar
+                
                 if (window.GAME_STATE && (window.GAME_STATE.coins > 0 || 
                     (window.GAME_STATE.ownedRods && window.GAME_STATE.ownedRods.length > 1) ||
                     Object.keys(window.GAME_STATE.collection || {}).length > 0)) {
                     window.saveGame();
                 }
-                // ─────────────────────────────────────────────────────────────────
             }
-            if (window.ROD_TEMPLATES) window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
             window.updateUI();
-            _startAutoSave(); // ← auto-save só começa APÓS o load completar
+            _startAutoSave(); 
         }).catch((e) => {
-            console.error(e);
-            if(safeGet('save-status')) safeGet('save-status').innerText = "❌ Offline";
-            // Fallback offline: carrega o último localStorage
-            let localData = localStorage.getItem('gatoPescadorSave_' + (currentUser ? currentUser.uid : 'visitante'))
-                         || localStorage.getItem('gatoPescadorSave');
-            if (localData) { try { processLoadedData(JSON.parse(localData)); } catch(e2){} }
+            console.error("Erro ao acessar Firebase:", e);
+            if(safeGet('save-status')) safeGet('save-status').innerText = "❌ Erro Nuvem";
+            
+            window.showToast && window.showToast(
+                "🌐 Conexão Perdida", 
+                "Não foi possível conectar ao Firebase. Verifique sua internet e recarregue a página.", 
+                "error"
+            );
+            window.GAME_STATE._loadComplete = true;
             window.updateUI();
             _startAutoSave();
         });
     }
 
-    // ── AUTO-SAVE CONTROLADO ────────────────────────────────────────────────
-    // setInterval só é registrado UMA VEZ, após o load completar.
-    // Isso evita que o timer dispare com GAME_STATE vazio durante o handshake.
     let _autoSaveStarted = false;
     function _startAutoSave() {
         if (_autoSaveStarted) return;
         _autoSaveStarted = true;
         setInterval(() => {
-            // Guarda de segurança: nunca salvar um estado claramente zerado
             if (!window.GAME_STATE || window.GAME_STATE._loadComplete !== true) return;
             window.saveGame();
         }, 30000);
     }
 
-    // 🔥 O CORAÇÃO DA NOVA SEGURANÇA E DO SINAL DO ADMIN
     if (!offlineMode && auth) { 
         onAuthStateChanged(auth, async (user) => { 
             currentUser = user; 
             if(!isGuestMode) {
-                // Se for o seu UID cravado no código
+                if (user && db) {
+                    window.cleanupLocalStorageIfAuthenticated();
+                }
                 if (user && user.uid === MEU_UID_DE_DEUS) {
                     window.isAdminUser = true;
-                    // EMITE O SINAL VERDE PARA O ADMIN.JS CONSTRUIR O BOTÃO
                     window.dispatchEvent(new Event('admin-verified'));
                 } else {
                     window.isAdminUser = false;
                 }
                 loadGame(); 
+            } else {
+                window.isAdminUser = false;
+                loadGame();
             }
         }); 
     } else {
         if(!isGuestMode) loadGame();
     }
     
-    // setInterval movido para _startAutoSave() dentro de loadGame() — ver acima
-
     function preloadImages() {
+        // ── PRELOAD COM PROMISE DE ONLOAD ────────────────────────────────────────
+        // A versão anterior colocava o objeto Image no dicionário imediatamente após
+        // criá-lo, antes de estar carregado. O SwimmingFish.draw() checa naturalWidth
+        // e retorna sem desenhar se ainda for 0 — peixes ficavam invisíveis para sempre.
+        // Agora só inserimos no dicionário após o onload confirmar que a imagem é válida.
+        function loadImg(src) {
+            if (!src || window.GAME_STATE.loadedImages[src]) return;
+            const img = new Image();
+            img.onload = () => { window.GAME_STATE.loadedImages[src] = img; };
+            img.onerror = () => { /* silencia erros de asset faltando */ };
+            img.src = src;
+        }
+
         if (window.RARITIES) {
             Object.values(window.RARITIES).forEach(rarity => {
-                rarity.variations.forEach(fish => { const img = new Image(); img.src = fish.image; window.GAME_STATE.loadedImages[fish.image] = img; });
+                rarity.variations.forEach(fish => loadImg(fish.image));
             });
         }
         if (window.SUCATAS) {
-            window.SUCATAS.forEach(scrap => { const img = new Image(); img.src = scrap.image; window.GAME_STATE.loadedImages[scrap.image] = img; });
+            window.SUCATAS.forEach(scrap => loadImg(scrap.image));
         }
-        ['/img/asset/67comum.jpeg', '/img/asset/67raro.png', '/img/asset/67muitoraro.webp'].forEach(src => { const img = new Image(); img.src = src; });
+        ['/img/asset/67comum.jpeg', '/img/asset/67raro.png', '/img/asset/67muitoraro.webp'].forEach(loadImg);
+        // ────────────────────────────────────────────────────────────────────────
     }
     preloadImages();
 
@@ -678,6 +799,16 @@ function iniciarMotorDoJogo() {
     window.castLine = function() {
         if (window.GAME_STATE.isFishing) return;
 
+        // Guard: sem rods no GAME_STATE não dá para pescar
+        if (!window.GAME_STATE.rods || window.GAME_STATE.rods.length === 0) {
+            if (window.ROD_TEMPLATES) {
+                window.GAME_STATE.rods = window.ROD_TEMPLATES.map((tpl, index) => ({ id: index, ...tpl }));
+            } else {
+                console.warn("castLine: ROD_TEMPLATES ainda não carregado.");
+                return;
+            }
+        }
+
         const activeBaitId = window.GAME_STATE.currentBait;
 
         if (window.GAME_STATE.currentBait) {
@@ -689,7 +820,10 @@ function iniciarMotorDoJogo() {
         window.updateUI();
         window.GAME_STATE.isFishing = true;
         
-        const rod = window.GAME_STATE.rods.find(r => r.id === window.GAME_STATE.currentRodIndex) || window.GAME_STATE.rods[0];
+        let safeRodId = window.GAME_STATE.currentRodIndex;
+        if (!window.checkIsAdmin() && safeRodId === 9999) safeRodId = 0; 
+        const rod = window.GAME_STATE.rods.find(r => r.id === safeRodId) || window.GAME_STATE.rods[0];
+        
         const sinker = window.SINKERS.find(s => s.id === window.GAME_STATE.currentSinker) || window.SINKERS[0];
         
         const btn = safeGet('cast-btn');
@@ -701,7 +835,15 @@ function iniciarMotorDoJogo() {
         const fishImg = safeGet('hooked-fish-img');
         if(fishImg) fishImg.style.display = 'none';
 
-        let targetDepth = Math.max(150, Math.floor((window.innerHeight - 150) * (0.3 + (((rod.id || 0) + 1) / 20 * 0.7))));
+        // ⚠️ CORREÇÃO DE PROFUNDIDADE (TRAVA DE SEGURANÇA PARA A VARA ADM)
+        let rodTierLevel = rod.id || 0;
+        if (rodTierLevel === 9999) rodTierLevel = 20; // AdmRod = Tier 20 para visual
+        
+        let depthFactor = 0.3 + ((rodTierLevel + 1) / 20 * 0.7);
+        if (depthFactor > 0.95) depthFactor = 0.95; // Nunca ultrapassa 95% da altura da tela!
+        
+        let targetDepth = Math.max(150, Math.floor((window.innerHeight - 150) * depthFactor));
+
         let speedMult = rod && rod.speed ? rod.speed : 1;
         if (sinker.stats && sinker.stats.speed) speedMult *= sinker.stats.speed;
         if (sinker.synergy && rod && sinker.synergy.type === rod.type && sinker.synergy.speed) speedMult *= sinker.synergy.speed;
@@ -710,7 +852,11 @@ function iniciarMotorDoJogo() {
             speedMult += window.GAME_STATE.baitBoosts[activeBaitId].speed || 0;
         }
 
-        const travelTime = (Math.max(400, 2000 - ((rod.id || 0) * 80)) / (speedMult || 1)) * (window.eventCastTimeMult || 1);
+        let baseTravelTime = 2000 - ((rod.id || 0) * 80);
+        if (baseTravelTime < 400) baseTravelTime = 400; // Impede travel time negativo da vara ADM
+        
+        const travelTime = (baseTravelTime / (speedMult || 1)) * (window.eventCastTimeMult || 1);
+        
         const line = safeGet('line-container');
         if(line) { line.style.transition = `height ${travelTime}ms ease-in`; line.style.height = `${targetDepth}px`; }
 
@@ -832,7 +978,7 @@ function iniciarMotorDoJogo() {
                 }
             }, reelTime);
         }, travelTime + 1000);
-    }
+    };
 
     document.addEventListener('keydown', (e) => { 
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -840,11 +986,9 @@ function iniciarMotorDoJogo() {
             e.preventDefault(); 
             if (e.repeat) return;
 
-            // Admin-modal usa .active (não .hidden) — checar correto
             const admPanel = document.getElementById('admin-modal');
             if (admPanel && admPanel.classList.contains('active')) return;
 
-            // Bloqueia se qualquer .modal estiver aberto (ausência de .hidden = visível)
             const openModal = document.querySelector('.modal:not(.hidden)');
             if (openModal) return;
 
@@ -1147,6 +1291,13 @@ function iniciarMotorDoJogo() {
         }
     }
 
+    let _animStarted = false;
+    function startAnimateBg() {
+        if (_animStarted) return;
+        _animStarted = true;
+        animateBg();
+    }
+
     for (let i = 0; i < 10; i++) { fishes.push(new SwimmingFish()); }
     const dustParticles = Array.from({length: 120}, () => new DustParticle());
     const bgTrash = Array.from({length: 15}, () => new DriftingTrash());
@@ -1174,7 +1325,10 @@ function iniciarMotorDoJogo() {
         const gc = safeGet('game-container'); if(gc) gc.className = window.GAME_STATE.isDay ? 'day-mode' : 'night-mode'; 
         const ti = safeGet('time-indicator'); if(ti) ti.innerText = window.GAME_STATE.isDay ? "☀️ Dia" : "🌙 Noite"; 
     }, 45000);
-    setTimeout(() => { window.updateUI(); if(canvas) animateBg(); }, 500);
+
+    // Inicia a animação do fundo após um tick para garantir que o canvas
+    // foi dimensionado e as imagens começaram a carregar.
+    setTimeout(() => { window.updateUI(); if(canvas) startAnimateBg(); }, 500);
 
     window.SushiMode = {
         pendingSushi: null, 
@@ -1541,5 +1695,7 @@ function iniciarMotorDoJogo() {
     };
     
     window.SushiMode.init();
-}
+
+} // <- O fechamento da função iniciarMotorDoJogo AGORA ESTÁ NO LUGAR CERTO!
+
 carregarBancoDeDadosEIniciar();

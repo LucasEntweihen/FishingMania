@@ -13,15 +13,28 @@
         *, *::before, *::after { box-sizing: border-box; }
 
         /* FUNDO: MESA DE COMANDO TÁTICO (Grid Holográfico) */
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background-color: #020617; 
-            background-image: 
+        html {
+            margin: 0; padding: 0; width: 100%; min-height: 100%;
+            background-color: #020617;
+            font-family: 'Poppins', sans-serif; color: #f8fafc;
+            overflow-y: scroll;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(56,189,248,0.6) rgba(0,0,0,0.3);
+        }
+        body {
+            margin: 0; padding: 0; width: 100%; min-height: 100%;
+            background-image:
                 linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
             background-size: 40px 40px; background-position: center center;
-            font-family: 'Poppins', sans-serif; color: #f8fafc; overflow: hidden;
+            background-attachment: fixed;
+            overflow: visible;
         }
+        /* Scrollbar nativa do documento — larga, visível, abrange toda a página */
+        html::-webkit-scrollbar { width: 20px; }
+        html::-webkit-scrollbar-track { background: rgba(2, 6, 23, 0.95); border-left: 1px solid rgba(56,189,248,0.15); }
+        html::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #38bdf8, #818cf8); border-radius: 10px; border: 3px solid rgba(2,6,23,0.9); }
+        html::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #7dd3fc, #a78bfa); }
 
         /* SCROLLBAR CYBERPUNK */
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
@@ -51,24 +64,28 @@
 
         /* LAYOUT PRINCIPAL */
         .main-container {
-            display: flex; gap: 30px; 
-            padding: 20px 20px; /* Reduzido top/bottom e lateral */
-            max-width: 98%; /* Expandido para a esquerda (colado na parede) */
+            display: flex; gap: 30px;
+            padding: 20px 20px;
+            max-width: 98%;
             margin: 0 auto;
-            height: calc(100vh - 70px); /* Ajustado pelo novo cabeçalho */
+            /* Sem altura fixa — cresce conforme conteúdo, scroll é do documento */
+            min-height: calc(100vh - 70px);
         }
 
         /* PAINEL ESQUERDO: LISTA DE QUIMERAS */
         .left-panel {
-            flex: 1; display: flex; flex-direction: column; gap: 20px;
+            display: flex; flex-direction: column; gap: 20px;
             background: rgba(15, 23, 42, 0.6); border-radius: 20px; padding: 20px;
-            border: 1px solid rgba(255,255,255,0.05); 
-            max-width: 450px; /* Mais espaço interno aproveitando o painel expandido */
+            border: 1px solid rgba(255,255,255,0.05);
+            max-width: 450px; width: 450px;
+            /* Sticky: fica visível enquanto o usuário scrolla as skills */
+            position: sticky; top: 20px; align-self: flex-start;
+            max-height: calc(100vh - 110px); overflow-y: auto;
         }
         .left-panel h2 { margin: 0; font-family: 'Fredoka', sans-serif; color: #bae6fd; font-size: 1.5rem; text-align: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;}
         
         .roster-list {
-            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 10px;
+            display: flex; flex-direction: column; gap: 10px; padding-right: 10px;
         }
         .roster-card {
             background: linear-gradient(90deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)); 
@@ -87,17 +104,17 @@
 
         /* PAINEL DIREITO: PELOTÃO E INSPEÇÃO */
         .right-panel {
-            flex: 2.5; /* Ocupa o resto do espaço expandido */
-            display: flex; flex-direction: column; 
-            gap: 20px; /* Reduzido para empurrar os elementos para cima */
+            flex: 1; display: flex; flex-direction: column;
+            gap: 20px; align-self: flex-start; width: 100%;
         }
 
         /* MÓDULO: PELOTÃO TÁTICO */
         .squad-container {
-            background: rgba(15, 23, 42, 0.6); border-radius: 20px; 
-            padding: 20px 30px; /* Reduzido padding superior e inferior */
+            background: rgba(15, 23, 42, 0.6); border-radius: 20px;
+            padding: 20px 30px;
             border: 1px solid rgba(56, 189, 248, 0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: flex; flex-direction: column; gap: 15px;
+            position: sticky; top: 20px; z-index: 10;
         }
         .squad-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(56,189,248,0.2); padding-bottom: 10px; }
         .squad-header h2 { margin: 0; font-family: 'Fredoka', sans-serif; color: #38bdf8; font-size: 1.8rem; }
@@ -136,46 +153,65 @@
         .slot-wrapper.filled:hover .btn-remove { opacity: 1; }
         .btn-remove:hover { background: #ef4444; transform: scale(1.2); }
 
-        /* MÓDULO: INSPEÇÃO DE UNIDADE */
+        /* MÓDULO: INSPEÇÃO DE UNIDADE
+           Sem altura fixa — cresce com o conteúdo, scroll é do documento inteiro */
         .inspect-container {
-            flex: 1; background: rgba(15, 23, 42, 0.6); border-radius: 20px; padding: 20px;
-            border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; position: relative; overflow: hidden;
+            background: rgba(15, 23, 42, 0.6); border-radius: 20px; padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column;
+            position: relative;
         }
-        .inspect-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.2rem; font-family: 'Fredoka'; background: rgba(2,6,23,0.8); z-index: 10; backdrop-filter: blur(5px); }
-        
+        .inspect-empty {
+            min-height: 120px; display: flex; align-items: center; justify-content: center;
+            color: #64748b; font-size: 1.2rem; font-family: 'Fredoka';
+            background: rgba(2,6,23,0.8); border-radius: 12px;
+        }
+
         .inspect-header { display: flex; gap: 30px; margin-bottom: 20px; align-items: center; }
-        .inspect-img-box { width: 150px; height: 150px; background: rgba(0,0,0,0.5); border-radius: 16px; border: 1px solid rgba(56,189,248,0.3); display: flex; align-items: center; justify-content: center; position: relative; }
+        .inspect-img-box { width: 150px; height: 150px; flex-shrink: 0; background: rgba(0,0,0,0.5); border-radius: 16px; border: 1px solid rgba(56,189,248,0.3); display: flex; align-items: center; justify-content: center; }
         .inspect-img-box img { max-width: 90%; max-height: 90%; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.8)); animation: floatHolo 3s ease-in-out infinite; }
-        
+
         .inspect-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
         .inspect-name { margin: 0 0 10px 0; font-family: 'Fredoka', sans-serif; font-size: 2.2rem; color: #f8fafc; text-shadow: 0 2px 5px rgba(0,0,0,0.8); line-height: 1.1; }
-        
+
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .stat-box { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; text-align: center; }
         .stat-lbl { color: #94a3b8; font-size: 0.7rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; display: block; margin-bottom: 5px; }
         .stat-val { color: #fff; font-family: 'Fredoka', sans-serif; font-size: 1.5rem; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
-        .val-hp { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4); }
-        .val-atk { color: #f87171; text-shadow: 0 0 10px rgba(248, 113, 113, 0.4); }
-        .val-def { color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.4); }
-        .val-spd { color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
+        .val-hp  { color: #4ade80; text-shadow: 0 0 10px rgba(74,222,128,0.4); }
+        .val-atk { color: #f87171; text-shadow: 0 0 10px rgba(248,113,113,0.4); }
+        .val-def { color: #60a5fa; text-shadow: 0 0 10px rgba(96,165,250,0.4); }
+        .val-spd { color: #facc15; text-shadow: 0 0 10px rgba(250,204,21,0.4); }
 
-        .skills-section { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; flex: 1; display: flex; flex-direction: column;}
+        /* Skills — exibe tudo, sem scroll interno, sem wrap: cada skill ocupa a largura toda */
+        .skills-section {
+            background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px;
+            display: flex; flex-direction: column; margin-top: 4px;
+        }
         .skills-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
         .skills-header h3 { margin: 0; color: #bae6fd; font-family: 'Fredoka'; font-size: 1.2rem; }
         .skills-header span { color: #94a3b8; font-size: 0.85rem; font-weight: bold; }
-        
-        .skills-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        /* GRADE DE SKILLS: 2 colunas, sem wrap, cresce para fora da tela */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
         .skill-chip {
-            background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; padding: 8px 15px; border-radius: 8px;
-            display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; flex: 1 1 calc(33% - 10px);
+            background: rgba(30, 41, 59, 0.8); border: 1px solid #334155;
+            padding: 20px 18px; border-radius: 12px;
+            display: flex; align-items: flex-start; gap: 16px;
+            cursor: pointer; transition: 0.2s;
+            min-height: 90px;
         }
         .skill-chip:hover { background: #334155; border-color: #94a3b8; }
-        .skill-chip.equipped { background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; box-shadow: inset 0 0 10px rgba(56,189,248,0.2); }
+        .skill-chip.equipped { background: rgba(56,189,248,0.15); border-color: #38bdf8; box-shadow: inset 0 0 10px rgba(56,189,248,0.2); }
         .skill-chip.equipped .s-icon { filter: drop-shadow(0 0 5px #38bdf8); }
-        .s-icon { font-size: 1.2rem; }
-        .s-info { display: flex; flex-direction: column; }
-        .s-name { font-weight: 700; color: #e2e8f0; font-size: 0.85rem; }
-        .s-desc { font-size: 0.65rem; color: #94a3b8; line-height: 1.2; margin-top: 2px; }
+        .skill-chip.disabled { opacity: 0.4; cursor: not-allowed; }
+        .s-icon { font-size: 2rem; flex-shrink: 0; padding-top: 2px; }
+        .s-info { display: flex; flex-direction: column; gap: 6px; }
+        .s-name { font-weight: 700; color: #e2e8f0; font-size: 1rem; }
+        .s-desc { font-size: 0.82rem; color: #94a3b8; line-height: 1.6; }
 
         .inspect-actions { margin-top: 20px; display: flex; justify-content: flex-end; }
         .btn-assign {
@@ -217,7 +253,7 @@
 
             <div class="inspect-container" id="inspect-panel">
                 <div class="inspect-empty" id="inspect-empty">Selecione uma Quimera para Análise Tática</div>
-                <div id="inspect-content" style="display: none; height: 100%; flex-direction: column;"></div>
+                <div id="inspect-content" style="display: none; flex-direction: column;"></div>
             </div>
 
         </div>
@@ -522,7 +558,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="skills-section">
+                <div class="skills-section custom-scrollbar">
                     <div class="skills-header">
                         <h3>🧬 Memória Genética Ativa</h3>
                         <span>${equipped.length}/3 Slots</span>
